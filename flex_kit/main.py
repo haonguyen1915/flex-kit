@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import json
+import sys
 from pathlib import Path
 
 import typer
 
+from flex_kit import hooks as hooks_mod
 from flex_kit import plan as plan_mod
 from flex_kit.add import add as run_add
 from flex_kit.add import list_packs
@@ -156,6 +159,40 @@ def close(
     else:
         left = len(p.steps) - p.done_count
         typer.echo(f"plan {p.id}: {left} step(s) incomplete. Re-run with --confirm to archive.")
+
+
+@app.command()
+def hook(
+    event: str = typer.Argument(..., help="session-start | pre-tool"),
+    project: Path = typer.Option(Path.cwd, "--project", "-p"),
+) -> None:
+    """Runtime hook entrypoint, invoked by the host via .claude/settings.json."""
+    root = project.resolve()
+    payload: dict = {}
+    if not sys.stdin.isatty():
+        raw = sys.stdin.read()
+        if raw.strip():
+            try:
+                payload = json.loads(raw)
+            except json.JSONDecodeError:
+                payload = {}
+
+    if event == "session-start":
+        typer.echo(hooks_mod.session_start(root))
+    elif event == "pre-tool":
+        reason = hooks_mod.pre_tool_decision(payload)
+        if reason:
+            typer.echo(
+                json.dumps(
+                    {
+                        "hookSpecificOutput": {
+                            "hookEventName": "PreToolUse",
+                            "permissionDecision": "deny",
+                            "permissionDecisionReason": reason,
+                        }
+                    }
+                )
+            )
 
 
 def _main() -> None:

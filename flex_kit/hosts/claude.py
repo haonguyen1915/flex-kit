@@ -8,6 +8,8 @@ frontmatter is a Claude model alias, passed through as-is.
 
 from __future__ import annotations
 
+import json
+
 from flex_kit.agents import Agent, inject_skills
 from flex_kit.commands import Command
 from flex_kit.emit import OutFile
@@ -18,6 +20,22 @@ ID = "claude"
 SKILLS_DIR = ".claude/skills"
 AGENTS_DIR = ".claude/agents"
 COMMANDS_DIR = ".claude/commands"
+SETTINGS_FILE = ".claude/settings.json"
+
+_HOOKS = {
+    "SessionStart": [
+        {
+            "matcher": "startup|resume|clear",
+            "hooks": [{"type": "command", "command": "flex-kit hook session-start"}],
+        }
+    ],
+    "PreToolUse": [
+        {
+            "matcher": "Bash|Read|Edit|Write|Glob|Grep",
+            "hooks": [{"type": "command", "command": "flex-kit hook pre-tool"}],
+        }
+    ],
+}
 
 
 def emit_skill(skill: Skill) -> list[OutFile]:
@@ -53,3 +71,9 @@ def emit_command(command: Command, skills: list[Skill]) -> list[OutFile]:
     body = inject_skills(command.body, skills)
     content = f"---\n{serialize_frontmatter(entries)}\n---\n\n{body.rstrip()}\n"
     return [OutFile(f"{COMMANDS_DIR}/{command.id}.md", content)]
+
+
+def emit_global() -> list[OutFile]:
+    """Host-level output not tied to a single capability: the hooks wiring."""
+    content = json.dumps({"hooks": _HOOKS}, indent=2) + "\n"
+    return [OutFile(SETTINGS_FILE, content)]
