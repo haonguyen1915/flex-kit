@@ -65,21 +65,21 @@ Không có engine, không có code nào "gọi agent". Thứ điều phối cả
 của slash command** - file `.claude/commands/flex-plan.md` được `gen` sinh ra từ
 `.flexkit/commands/flex-plan.md`. Host (Claude Code) đọc file đó như một danh sách việc
 và làm tuần tự; trong danh sách đó, **vài bước là "chạy lệnh CLI", một bước là "spawn
-`planner` để nó draft plan thật"**. Nội dung `/flex-plan` (1 bước route tùy chọn + 3 chính):
+`planner` để nó draft plan thật"**. `/flex-plan` là **cửa trước** (việc mơ hồ tự route);
+các bước rút gọn:
 
 ```
-0. (tùy chọn) Hướng chưa rõ? áp skill navigator để route - có thể đẩy sang      [AGENT]
-   /flex-fix, /flex-change hoặc /flex-review thay vì plan thường.
-1. Chạy `flex-kit plan "<task>"` ở terminal (thêm --mode nếu task gợi ý kích cỡ).   [CLI]
-2. Spawn `planner` -> nó draft plan.md (Goal + Steps kèm acceptance + Files + Done),  [PLANNER]
-   đề xuất mode; main agent + user xem lại.
-3. Chạy `flex-kit status` để xác nhận, rồi gợi ý `/flex-implement` để giao việc.        [CLI]
+1. Route (navigator) - mơ hồ → có thể sang /flex-fix, /flex-change, /flex-review.   [AGENT]
+2. flex-kit plan "<task>" [--mode] -> scaffold plan.md rỗng.                         [CLI]
+3. Spawn `planner` -> draft plan.md (Goal/Steps kèm acceptance/Files/Done/Risks/Q).  [PLANNER]
+4. flex-kit status; mirror Open Questions thành "Questions for You".                  [CLI]
+5. Checkpoint: [A] -> /flex-implement · [D] -> --full · [R] revise.                  [AGENT]
 ```
 
 Nói cách khác:
 
-- **Bước 1 và 3** là main agent gọi CLI (qua Bash tool) - CLI làm phần plumbing.
-- **Bước 2** không có lệnh CLI nào để gọi: nó là chỉ thị bằng văn xuôi yêu cầu main agent
+- Các **bước CLI** (scaffold, status) là main agent gọi qua Bash - CLI làm phần plumbing.
+- Bước **draft** không có lệnh CLI nào để gọi: nó là chỉ thị văn xuôi yêu cầu main agent
   **spawn subagent `planner`** để biến task thành plan. Đây chính là chỗ "lên plan", và
   nó là một *agent* làm - không phải CLI.
 - Bỏ slash đi, tự gõ `flex-kit plan` ở terminal: bạn chỉ nhận khung rỗng và **bạn** phải

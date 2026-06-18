@@ -4,16 +4,30 @@ description: Create a tracked plan for a task and scaffold its steps. Use to sta
 argument-hint: [task] [--mode patch|build|design]
 ---
 
-Create a plan for: **$ARGUMENTS**
+Plan the work for: **$ARGUMENTS**
 
-1. **Route first (if unclear).** If the task's intent or the right path is not obvious
-   - or several domains could apply - apply the `navigator` skill. It may send you to
-   `/flex-fix` (a bug), `/flex-change` (design-first), or `/flex-review` instead of a
-   plain plan, and names the domain skills that apply. Skip when the path is clear.
-2. Run `flex-kit plan "<task>"` in the terminal (add `--mode patch|build|design` if
-   the task implies a size; default is `build`). This scaffolds an empty `plan.md`.
-3. Spawn the `planner` agent to draft the plan: it scouts the relevant files, then
-   fills `## Goal`, a concrete `## Steps` checklist (`- [ ] ...` with acceptance),
-   `## Files In Scope`, and `## Done Criteria`, and recommends a mode.
-4. Review the draft with the user, run `flex-kit status` to confirm, then suggest
-   `/flex-implement` to deliver it.
+This is the front door for any plan-shaped request - ambiguous or cross-cutting work
+routes onward from here, so you never have to pick the lane yourself.
+
+1. **Route.** If the intent or path is unclear, or several domains could apply, apply
+   the `navigator` skill - it may send you to `/flex-fix`, `/flex-change`, or
+   `/flex-review` instead. Skip when the path is obvious.
+2. **Frame (large/ambiguous only).** For a large, ambiguous, or contract-changing plan,
+   apply the `decision-interview` skill before drafting.
+3. **Scaffold.** Run `flex-kit plan "<task>"` (add `--mode patch|build|design`; the
+   `planning-methodology` skill's scope-challenge maps complexity to a mode). This
+   writes an empty `plan.md` - don't hand-roll the folder.
+4. **Draft.** Spawn the `planner` agent to fill `plan.md` (Goal, Steps, Files, Done,
+   Risks, Open Questions). Mirror any `## Open Questions` back as `Questions for You` -
+   numbered, with 2-4 concrete options each - don't make the user open the file.
+5. **Log decisions.** Append each settled decision to the plan's `decisions.md` as
+   `## YYYY-MM-DD - <label>` (create the file if absent).
+6. **Approve.** Run `flex-kit status` to confirm, then close with a checkpoint:
+   - `[A] Approve` -> `/flex-implement` (step-by-step)
+   - `[D] Approve` -> `/flex-implement --full` (autonomous end-to-end)
+   - `[R] Revise` -> adjust scope, mode, or steps first
+
+   Use `[C] Continue` only as a soft nudge after approval.
+
+When a choice comes up (routing or plan shape), present 2-4 numbered options and
+recommend one; the user can pick a number or answer free-form. Don't implement here.
