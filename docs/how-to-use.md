@@ -7,9 +7,13 @@ things and it's easy to confuse them:
 
 | You run it... | What it is | Examples |
 |---|---|---|
-| **In a terminal** | the `flex-kit` CLI | `flex-kit init`, `gen`, `plan`, `status`, `close`, `add`, `doctor` |
-| **Inside the host** (Claude Code) | a generated **slash command** | `/implement` |
+| **Inside the host** (Claude Code) | generated **slash commands** (the main interface) | `/plan`, `/status`, `/next-step`, `/implement`, `/close` |
+| **In a terminal** | the `flex-kit` CLI (same actions + setup) | `flex-kit init`, `gen`, `add`, `doctor`, `plan`, `status`, `close` |
 | **Automatically** | **hooks** the host fires | session orientation, plan reminder, secret guard |
+
+Day to day you stay in Claude Code and use the slash commands; the CLI is the same
+engine for setup (`init` / `gen` / `add` / `doctor`) and for driving from a terminal
+or Codex.
 
 The golden rule:
 
@@ -83,48 +87,39 @@ flex-kit doctor    # verify everything is in sync (fails if you hand-edited gene
 That `edit source → gen → doctor` loop is the whole content workflow. Agents
 (`.flexkit/agents/<id>.md`) and commands (`.flexkit/commands/<id>.md`) work the same.
 
-## 4. Do real work with the OS
+## 4. Do real work with the OS - all inside Claude Code
 
-Scenario: *"add a login endpoint."*
+Scenario: *"add a login endpoint."* Everything below is typed **in Claude Code** as
+slash commands; each one drives the underlying `flex-kit` CLI for you.
 
-**Step 1 - make a plan (terminal):**
-```bash
-flex-kit plan "add login endpoint" --mode build
-# created plan 260618-1641-add-login-endpoint (mode: build)
 ```
-Open the created `plans/active/<id>/plan.md` and fill in the **Steps** checklist:
-```markdown
-## Steps
-- [ ] add the route
-- [ ] add the handler
-- [ ] add tests
+/plan add login endpoint --mode build
 ```
+Creates the plan and scaffolds a `## Steps` checklist from the task. Review/adjust the
+steps in `plans/active/<id>/plan.md`.
 
-**Step 2 - check where you are (terminal):**
-```bash
-flex-kit status
-# plan ... (mode: build, status: active)
-#   steps: 0/3 done
-#   next: add the route
 ```
+/status
+```
+Shows where you are: `plan ... (build), 0/3 steps, next: add the route`. (If the mode
+escalated, e.g. `patch -> build`, it tells you.)
 
-**Step 3 - implement (inside Claude Code):**
-Type the slash command:
 ```
 /implement
 ```
-The agent reads the active plan, implements the next step (or all steps with
-`/implement --full`), then runs the **verify-fix loop**: it spawns the `reviewer`
-subagent, and if there are critical/high findings it spawns `implementer` to fix and
-re-reviews - up to a couple of rounds. As each step lands it ticks `- [x]` in
-`plan.md`.
+Implements the next step - or all steps with `/implement --full` - then runs the
+**verify-fix loop**: spawns the `reviewer` subagent, and on critical/high findings
+spawns `implementer` to fix and re-reviews, a couple of rounds. Each step it finishes
+gets ticked `- [x]` in `plan.md`.
 
-**Step 4 - close (terminal):**
-```bash
-flex-kit status        # 3/3 done
-flex-kit close --confirm
-# closed plan ... -> plans/archive/...
 ```
+/close
+```
+Confirms the steps are done and archives the plan to `plans/archive/`.
+
+> The slash commands are the **host interface**; the `flex-kit` CLI (`flex-kit plan`,
+> `status`, `close`, ...) is the same thing from a terminal - use it directly when
+> driving from a script or from Codex.
 
 ## 5. What the hooks do (automatic - you just see it)
 
@@ -162,12 +157,11 @@ flex-kit add <pack>        # pull a domain pack into .flexkit/
 flex-kit gen               # regenerate host surfaces  (run after every edit)
 flex-kit doctor            # validate + catch drift     (run before committing)
 
-# work
-flex-kit plan "<task>"     # start tracked work
-flex-kit status            # where am I?
-flex-kit next-step         # what's next?
-/implement                 # (in Claude Code) deliver the plan + verify-fix loop
-flex-kit close --confirm   # archive when done
+# work - in Claude Code (slash commands), or the same via the CLI in a terminal
+/plan <task>               # start tracked work        (cli: flex-kit plan "<task>")
+/status   /next-step       # where am I? what's next?  (cli: flex-kit status / next-step)
+/implement                 # deliver the plan + verify-fix loop
+/close                     # archive when done         (cli: flex-kit close --confirm)
 ```
 
 ## 8. Where things live
