@@ -37,7 +37,8 @@ def init(
     if result.gen is not None:
         g = result.gen
         typer.echo(
-            f"  gen: {g.skills} skills + {g.agents} agents -> [{', '.join(g.hosts)}]"
+            f"  gen: {g.skills} skills + {g.agents} agents + {g.commands} commands "
+            f"-> [{', '.join(g.hosts)}]"
         )
     typer.echo("Edit .flexkit/skills/ then run `flex-kit gen`.")
 
