@@ -43,6 +43,8 @@ flex-kit gen                  # regenerate host surfaces after editing source
 flex-kit doctor               # validate source + that surfaces are in sync
 ```
 
+New here? Read the step-by-step walkthrough: [`docs/how-to-use.md`](docs/how-to-use.md).
+
 ## templates (base) vs packs (opt-in)
 
 flex-kit ships two kinds of bundled content. The dividing question:
