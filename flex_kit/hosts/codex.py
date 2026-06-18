@@ -15,7 +15,9 @@ from flex_kit.frontmatter import (
 )
 
 ID = "codex"
-BASE_DIR = ".codex/skills"
+# Codex natively scans .agents/skills/ (https://developers.openai.com/codex/skills);
+# a .codex/skills/ dir is NOT discovered.
+BASE_DIR = ".agents/skills"
 
 _LINE_WIDTH = 88
 _INDENT = "  "
