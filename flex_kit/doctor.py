@@ -6,6 +6,7 @@ import importlib.util
 from dataclasses import dataclass
 from pathlib import Path
 
+from flex_kit.agents import discover_agents
 from flex_kit.checks import Check, Ctx, Finding
 from flex_kit.config import load_config
 from flex_kit.registry import CHECKS, HOSTS
@@ -38,7 +39,8 @@ def _load_project_checks(project_root: Path) -> list[Check]:
 def doctor(project_root: Path) -> list[CheckResult]:
     config = load_config(project_root)
     skills = discover_skills(project_root, config.skills_dir)
-    ctx = Ctx(project_root=project_root, config=config, skills=skills, hosts=HOSTS)
+    agents = discover_agents(project_root, config.agents_dir)
+    ctx = Ctx(project_root=project_root, config=config, skills=skills, agents=agents, hosts=HOSTS)
 
     results: list[CheckResult] = []
     for check in [*CHECKS, *_load_project_checks(project_root)]:

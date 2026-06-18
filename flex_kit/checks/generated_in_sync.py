@@ -1,39 +1,51 @@
-"""The host surfaces must equal what ``gen`` would produce right now.
+"""The host surfaces must equal what `gen` would produce right now.
 
-A mismatch means someone hand-edited a generated file or forgot to re-run gen
-after editing the source - the drift this kit exists to prevent.
+A mismatch means someone hand-edited a generated file, added a stray file, or
+forgot to re-run gen after editing the source - the drift this kit prevents.
 """
 
 from __future__ import annotations
 
+from flex_kit.build import emit_for_host
 from flex_kit.checks import Check, Ctx, Finding
-from flex_kit.render import render_skill_content
 
 
 def _run(ctx: Ctx) -> list[Finding]:
     findings: list[Finding] = []
     for host_name in ctx.config.hosts:
         host = ctx.hosts[host_name]
-        for skill in ctx.skills:
-            dest_dir = ctx.project_root / host.BASE_DIR / skill.id
-            skill_file = dest_dir / "SKILL.md"
-            if not skill_file.exists():
-                findings.append(Finding("error", f"{host_name}/{skill.id}: missing - run gen"))
-                continue
-            if skill_file.read_text(encoding="utf-8") != render_skill_content(host, skill):
-                findings.append(
-                    Finding(
-                        "error",
-                        f"{host_name}/{skill.id}: SKILL.md drifted from source - run gen "
-                        "(do not hand-edit generated)",
-                    )
-                )
-            for rel in skill.references:
-                dest = dest_dir / rel
-                if not dest.exists() or dest.read_bytes() != (skill.dir / rel).read_bytes():
+        expected: set[str] = set()
+
+        for f in emit_for_host(host, ctx.skills, ctx.agents):
+            expected.add(f.path)
+            dest = ctx.project_root / f.path
+            if not dest.exists():
+                findings.append(Finding("error", f"{host_name}: {f.path} missing - run gen"))
+            elif f.content is not None:
+                if dest.read_text(encoding="utf-8") != f.content:
                     findings.append(
-                        Finding("error", f"{host_name}/{skill.id}: reference {rel} out of sync - run gen")
+                        Finding(
+                            "error",
+                            f"{host_name}: {f.path} drifted from source - run gen "
+                            "(do not hand-edit generated)",
+                        )
                     )
+            elif dest.read_bytes() != f.copy_from.read_bytes():
+                findings.append(Finding("error", f"{host_name}: {f.path} out of sync - run gen"))
+
+        # Stray files: anything in the host's owned roots that gen would not write.
+        roots = {host.SKILLS_DIR, getattr(host, "AGENTS_DIR", None)}
+        for base in filter(None, roots):
+            root = ctx.project_root / base
+            if not root.exists():
+                continue
+            for p in root.rglob("*"):
+                if p.is_file():
+                    rel = p.relative_to(ctx.project_root).as_posix()
+                    if rel not in expected:
+                        findings.append(
+                            Finding("error", f"{host_name}: {rel} is stray (not produced by gen)")
+                        )
     return findings
 
 

@@ -1,20 +1,29 @@
 """Claude Code host adapter.
 
-Claude renders markdown in skill descriptions, so backticks / angle brackets are
-kept and the description stays a single line. Only the shared normalization
-(em-dash -> hyphen) is applied.
+Skills -> .claude/skills/<id>/. Claude renders markdown in descriptions, so
+backticks / angle brackets are kept; only the shared normalization (em-dash ->
+hyphen) is applied.
 """
 
 from __future__ import annotations
 
+from flex_kit.emit import OutFile
 from flex_kit.frontmatter import normalize_common, serialize_frontmatter
+from flex_kit.skills import Skill
 
 ID = "claude"
-BASE_DIR = ".claude/skills"
+SKILLS_DIR = ".claude/skills"
 
 
-def render_frontmatter(fm: dict[str, str]) -> str:
+def emit_skill(skill: Skill) -> list[OutFile]:
     entries = [
-        (k, normalize_common(v) if k == "description" else v) for k, v in fm.items()
+        (k, normalize_common(v) if k == "description" else v)
+        for k, v in skill.frontmatter.items()
     ]
-    return serialize_frontmatter(entries)
+    content = f"---\n{serialize_frontmatter(entries)}\n---\n\n{skill.body.rstrip()}\n"
+    files = [OutFile(f"{SKILLS_DIR}/{skill.id}/SKILL.md", content)]
+    files += [
+        OutFile(f"{SKILLS_DIR}/{skill.id}/{rel}", copy_from=skill.dir / rel)
+        for rel in skill.references
+    ]
+    return files

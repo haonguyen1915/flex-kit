@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 
 import typer
 
@@ -22,15 +21,18 @@ app = typer.Typer(
 def gen(
     project: Path = typer.Option(Path.cwd, "--project", "-p", help="Project root."),
     dry_run: bool = typer.Option(False, "--dry-run", help="Report without writing."),
-    out: Optional[Path] = typer.Option(None, "--out", help="Write surfaces under this root."),
+    out: Path | None = typer.Option(None, "--out", help="Write surfaces under this root."),
 ) -> None:
     """Generate .claude/ and .codex/ skill surfaces from .flexkit/skills/."""
     root = project.resolve()
     result = run_gen(root, dry_run=dry_run, out_root=out.resolve() if out else None)
     tag = " (dry-run)" if dry_run else ""
-    typer.echo(f"flex-kit gen{tag}: {result.skills} skills -> [{', '.join(result.hosts)}]")
-    for w in result.written:
-        typer.echo(f"  {w.host}/{w.id}  ({w.count} files)")
+    typer.echo(
+        f"flex-kit gen{tag}: {result.skills} skills + {result.agents} agents "
+        f"-> [{', '.join(result.hosts)}]"
+    )
+    for host, n in result.files_per_host.items():
+        typer.echo(f"  {host}: {n} files")
 
 
 @app.command()
