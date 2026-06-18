@@ -1,6 +1,6 @@
 ---
 name: verify-fix-loop
-description: Run a post-implementation review-and-fix loop - review the change, and if there are critical or high findings, fix and re-review until clean or a max iteration count. Use after implementing a scoped change, before calling the work done.
+description: Run a post-implementation review-and-fix loop - review the change and run tests, and if there are critical/high findings or failing tests, fix and re-verify until clean or a max iteration count. Use after implementing a scoped change, before calling the work done.
 ---
 
 # Verify-Fix Loop
@@ -18,20 +18,43 @@ a convergence-driven loop before presenting results.
 
 ## Protocol
 
-1. **Hand off context.** Write `handoffs/review-input.md` with: the goal, files
-   changed, checks already run, key decisions, and what to read first.
-2. **Verify (in parallel).** Spawn the `reviewer` and `tester` agents together,
-   each reading `handoffs/review-input.md`:
+1. **Hand off context.** Write `handoffs/review-input.md` using the template below.
+2. **Verify (in parallel).** Spawn the `reviewer` and `tester` agents together, each
+   reading `handoffs/review-input.md`:
    - `reviewer` writes `handoffs/review-verdict.md` - a verdict (`approve` |
      `revise`), critical/high finding counts, and fix recommendations.
    - `tester` writes `handoffs/test-report.md` - `pass` | `fail` and any failing
      tests.
+   - Each also writes a durable, timestamped copy under `reports/` -
+     `reports/review-<timestamp>.md` and `reports/test-<timestamp>.md` - so the audit
+     trail survives across iterations instead of living only in chat.
 3. **Merge and decide.** A `revise` verdict OR any failing test means continue to
-   step 4. `approve` with only low/medium findings and all tests passing means exit.
+   step 4. `approve` with only low/medium findings AND all tests passing means the
+   loop may exit - check the Exit gates first.
 4. **Fix and re-verify.** Spawn the `implementer` agent with the verdict and test
    report in scope; it addresses every critical/high finding and failing test. Then
    return to step 2. After `maxIterations` cycles, stop and hand what remains to the
    user.
+
+## Handoff template (`handoffs/review-input.md`)
+
+```
+# Review input
+- Goal: <one line - what this change delivers>
+- Files changed: <repo paths>
+- Checks run: <command -> pass | fail>
+- Key decisions: <constraints accepted, choices made>
+- Read these first: <file:line references, most important first>
+```
+
+## Exit gates
+
+Do not mark the loop complete until ALL of these hold:
+
+- every acceptance criterion of the current plan step is met;
+- deterministic checks (build / lint / type / tests) pass;
+- no stubs or TODOs remain in the changed files;
+- the reviewer verdict has no unaddressed critical or high findings.
 
 ## Parameters
 
@@ -46,7 +69,6 @@ a convergence-driven loop before presenting results.
 ## Rules
 
 - Agents communicate only through `handoffs/` files, never directly.
-- The reviewer's verdict is authoritative.
-- Exit only on: a clean verdict, only low/medium findings remaining, or the user
-  stopping the loop.
-- Do not mark the loop complete while stubs or TODOs remain in the changed files.
+- The reviewer's verdict is authoritative; a failing `tester` run is a finding.
+- Never skip the handoff write - the verifiers need scoped context to be useful.
+- Exit only when the Exit gates hold, or the user stops the loop.
