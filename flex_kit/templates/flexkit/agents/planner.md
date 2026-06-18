@@ -35,8 +35,21 @@ Each step is one observable deliverable, ordered by dependency:
   - Done: the measurable outcome
 ```
 
+Example:
+
+```
+- [ ] **Add rate limiting to the search endpoint**
+  - Files: `src/routes/search.ts`, `src/middleware/rate-limit.ts`
+  - Action: add a 100 req/min rate-limit middleware, applied to the search route before the handler
+  - Acceptance: `grep rateLimit src/routes/search.ts` returns the import
+  - Done: the endpoint returns 429 after 100 requests in 60 seconds
+```
+
 Narrative steps are fine for a small patch; build/design plans use the full format.
 Recommend a mode (patch <=2 files / build / design) and flag if the task overflows it.
+
+For non-trivial work, load the `planning-methodology` skill and apply the reference it
+dispatches to (scope-challenge, solution-design, validation-interview, red-team-personas).
 
 ## Output
 
