@@ -19,15 +19,15 @@ def test_init_scaffolds_and_gens(tmp_path: Path) -> None:
     assert (tmp_path / ".flexkit/skills/verify-fix-loop/SKILL.md").exists()
     assert (tmp_path / ".flexkit/agents/reviewer.md").exists()
     assert (tmp_path / ".flexkit/agents/implementer.md").exists()
-    assert (tmp_path / ".flexkit/commands/implement.md").exists()
-    assert (tmp_path / ".flexkit/commands/plan.md").exists()
+    assert (tmp_path / ".flexkit/commands/flex-implement.md").exists()
+    assert (tmp_path / ".flexkit/commands/flex-plan.md").exists()
 
-    # gen ran -> host surfaces exist.
+    # gen ran -> host surfaces exist (commands are flex- prefixed to avoid host built-ins).
     assert (tmp_path / ".claude/skills/skill-creator/SKILL.md").exists()
     assert (tmp_path / ".agents/skills/verify-fix-loop/SKILL.md").exists()
     assert (tmp_path / ".codex/agents/reviewer.toml").exists()
-    assert (tmp_path / ".claude/commands/implement.md").exists()
-    assert (tmp_path / ".claude/commands/close.md").exists()
+    assert (tmp_path / ".claude/commands/flex-implement.md").exists()
+    assert (tmp_path / ".claude/commands/flex-close.md").exists()
     g = result.gen
     assert g is not None and g.skills == 2 and g.agents == 2 and g.commands == 5
 

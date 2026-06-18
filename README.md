@@ -90,9 +90,11 @@ of the host's native subagents:
   session-start injects branch + plan orientation (and re-orients after compaction),
   a per-prompt reminder tracks plan progress, and a pre-tool guard blocks
   secret/credential access. One Python binary, no scattered scripts.
-- **Autonomous delivery** - the bundled `implement` command walks the active plan and
-  runs the `verify-fix-loop` (reviewer/implementer subagents) until the change is
-  clean. The host runs it; flex-kit supplies the plan, agents, and protocol.
+- **Autonomous delivery** - the bundled `/flex-implement` command walks the active plan
+  and runs the `verify-fix-loop` (reviewer/implementer subagents) until the change is
+  clean. The host runs it; flex-kit supplies the plan, agents, and protocol. Slash
+  commands are `flex-` prefixed (`/flex-plan`, `/flex-status`, `/flex-close`, ...) to
+  avoid colliding with the host's built-ins.
 
 ## How it stays extensible
 

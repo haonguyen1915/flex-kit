@@ -1,5 +1,5 @@
 ---
-name: implement
+name: flex-implement
 description: Deliver the active plan - the next step, or all steps with --full - then run the verify-fix loop until the change is clean. Use to implement planned work autonomously.
 argument-hint: [--full]
 ---
@@ -11,7 +11,7 @@ engine here - you, the agent, follow the steps and spawn the subagents.
 ## Flow
 
 1. **Orient.** Run `flex-kit status` and `flex-kit next-step`. If there is no active
-   plan, stop and ask the user to create one with `flex-kit plan "<task>"`.
+   plan, stop and ask the user to create one with `/flex-plan "<task>"`.
 2. **Check scope.** If `flex-kit status` shows the mode escalated (e.g.
    `patch -> build`), surface it and confirm before long autonomous execution.
 3. **Implement.**
@@ -23,7 +23,7 @@ engine here - you, the agent, follow the steps and spawn the subagents.
    `implementer` with the verdict to fix, then re-review. Cap at 2 iterations
    (`--full`: 3), then hand any remaining findings to the user.
 5. **Close out.** When every step is `- [x]` and the loop is clean, summarize what
-   shipped and offer `flex-kit close --confirm` to archive the plan.
+   shipped and offer `/flex-close` to archive the plan.
 
 ## Rules
 

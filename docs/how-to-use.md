@@ -7,7 +7,7 @@ things and it's easy to confuse them:
 
 | You run it... | What it is | Examples |
 |---|---|---|
-| **Inside the host** (Claude Code) | generated **slash commands** (the main interface) | `/plan`, `/status`, `/next-step`, `/implement`, `/close` |
+| **Inside the host** (Claude Code) | generated **slash commands** (the main interface) | `/flex-plan`, `/flex-status`, `/flex-next-step`, `/flex-implement`, `/flex-close` |
 | **In a terminal** | the `flex-kit` CLI (same actions + setup) | `flex-kit init`, `gen`, `add`, `doctor`, `plan`, `status`, `close` |
 | **Automatically** | **hooks** the host fires | session orientation, plan reminder, secret guard |
 
@@ -93,27 +93,27 @@ Scenario: *"add a login endpoint."* Everything below is typed **in Claude Code**
 slash commands; each one drives the underlying `flex-kit` CLI for you.
 
 ```
-/plan add login endpoint --mode build
+/flex-plan add login endpoint --mode build
 ```
 Creates the plan and scaffolds a `## Steps` checklist from the task. Review/adjust the
 steps in `plans/active/<id>/plan.md`.
 
 ```
-/status
+/flex-status
 ```
 Shows where you are: `plan ... (build), 0/3 steps, next: add the route`. (If the mode
 escalated, e.g. `patch -> build`, it tells you.)
 
 ```
-/implement
+/flex-implement
 ```
-Implements the next step - or all steps with `/implement --full` - then runs the
+Implements the next step - or all steps with `/flex-implement --full` - then runs the
 **verify-fix loop**: spawns the `reviewer` subagent, and on critical/high findings
 spawns `implementer` to fix and re-reviews, a couple of rounds. Each step it finishes
 gets ticked `- [x]` in `plan.md`.
 
 ```
-/close
+/flex-close
 ```
 Confirms the steps are done and archives the plan to `plans/archive/`.
 
@@ -158,10 +158,10 @@ flex-kit gen               # regenerate host surfaces  (run after every edit)
 flex-kit doctor            # validate + catch drift     (run before committing)
 
 # work - in Claude Code (slash commands), or the same via the CLI in a terminal
-/plan <task>               # start tracked work        (cli: flex-kit plan "<task>")
-/status   /next-step       # where am I? what's next?  (cli: flex-kit status / next-step)
-/implement                 # deliver the plan + verify-fix loop
-/close                     # archive when done         (cli: flex-kit close --confirm)
+/flex-plan <task>          # start tracked work        (cli: flex-kit plan "<task>")
+/flex-status /flex-next-step  # where am I? what's next?  (cli: flex-kit status / next-step)
+/flex-implement            # deliver the plan + verify-fix loop
+/flex-close                # archive when done         (cli: flex-kit close --confirm)
 ```
 
 ## 8. Where things live
