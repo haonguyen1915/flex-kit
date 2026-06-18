@@ -9,9 +9,11 @@ from __future__ import annotations
 
 import json
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
+
+from flex_kit import modes
 
 ACTIVE_DIR = "plans/active"
 ARCHIVE_DIR = "plans/archive"
@@ -35,6 +37,7 @@ class Plan:
     mode: str
     status: str
     steps: list[Step]
+    files: list[str] = field(default_factory=list)
 
     @property
     def done_count(self) -> int:
@@ -43,6 +46,10 @@ class Plan:
     @property
     def next_step(self) -> Step | None:
         return next((s for s in self.steps if not s.done), None)
+
+    @property
+    def mode_verdict(self) -> modes.ModeVerdict:
+        return modes.effective_mode(self.mode, len(self.steps), len(self.files))
 
 
 def _slugify(title: str) -> str:
@@ -70,18 +77,23 @@ def _render(plan_id: str, title: str, mode: str, created: str) -> str:
         f"- status: active\n\n"
         "## Goal\n\n_Describe the outcome._\n\n"
         "## Steps\n\n- [ ] first step\n\n"
+        "## Files In Scope\n\n_- path/to/file_\n\n"
         "## Done Criteria\n\n_How we know it is finished._\n"
     )
 
 
 def _parse(plan_dir: Path) -> Plan:
     text = (plan_dir / "plan.md").read_text(encoding="utf-8")
-    title, meta, steps = plan_dir.name, {}, []
+    title, meta, steps, files, section = plan_dir.name, {}, [], [], ""
     for line in text.splitlines():
         if line.startswith("# Plan: "):
             title = line[len("# Plan: ") :].strip()
+        elif line.startswith("## "):
+            section = line[3:].strip().lower()
         elif m := _STEP.match(line):
             steps.append(Step(done=m.group(1) == "x", text=m.group(2).strip()))
+        elif section == "files in scope" and line.startswith("- "):
+            files.append(line[2:].strip())
         elif m := _META.match(line):
             meta[m.group(1).strip()] = m.group(2).strip()
     return Plan(
@@ -91,10 +103,13 @@ def _parse(plan_dir: Path) -> Plan:
         mode=meta.get("mode", "build"),
         status=meta.get("status", "active"),
         steps=steps,
+        files=files,
     )
 
 
 def create_plan(root: Path, title: str, mode: str = "build", now: datetime | None = None) -> Plan:
+    if not modes.is_valid(mode):
+        raise ValueError(f"Invalid mode '{mode}' (use one of {', '.join(modes.MODES)})")
     now = now or datetime.now()
     plan_id = f"{now:%y%m%d-%H%M}-{_slugify(title)}"
     plan_dir = root / ACTIVE_DIR / plan_id

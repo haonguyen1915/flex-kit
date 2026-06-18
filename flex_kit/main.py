@@ -111,7 +111,10 @@ def plan(
     project: Path = typer.Option(Path.cwd, "--project", "-p"),
 ) -> None:
     """Create a tracked plan under plans/active/ and make it the active plan."""
-    p = plan_mod.create_plan(project.resolve(), title, mode=mode)
+    try:
+        p = plan_mod.create_plan(project.resolve(), title, mode=mode)
+    except ValueError as e:
+        raise typer.BadParameter(str(e)) from e
     typer.echo(f"created plan {p.id} (mode: {p.mode})")
     typer.echo(f"  edit {p.dir}/plan.md, then `flex-kit status`")
 
@@ -123,7 +126,11 @@ def status(project: Path = typer.Option(Path.cwd, "--project", "-p")) -> None:
     if p is None:
         typer.echo("No active plan. Create one with `flex-kit plan \"<task>\"`.")
         return
-    typer.echo(f"plan {p.id}  (mode: {p.mode}, status: {p.status})")
+    v = p.mode_verdict
+    mode_str = p.mode if v.effective == v.declared else f"{v.declared} -> {v.effective}"
+    typer.echo(f"plan {p.id}  (mode: {mode_str}, status: {p.status})")
+    if v.reason:
+        typer.echo(f"  ! scope grew ({v.reason}) - consider declaring `{v.effective}` mode")
     typer.echo(f"  steps: {p.done_count}/{len(p.steps)} done")
     nxt = p.next_step
     typer.echo(f"  next: {nxt.text}" if nxt else "  next: all steps done - `flex-kit close`")
