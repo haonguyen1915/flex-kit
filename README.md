@@ -44,6 +44,8 @@ flex-kit doctor               # validate source + that surfaces are in sync
 ```
 
 New here? Read the step-by-step walkthrough: [`docs/how-to-use.md`](docs/how-to-use.md).
+For how each automated flow works (who runs it, state, loop-back, review), see
+[`docs/workflows/`](docs/workflows/README.md).
 
 ## templates (base) vs packs (opt-in)
 
