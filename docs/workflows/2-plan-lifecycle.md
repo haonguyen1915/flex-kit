@@ -63,9 +63,11 @@ Không có engine, không có code nào "gọi agent". Thứ điều phối cả
 của slash command** - file `.claude/commands/flex-plan.md` được `gen` sinh ra từ
 `.flexkit/commands/flex-plan.md`. Host (Claude Code) đọc file đó như một danh sách việc
 và làm tuần tự; trong danh sách đó, **vài bước là "chạy lệnh CLI", một bước là "đến lượt
-mày, agent, viết plan thật"**. Nội dung `/flex-plan` đúng 3 bước:
+mày, agent, viết plan thật"**. Nội dung `/flex-plan` (1 bước route tùy chọn + 3 bước chính):
 
 ```
+0. (tùy chọn) Hướng chưa rõ? áp skill navigator để route - có thể đẩy sang     [AGENT]
+   /flex-fix, /flex-change hoặc /flex-review thay vì plan thường.
 1. Chạy `flex-kit plan "<task>"` ở terminal (thêm --mode nếu task gợi ý kích cỡ).   [CLI]
 2. Mở plans/active/<id>/plan.md, thay placeholder bằng checklist `## Steps` cụ thể     [AGENT]
    suy ra từ task, rồi điền `## Goal` và `## Files In Scope`.

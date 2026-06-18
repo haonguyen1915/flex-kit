@@ -22,7 +22,7 @@ hand-edit.**
 ```
 $ flex-kit init -p proj
 flex-kit init: created proj/.flexkit
-  gen: 3 skills + 3 agents + 9 commands -> [claude, codex]
+  gen: 4 skills + 3 agents + 9 commands -> [claude, codex]
 ```
 
 One source tree produces both hosts:
@@ -126,7 +126,7 @@ Available packs:
 $ flex-kit add api-design
 flex-kit add api-design: 1 added, 0 skipped
   + skills/api-design-pattern
-  gen: 4 skills + 3 agents      # the pack's skill is now in source + both hosts
+  gen: 5 skills + 3 agents      # the pack's skill is now in source + both hosts
 ```
 
 ## 7. Design-first — settle a spec before code

@@ -23,9 +23,11 @@ review, và cuối cùng là các vòng đầy đủ ghép tất cả lại.
 Vội? Đọc **1 → 2 → 6**; đó là xương sống (build surface, track việc, chạy delivery
 loop). Phần còn lại lấp runtime, review, và đường spec-first.
 
-Hai command không có doc riêng vì chỉ là biến thể gọn của delivery: **`/flex-fix`**
-(bug nhỏ: reproduce → diagnose → patch ở mode `patch` → verify) và skill
-**`decision-interview`** (gỡ quyết định mơ hồ đầu `/flex-change`).
+Vài thứ không có doc riêng vì chỉ là biến thể/phụ trợ của các flow trên:
+**`/flex-fix`** (bug nhỏ: reproduce → diagnose → patch mode → verify), skill
+**`decision-interview`** (gỡ quyết định mơ hồ đầu `/flex-change`), và skill
+**`navigator`** (route task → đúng intent/command/skill/mode trước khi lên plan; chạy
+đầu `/flex-plan`,`/flex-change` khi hướng chưa rõ - càng nhiều domain càng giá trị).
 
 ## Một nguyên tắc xuyên suốt mọi flow
 
