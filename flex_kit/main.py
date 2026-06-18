@@ -6,6 +6,7 @@ from pathlib import Path
 
 import typer
 
+from flex_kit import plan as plan_mod
 from flex_kit.add import add as run_add
 from flex_kit.add import list_packs
 from flex_kit.doctor import doctor as run_doctor
@@ -101,6 +102,53 @@ def doctor(
             typer.echo(f"{mark} {res.id}: {f.msg}")
     typer.echo(f"\n{errors} error(s), {warns} warning(s)")
     raise typer.Exit(1 if errors else 0)
+
+
+@app.command()
+def plan(
+    title: str = typer.Argument(..., help="What the plan delivers."),
+    mode: str = typer.Option("build", "--mode", help="patch | build | design."),
+    project: Path = typer.Option(Path.cwd, "--project", "-p"),
+) -> None:
+    """Create a tracked plan under plans/active/ and make it the active plan."""
+    p = plan_mod.create_plan(project.resolve(), title, mode=mode)
+    typer.echo(f"created plan {p.id} (mode: {p.mode})")
+    typer.echo(f"  edit {p.dir}/plan.md, then `flex-kit status`")
+
+
+@app.command()
+def status(project: Path = typer.Option(Path.cwd, "--project", "-p")) -> None:
+    """Show the active plan and step progress."""
+    p = plan_mod.active_plan(project.resolve())
+    if p is None:
+        typer.echo("No active plan. Create one with `flex-kit plan \"<task>\"`.")
+        return
+    typer.echo(f"plan {p.id}  (mode: {p.mode}, status: {p.status})")
+    typer.echo(f"  steps: {p.done_count}/{len(p.steps)} done")
+    nxt = p.next_step
+    typer.echo(f"  next: {nxt.text}" if nxt else "  next: all steps done - `flex-kit close`")
+
+
+@app.command("next-step")
+def next_step(project: Path = typer.Option(Path.cwd, "--project", "-p")) -> None:
+    """Print the next incomplete step of the active plan."""
+    p = plan_mod.active_plan(project.resolve())
+    nxt = p.next_step if p else None
+    typer.echo(nxt.text if nxt else "(no next step)")
+
+
+@app.command()
+def close(
+    confirm: bool = typer.Option(False, "--confirm", help="Archive the plan."),
+    project: Path = typer.Option(Path.cwd, "--project", "-p"),
+) -> None:
+    """Archive the active plan (use --confirm to move it to plans/archive/)."""
+    p = plan_mod.close_plan(project.resolve(), confirm=confirm)
+    if confirm:
+        typer.echo(f"closed plan {p.id} -> {plan_mod.ARCHIVE_DIR}/{p.id}")
+    else:
+        left = len(p.steps) - p.done_count
+        typer.echo(f"plan {p.id}: {left} step(s) incomplete. Re-run with --confirm to archive.")
 
 
 def _main() -> None:
