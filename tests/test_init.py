@@ -16,13 +16,15 @@ def test_init_scaffolds_and_gens(tmp_path: Path) -> None:
     # Source scaffolded.
     assert (tmp_path / ".flexkit/flexkit.config.json").exists()
     assert (tmp_path / ".flexkit/skills/skill-creator/SKILL.md").exists()
-    assert (tmp_path / ".flexkit/agents/example-agent.md").exists()
+    assert (tmp_path / ".flexkit/skills/verify-fix-loop/SKILL.md").exists()
+    assert (tmp_path / ".flexkit/agents/reviewer.md").exists()
+    assert (tmp_path / ".flexkit/agents/implementer.md").exists()
 
     # gen ran -> host surfaces exist.
     assert (tmp_path / ".claude/skills/skill-creator/SKILL.md").exists()
-    assert (tmp_path / ".agents/skills/skill-creator/SKILL.md").exists()
-    assert (tmp_path / ".codex/agents/example-agent.toml").exists()
-    assert result.gen is not None and result.gen.skills == 2 and result.gen.agents == 1
+    assert (tmp_path / ".agents/skills/verify-fix-loop/SKILL.md").exists()
+    assert (tmp_path / ".codex/agents/reviewer.toml").exists()
+    assert result.gen is not None and result.gen.skills == 2 and result.gen.agents == 2
 
     # Freshly scaffolded project is in sync.
     findings = [f for r in doctor(tmp_path) for f in r.findings]
