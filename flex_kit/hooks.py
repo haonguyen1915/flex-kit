@@ -52,6 +52,20 @@ def session_start(root: Path) -> str:
     return "flex-kit: " + "; ".join(parts)
 
 
+def user_prompt(root: Path) -> str | None:
+    """Per-prompt plan reminder, deduped - only fires when plan state advances."""
+    p = plan_mod.active_plan(root)
+    if p is None:
+        return None
+    v = p.mode_verdict
+    nxt = p.next_step
+    sig = f"{p.id}|{v.effective}|{p.done_count}/{len(p.steps)}|{nxt.text if nxt else ''}"
+    if not plan_mod.reminder_changed(root, sig):
+        return None
+    line = f"flex-kit plan: {v.effective} {p.done_count}/{len(p.steps)} steps"
+    return f"{line}; next: {nxt.text}" if nxt else line
+
+
 def pre_tool_decision(payload: dict) -> str | None:
     """Return a deny reason if a tool call touches a secret/credential path."""
     tool_input = payload.get("tool_input", {})

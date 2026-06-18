@@ -180,6 +180,10 @@ def hook(
 
     if event == "session-start":
         typer.echo(hooks_mod.session_start(root))
+    elif event == "user-prompt":
+        line = hooks_mod.user_prompt(root)
+        if line:
+            typer.echo(line)
     elif event == "pre-tool":
         reason = hooks_mod.pre_tool_decision(payload)
         if reason:

@@ -125,6 +125,17 @@ def create_plan(root: Path, title: str, mode: str = "build", now: datetime | Non
     return _parse(plan_dir)
 
 
+def reminder_changed(root: Path, sig: str) -> bool:
+    """True (and records `sig`) when it differs from the last reminder - cheap dedup
+    so the per-prompt reminder only fires when plan state actually advances."""
+    state = _read_state(root)
+    if state.get("last_reminder") == sig:
+        return False
+    state["last_reminder"] = sig
+    _write_state(root, state)
+    return True
+
+
 def active_plan(root: Path) -> Plan | None:
     plan_id = _read_state(root).get("active_plan")
     if not plan_id:

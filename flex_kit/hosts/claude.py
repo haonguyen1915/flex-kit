@@ -23,11 +23,16 @@ COMMANDS_DIR = ".claude/commands"
 SETTINGS_FILE = ".claude/settings.json"
 
 _HOOKS = {
+    # "compact" re-orients after compaction - flex-kit's state is durable in plans/,
+    # so re-running session-start is enough; no separate snapshot hook is needed.
     "SessionStart": [
         {
-            "matcher": "startup|resume|clear",
+            "matcher": "startup|resume|clear|compact",
             "hooks": [{"type": "command", "command": "flex-kit hook session-start"}],
         }
+    ],
+    "UserPromptSubmit": [
+        {"hooks": [{"type": "command", "command": "flex-kit hook user-prompt"}]}
     ],
     "PreToolUse": [
         {
