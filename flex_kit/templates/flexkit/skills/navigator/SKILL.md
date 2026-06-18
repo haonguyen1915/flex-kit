@@ -28,10 +28,10 @@ Skip it for a clearly-scoped request that already names its own path.
    - *design* ambiguous or cross-cutting work -> `/flex-change` (runs decision-interview)
    - *review* existing work -> `/flex-review` (or `/flex-codex-review` for a 2nd model)
    - *research / explain* only -> answer directly, no plan
-2. **Pick the skills.** Scan the available-skills catalog. Name the skills whose
-   `description` matches this task - especially domain skills from installed packs - so
-   the work uses them instead of reinventing. If two domains overlap, say which fits
-   better and why. If nothing matches, say so rather than forcing a domain skill.
+2. **Pick the skills.** Scan the skills available to you (this project's skills,
+   including any added with `flex-kit add`). Name the ones whose `description` matches
+   this task so the work uses them instead of reinventing. If two overlap, say which
+   fits better and why. If nothing matches, say so rather than forcing a skill.
 3. **Suggest a mode.** patch (tiny, <=2 files) / build (standard) / design (needs a
    spec). Default to build when unsure.
 4. **Recommend one path.** State the single best route as

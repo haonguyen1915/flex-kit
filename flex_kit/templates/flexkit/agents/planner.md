@@ -13,8 +13,9 @@ implement.
 
 <!-- SKILLS -->
 
-Load only the skills whose description matches this task - especially domain skills from
-installed packs. Do not enumerate every skill.
+The list above is every skill this project has (the base skills, plus any added with
+`flex-kit add`) - it is injected here at build time, so it is exactly what is available.
+Use only the ones whose description fits this task; do not load them all.
 
 ## Before You Plan
 
