@@ -6,6 +6,8 @@ from pathlib import Path
 
 import typer
 
+from flex_kit.add import add as run_add
+from flex_kit.add import list_packs
 from flex_kit.doctor import doctor as run_doctor
 from flex_kit.gen import gen as run_gen
 from flex_kit.init import init as run_init
@@ -34,6 +36,29 @@ def init(
             f"  gen: {g.skills} skills + {g.agents} agents -> [{', '.join(g.hosts)}]"
         )
     typer.echo("Edit .flexkit/skills/ then run `flex-kit gen`.")
+
+
+@app.command()
+def add(
+    pack: str = typer.Argument(None, help="Pack to add. Omit to list available packs."),
+    project: Path = typer.Option(Path.cwd, "--project", "-p", help="Project root."),
+    force: bool = typer.Option(False, "--force", help="Overwrite skills/agents of the same id."),
+    no_gen: bool = typer.Option(False, "--no-gen", help="Copy only, skip gen."),
+) -> None:
+    """Add a bundled pack's skills/agents into .flexkit/, then gen."""
+    if not pack:
+        typer.echo("Available packs:")
+        for p in list_packs():
+            typer.echo(f"  {p}")
+        return
+    result = run_add(project.resolve(), pack, force=force, run_gen=not no_gen)
+    typer.echo(f"flex-kit add {pack}: {len(result.added)} added, {len(result.skipped)} skipped")
+    for rel in result.added:
+        typer.echo(f"  + {rel}")
+    for rel in result.skipped:
+        typer.echo(f"  = {rel} (exists - use --force)")
+    if result.gen is not None:
+        typer.echo(f"  gen: {result.gen.skills} skills + {result.gen.agents} agents")
 
 
 @app.command()
