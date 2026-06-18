@@ -52,6 +52,7 @@ def gen(project_root: Path, dry_run: bool = False, out_root: Path | None = None)
             if f.content is not None:
                 dest.write_text(f.content, encoding="utf-8")
             else:
+                assert f.copy_from is not None  # an OutFile is content or copy_from
                 shutil.copyfile(f.copy_from, dest)
 
     return GenResult(

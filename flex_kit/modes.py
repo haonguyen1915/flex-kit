@@ -9,11 +9,18 @@ escalates to `build`, and a `build` past its budget escalates to `design` - so a
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TypedDict
 
 MODES = ("patch", "build", "design")
 
-# Escalation budgets. None = unbounded (the top mode, design, has no cap).
-_BUDGET = {
+
+class _Budget(TypedDict):
+    max_steps: int
+    max_files: int | None  # None = unbounded
+
+
+# Escalation budgets. The top mode (design) has no cap, so it is absent here.
+_BUDGET: dict[str, _Budget] = {
     "patch": {"max_steps": 3, "max_files": 2},
     "build": {"max_steps": 15, "max_files": None},
 }

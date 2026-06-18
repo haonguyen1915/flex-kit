@@ -30,7 +30,7 @@ def _run(ctx: Ctx) -> list[Finding]:
                             "(do not hand-edit generated)",
                         )
                     )
-            elif dest.read_bytes() != f.copy_from.read_bytes():
+            elif f.copy_from is not None and dest.read_bytes() != f.copy_from.read_bytes():
                 findings.append(Finding("error", f"{host_name}: {f.path} out of sync - run gen"))
 
         # Stray files: anything in the host's owned roots that gen would not write.
