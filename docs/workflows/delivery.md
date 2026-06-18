@@ -72,6 +72,7 @@ so the decision is always made from the latest files, never from memory.
 ## Review / Codex
 
 Review is the **`reviewer` subagent** spawned on the host; its verdict file is
-authoritative and a failing `tester` run counts as a finding to fix. There is no
-external/Codex cross-model review step today - see
-[README](README.md#codex--external-review).
+authoritative and a failing `tester` run counts as a finding to fix. For an
+independent second opinion from a different model, run
+[`/flex-codex-review`](codex-review.md) and merge its critical/high findings into
+`review-verdict.md`.

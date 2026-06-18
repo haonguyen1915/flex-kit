@@ -9,7 +9,8 @@ review) is invoked.
 |---|---|---|
 | [delivery](delivery.md) | `/flex-implement` | one-command multi-agent loop |
 | [design-first](design-first.md) | `/flex-change` + `flex-kit spec` | spec-then-build |
-| [review](review.md) | `/flex-review` | standalone review |
+| [review](review.md) | `/flex-review` | standalone review (host subagent) |
+| [codex-review](codex-review.md) | `/flex-codex-review` | cross-model review (Codex CLI) |
 | [plan-lifecycle](plan-lifecycle.md) | `flex-kit plan/status/next-step/close` | stateful CLI |
 | [hooks-runtime](hooks-runtime.md) | host events (automatic) | passive runtime |
 | [build-sync](build-sync.md) | `flex-kit gen` / `doctor` | content build |
@@ -44,8 +45,10 @@ The reviewer's verdict is authoritative; the loop reads these files to decide.
 
 ### Codex / external review
 
-Review today is the `reviewer` **subagent spawned by the host** (Claude Code's Task
-tool). flex-kit does **not** currently send a change to a *different* model (e.g.
-Codex) for a second opinion - that cross-model review step (prep-kit's
-`/prep-codex-review`) is not built. If added, it would be another command that pipes
-the diff to an external reviewer and merges its findings into `review-verdict.md`.
+There are two kinds of review:
+
+- **Same-host review** - the `reviewer` subagent spawned by the host (Claude Code's
+  Task tool). Used by the [delivery](delivery.md) and [review](review.md) flows.
+- **Cross-model review** - [`/flex-codex-review`](codex-review.md) shells out to the
+  Codex CLI (`codex exec`) for an independent second opinion from a *different* model,
+  saved as a report. Faithful to prep-kit's `/prep-codex-review`.

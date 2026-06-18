@@ -51,7 +51,6 @@ yourself, ask for the `implementer`, or wrap the change in a plan and use
 
 ## Review / Codex
 
-The review is the `reviewer` subagent on the host. This is also the natural place a
-future external/Codex review would hook in - it would add a second reviewer that
-pipes the diff to another model and merges its findings into `review-verdict.md`. Not
-built today (see [README](README.md#codex--external-review)).
+The review is the `reviewer` subagent on the host. For an independent second opinion
+from a *different* model, use [`/flex-codex-review`](codex-review.md), which sends the
+same diff to the Codex CLI and saves its findings as a report.
