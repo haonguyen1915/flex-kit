@@ -21,5 +21,5 @@ skill helps decide). Otherwise:
    checklist). Log key decisions to `decisions.md` as `## YYYY-MM-DD - <label>`.
 5. **Hard checkpoint.** Present the design with `[A] Approve / [R] Revise` and do
    **not** implement until the user approves.
-6. On approval, derive the plan `## Steps` from `spec/tasks.md`, then run
-   `/flex-implement`.
+6. On approval, spawn the `planner` agent to derive the plan `## Steps` from
+   `spec/tasks.md`, then run `/flex-implement`.

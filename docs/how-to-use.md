@@ -43,7 +43,7 @@ This creates `.flexkit/` (your source) and generates the host surfaces:
 .flexkit/                      # SOURCE - you edit this
   flexkit.config.json
   skills/   skill-creator/  verify-fix-loop/  decision-interview/  navigator/
-  agents/   reviewer.md  implementer.md  tester.md
+  agents/   planner.md  reviewer.md  implementer.md  tester.md
   commands/ flex-plan.md  flex-implement.md  flex-fix.md  ...
 .claude/                       # GENERATED - never edit
   skills/  agents/  commands/  settings.json   (hooks wired here)

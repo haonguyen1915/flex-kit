@@ -22,6 +22,7 @@ def test_init_scaffolds_and_gens(tmp_path: Path) -> None:
     assert (tmp_path / ".flexkit/agents/reviewer.md").exists()
     assert (tmp_path / ".flexkit/agents/implementer.md").exists()
     assert (tmp_path / ".flexkit/agents/tester.md").exists()
+    assert (tmp_path / ".flexkit/agents/planner.md").exists()
     assert (tmp_path / ".flexkit/commands/flex-implement.md").exists()
     assert (tmp_path / ".flexkit/commands/flex-change.md").exists()
     assert (tmp_path / ".flexkit/commands/flex-fix.md").exists()
@@ -34,7 +35,7 @@ def test_init_scaffolds_and_gens(tmp_path: Path) -> None:
     assert (tmp_path / ".claude/commands/flex-review.md").exists()
     assert (tmp_path / ".claude/commands/flex-codex-review.md").exists()
     g = result.gen
-    assert g is not None and g.skills == 4 and g.agents == 3 and g.commands == 9
+    assert g is not None and g.skills == 4 and g.agents == 4 and g.commands == 9
 
     # Freshly scaffolded project is in sync.
     findings = [f for r in doctor(tmp_path) for f in r.findings]

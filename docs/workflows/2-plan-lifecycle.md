@@ -21,19 +21,21 @@ không phải wrapper mỏng**: nó còn chứa bước agent tự lên plan (xe
 
 ## Ai làm
 
-Hai vai tách bạch - đừng nhầm:
+Ba vai tách bạch - đừng nhầm:
 
-- **Agent (chủ thể lên plan).** Phần "nghĩ" là của agent: đọc task, chọn mode, **chia
-  task thành các step cụ thể**, viết Goal và Files In Scope. Đây là công việc trí tuệ,
-  CLI không làm thay được. `/flex-plan` chính là *protocol agent theo*: chạy CLI để dựng
-  khung, rồi **mở `plan.md` và điền nội dung thật** (xem Flow).
-- **CLI `flex-kit` (plumbing bền).** CLI cố tình "ngu": chỉ (1) scaffold một `plan.md`
+- **`planner` (subagent lên plan).** Phần "nghĩ" giao cho subagent `planner`: scout
+  file liên quan, **chia task thành step cụ thể kèm acceptance**, viết Goal / Files In
+  Scope / Done, đề xuất mode. Đây là công việc trí tuệ, CLI không làm thay được.
+- **Main agent (điều phối + duyệt).** Đi theo `/flex-plan`: chạy CLI dựng khung, **spawn
+  `planner` để draft**, rồi cùng user xem lại và chốt. Không tự tay nghĩ plan - giao
+  planner (đối xứng với việc giao `implementer`/`reviewer`/`tester` ở delivery).
+- **CLI `flex-kit` (plumbing bền).** Cố tình "ngu": chỉ (1) scaffold một `plan.md`
   **rỗng** (placeholder `- [ ] first step`), (2) đặt con trỏ `active_plan` trong
   `state.json`, (3) parse lại checklist cho `status`/`next-step`, (4) di chuyển thư mục
-  khi `close`. Nó **không** sinh step, không suy luận - đó là việc của agent.
+  khi `close`. Nó **không** sinh step, không suy luận.
 
-Không có subagent ở flow này: agent chính (đang theo `/flex-plan`) tự lên plan; các
-subagent (`implementer`…) chỉ vào cuộc ở [delivery](6-delivery.md).
+`planner` là subagent đầu tiên vào cuộc; `implementer`/`reviewer`/`tester` vào ở
+[delivery](6-delivery.md).
 
 ## Flow
 
@@ -43,10 +45,10 @@ subagent (`implementer`…) chỉ vào cuộc ở [delivery](6-delivery.md).
               Steps chỉ có 1 placeholder "- [ ] first step")
            -> ghi .flexkit/state.json { "active_plan": "<id>" }
 
-[AGENT]  mở plan.md và LÊN PLAN THẬT  <-- phần cốt lõi, không phải CLI
-           -> viết Goal (kết quả mong đợi)
-           -> thay placeholder bằng checklist step cụ thể suy ra từ task
-           -> điền Files In Scope (chi phối cả escalation theo file ở mode)
+[PLANNER] main agent spawn `planner` -> nó DRAFT plan.md  <-- phần cốt lõi, không phải CLI
+           -> scout file liên quan
+           -> viết Goal + checklist Steps (kèm acceptance) + Files In Scope + Done
+           -> đề xuất mode; main agent + user xem lại và chốt
 
 [CLI]    flex-kit status / next-step
            -> đọc plan active, parse checklist - [ ] / - [x]
@@ -62,26 +64,28 @@ subagent (`implementer`…) chỉ vào cuộc ở [delivery](6-delivery.md).
 Không có engine, không có code nào "gọi agent". Thứ điều phối cả chuỗi trên là **prose
 của slash command** - file `.claude/commands/flex-plan.md` được `gen` sinh ra từ
 `.flexkit/commands/flex-plan.md`. Host (Claude Code) đọc file đó như một danh sách việc
-và làm tuần tự; trong danh sách đó, **vài bước là "chạy lệnh CLI", một bước là "đến lượt
-mày, agent, viết plan thật"**. Nội dung `/flex-plan` (1 bước route tùy chọn + 3 bước chính):
+và làm tuần tự; trong danh sách đó, **vài bước là "chạy lệnh CLI", một bước là "spawn
+`planner` để nó draft plan thật"**. Nội dung `/flex-plan` (1 bước route tùy chọn + 3 chính):
 
 ```
-0. (tùy chọn) Hướng chưa rõ? áp skill navigator để route - có thể đẩy sang     [AGENT]
+0. (tùy chọn) Hướng chưa rõ? áp skill navigator để route - có thể đẩy sang      [AGENT]
    /flex-fix, /flex-change hoặc /flex-review thay vì plan thường.
 1. Chạy `flex-kit plan "<task>"` ở terminal (thêm --mode nếu task gợi ý kích cỡ).   [CLI]
-2. Mở plans/active/<id>/plan.md, thay placeholder bằng checklist `## Steps` cụ thể     [AGENT]
-   suy ra từ task, rồi điền `## Goal` và `## Files In Scope`.
+2. Spawn `planner` -> nó draft plan.md (Goal + Steps kèm acceptance + Files + Done),  [PLANNER]
+   đề xuất mode; main agent + user xem lại.
 3. Chạy `flex-kit status` để xác nhận, rồi gợi ý `/flex-implement` để giao việc.        [CLI]
 ```
 
 Nói cách khác:
 
-- **Bước 1 và 3** là agent gọi CLI (qua Bash tool) - CLI làm phần plumbing.
-- **Bước 2** không có lệnh nào để gọi: nó là chỉ thị bằng văn xuôi yêu cầu *chính agent*
-  dùng năng lực đọc-hiểu của mình để biến task thành step. Đây chính là chỗ "lên plan".
+- **Bước 1 và 3** là main agent gọi CLI (qua Bash tool) - CLI làm phần plumbing.
+- **Bước 2** không có lệnh CLI nào để gọi: nó là chỉ thị bằng văn xuôi yêu cầu main agent
+  **spawn subagent `planner`** để biến task thành plan. Đây chính là chỗ "lên plan", và
+  nó là một *agent* làm - không phải CLI.
 - Bỏ slash đi, tự gõ `flex-kit plan` ở terminal: bạn chỉ nhận khung rỗng và **bạn** phải
-  tự điền bước 2. `/flex-plan` chỉ đóng gói "scaffold + điền + xác nhận" thành chỉ thị để
-  agent làm trọn trong một lượt - bản chất handoff [CLI]↔[AGENT] là vậy, không phải magic.
+  tự đóng vai planner điền bước 2. `/flex-plan` chỉ đóng gói "scaffold + spawn planner +
+  duyệt" thành chỉ thị để làm trọn trong một lượt - bản chất handoff vẫn là CLI lo
+  plumbing, agent lo phần nghĩ.
 
 ## Điều hướng / routing
 
@@ -94,7 +98,7 @@ còn chạy `modes.effective_mode()` để báo mode khai báo có escalate khô
 
 | File | Vai trò | Ai ghi |
 |---|---|---|
-| `plans/active/<id>/plan.md` | plan + checklist step | agent (lên plan); `implementer` tick box khi delivery |
+| `plans/active/<id>/plan.md` | plan + checklist step | `planner` (draft); `implementer` tick box khi delivery |
 | `.flexkit/state.json` | pointer `active_plan` + hash dedup `last_reminder` | CLI + hooks |
 | `plans/archive/<id>/` | plan đã đóng, giữ tham khảo | `close --confirm` |
 
