@@ -23,6 +23,8 @@ def _run(ctx: Ctx) -> list[Finding]:
         _check_item("skill", s.id, s.frontmatter, findings)
     for a in ctx.agents:
         _check_item("agent", a.id, a.frontmatter, findings)
+    for c in ctx.commands:
+        _check_item("command", c.id, c.frontmatter, findings)
     return findings
 
 

@@ -9,6 +9,7 @@ frontmatter is a Claude model alias, passed through as-is.
 from __future__ import annotations
 
 from flex_kit.agents import Agent, inject_skills
+from flex_kit.commands import Command
 from flex_kit.emit import OutFile
 from flex_kit.frontmatter import normalize_common, serialize_frontmatter
 from flex_kit.skills import Skill
@@ -16,6 +17,7 @@ from flex_kit.skills import Skill
 ID = "claude"
 SKILLS_DIR = ".claude/skills"
 AGENTS_DIR = ".claude/agents"
+COMMANDS_DIR = ".claude/commands"
 
 
 def emit_skill(skill: Skill) -> list[OutFile]:
@@ -40,3 +42,14 @@ def emit_agent(agent: Agent, skills: list[Skill]) -> list[OutFile]:
     body = inject_skills(agent.body, skills)
     content = f"---\n{serialize_frontmatter(entries)}\n---\n\n{body.rstrip()}\n"
     return [OutFile(f"{AGENTS_DIR}/{agent.id}.md", content)]
+
+
+def emit_command(command: Command, skills: list[Skill]) -> list[OutFile]:
+    fm = command.frontmatter
+    # Claude commands key off the filename, so `name` is dropped from frontmatter.
+    entries = [("description", normalize_common(fm["description"]))]
+    if fm.get("argument-hint"):
+        entries.append(("argument-hint", fm["argument-hint"]))
+    body = inject_skills(command.body, skills)
+    content = f"---\n{serialize_frontmatter(entries)}\n---\n\n{body.rstrip()}\n"
+    return [OutFile(f"{COMMANDS_DIR}/{command.id}.md", content)]

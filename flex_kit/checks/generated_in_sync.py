@@ -16,7 +16,7 @@ def _run(ctx: Ctx) -> list[Finding]:
         host = ctx.hosts[host_name]
         expected: set[str] = set()
 
-        for f in emit_for_host(host, ctx.skills, ctx.agents):
+        for f in emit_for_host(host, ctx.skills, ctx.agents, ctx.commands):
             expected.add(f.path)
             dest = ctx.project_root / f.path
             if not dest.exists():
@@ -34,7 +34,7 @@ def _run(ctx: Ctx) -> list[Finding]:
                 findings.append(Finding("error", f"{host_name}: {f.path} out of sync - run gen"))
 
         # Stray files: anything in the host's owned roots that gen would not write.
-        roots = {host.SKILLS_DIR, getattr(host, "AGENTS_DIR", None)}
+        roots = [getattr(host, a, None) for a in ("SKILLS_DIR", "AGENTS_DIR", "COMMANDS_DIR")]
         for base in filter(None, roots):
             root = ctx.project_root / base
             if not root.exists():

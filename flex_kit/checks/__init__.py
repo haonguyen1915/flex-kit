@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from flex_kit.agents import Agent
+from flex_kit.commands import Command
 from flex_kit.config import Config
 from flex_kit.skills import Skill
 
@@ -17,6 +18,7 @@ class Ctx:
     config: Config
     skills: list[Skill]
     agents: list[Agent]
+    commands: list[Command]
     hosts: dict
 
 

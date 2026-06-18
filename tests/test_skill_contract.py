@@ -21,7 +21,14 @@ def _skill(skill_id: str, name: str, description: str) -> Skill:
 
 
 def _ctx(*skills: Skill) -> Ctx:
-    return Ctx(project_root=Path("."), config=Config(), skills=list(skills), agents=[], hosts={})
+    return Ctx(
+        project_root=Path("."),
+        config=Config(),
+        skills=list(skills),
+        agents=[],
+        commands=[],
+        hosts={},
+    )
 
 
 def test_short_description_errors() -> None:

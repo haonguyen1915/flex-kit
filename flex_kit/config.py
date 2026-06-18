@@ -9,6 +9,7 @@ from pathlib import Path
 _DEFAULT_HOSTS = ["claude", "codex"]
 _DEFAULT_SKILLS_DIR = ".flexkit/skills"
 _DEFAULT_AGENTS_DIR = ".flexkit/agents"
+_DEFAULT_COMMANDS_DIR = ".flexkit/commands"
 
 
 @dataclass
@@ -16,6 +17,7 @@ class Config:
     hosts: list[str] = field(default_factory=lambda: list(_DEFAULT_HOSTS))
     skills_dir: str = _DEFAULT_SKILLS_DIR
     agents_dir: str = _DEFAULT_AGENTS_DIR
+    commands_dir: str = _DEFAULT_COMMANDS_DIR
 
 
 def load_config(project_root: Path) -> Config:
@@ -27,4 +29,5 @@ def load_config(project_root: Path) -> Config:
         hosts=raw.get("hosts", list(_DEFAULT_HOSTS)),
         skills_dir=raw.get("skillsDir", _DEFAULT_SKILLS_DIR),
         agents_dir=raw.get("agentsDir", _DEFAULT_AGENTS_DIR),
+        commands_dir=raw.get("commandsDir", _DEFAULT_COMMANDS_DIR),
     )

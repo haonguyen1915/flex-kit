@@ -8,6 +8,7 @@ from pathlib import Path
 
 from flex_kit.agents import discover_agents
 from flex_kit.checks import Check, Ctx, Finding
+from flex_kit.commands import discover_commands
 from flex_kit.config import load_config
 from flex_kit.registry import CHECKS, HOSTS
 from flex_kit.skills import discover_skills
@@ -40,7 +41,15 @@ def doctor(project_root: Path) -> list[CheckResult]:
     config = load_config(project_root)
     skills = discover_skills(project_root, config.skills_dir)
     agents = discover_agents(project_root, config.agents_dir)
-    ctx = Ctx(project_root=project_root, config=config, skills=skills, agents=agents, hosts=HOSTS)
+    commands = discover_commands(project_root, config.commands_dir)
+    ctx = Ctx(
+        project_root=project_root,
+        config=config,
+        skills=skills,
+        agents=agents,
+        commands=commands,
+        hosts=HOSTS,
+    )
 
     results: list[CheckResult] = []
     for check in [*CHECKS, *_load_project_checks(project_root)]:

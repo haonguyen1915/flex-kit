@@ -74,7 +74,7 @@ def gen(
     tag = " (dry-run)" if dry_run else ""
     typer.echo(
         f"flex-kit gen{tag}: {result.skills} skills + {result.agents} agents "
-        f"-> [{', '.join(result.hosts)}]"
+        f"+ {result.commands} commands -> [{', '.join(result.hosts)}]"
     )
     for host, n in result.files_per_host.items():
         typer.echo(f"  {host}: {n} files")
