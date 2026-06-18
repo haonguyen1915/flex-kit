@@ -13,6 +13,7 @@ from flex_kit import hooks as hooks_mod
 from flex_kit import plan as plan_mod
 from flex_kit.add import add as run_add
 from flex_kit.add import list_packs
+from flex_kit.add import remove as run_remove
 from flex_kit.doctor import doctor as run_doctor
 from flex_kit.gen import gen as run_gen
 from flex_kit.init import init as run_init
@@ -63,6 +64,24 @@ def add(
         typer.echo(f"  + {rel}")
     for rel in result.skipped:
         typer.echo(f"  = {rel} (exists - use --force)")
+    if result.gen is not None:
+        typer.echo(f"  gen: {result.gen.skills} skills + {result.gen.agents} agents")
+
+
+@app.command()
+def remove(
+    pack: str = typer.Argument(..., help="Pack to remove from .flexkit/."),
+    project: Path = typer.Option(Path.cwd, "--project", "-p"),
+    no_gen: bool = typer.Option(False, "--no-gen", help="Delete only, skip gen."),
+) -> None:
+    """Remove a pack's skills/agents from .flexkit/ (the un-add), then gen."""
+    result = run_remove(project.resolve(), pack, run_gen=not no_gen)
+    typer.echo(
+        f"flex-kit remove {pack}: {len(result.removed)} removed, "
+        f"{len(result.missing)} not present"
+    )
+    for rel in result.removed:
+        typer.echo(f"  - {rel}")
     if result.gen is not None:
         typer.echo(f"  gen: {result.gen.skills} skills + {result.gen.agents} agents")
 

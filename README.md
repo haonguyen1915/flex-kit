@@ -72,6 +72,7 @@ flex-kit ships two kinds of bundled content. The dividing question:
 |---|---|
 | `flex-kit init` | scaffold `.flexkit/` from the base template, then `gen` |
 | `flex-kit add <pack>` | copy a bundled pack's skills/agents into `.flexkit/`, then `gen` |
+| `flex-kit remove <pack>` | delete a pack's skills/agents from `.flexkit/` (un-add), then `gen` |
 | `flex-kit gen` | source → host surfaces (`.claude/`, `.agents/skills/`, `.codex/agents/`) |
 | `flex-kit doctor` | run validation checks (source-valid, skill-contract, skill-refs, generated-in-sync) |
 | `flex-kit plan "<task>"` | create a tracked plan under `plans/active/` (the active plan) |
