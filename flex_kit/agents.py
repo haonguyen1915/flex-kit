@@ -35,11 +35,19 @@ def discover_agents(project_root: Path, agents_dir: str) -> list[Agent]:
     return agents
 
 
+def _lead(desc: str) -> str:
+    """The lead clause of a description - up to the first ` - ` or sentence period.
+
+    The full description drives host triggering (kept in each skill file); the catalog
+    only needs enough for an agent to pick, so it stays terse.
+    """
+    cuts = [i for i in (desc.find(" - "), desc.find(". ")) if i != -1]
+    return (desc[: min(cuts)] if cuts else desc).strip().rstrip(".")
+
+
 def skill_catalog(skills) -> str:
-    """A one-line-per-skill catalog injected into agent bodies at SKILLS_MARKER."""
-    return "\n".join(
-        f"- {s.id}: {s.frontmatter.get('description', '').strip()}" for s in skills
-    )
+    """A one-line-per-skill catalog (id + lead clause) injected at SKILLS_MARKER."""
+    return "\n".join(f"- {s.id}: {_lead(s.frontmatter.get('description', ''))}" for s in skills)
 
 
 def inject_skills(body: str, skills) -> str:
