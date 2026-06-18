@@ -8,6 +8,7 @@ from pathlib import Path
 
 import typer
 
+from flex_kit import codex_review as codex_review_mod
 from flex_kit import hooks as hooks_mod
 from flex_kit import plan as plan_mod
 from flex_kit.add import add as run_add
@@ -82,6 +83,25 @@ def gen(
     )
     for host, n in result.files_per_host.items():
         typer.echo(f"  {host}: {n} files")
+
+
+@app.command("codex-review")
+def codex_review(
+    target: str = typer.Argument(None, help="A file path (with --type file)."),
+    type_: str = typer.Option("plan", "--type", help="plan | diff | file."),
+    model: str = typer.Option(codex_review_mod.DEFAULT_MODEL, "--model"),
+    effort: str = typer.Option(codex_review_mod.DEFAULT_EFFORT, "--effort"),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Print the command, don't run codex."),
+    project: Path = typer.Option(Path.cwd, "--project", "-p"),
+) -> None:
+    """Send the active plan, the diff, or a file to Codex (codex exec) for review."""
+    res = codex_review_mod.codex_review(
+        project.resolve(), kind=type_, target=target, model=model, effort=effort, dry_run=dry_run
+    )
+    if dry_run:
+        typer.echo(f"[dry-run] {' '.join(res.command)}  ->  {res.report_path}")
+    else:
+        typer.echo(f"codex review ({res.model}) saved -> {res.report_path}")
 
 
 @app.command()
