@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Single-source AI-host kit: author skills once, generate native surfaces for Claude Code and Codex, validate they stay in sync."
 license = "MIT"
 packages = [{include = "flex_kit"}]
+include = [{ path = "flex_kit/templates/**/*", format = ["sdist", "wheel"] }]
 
 [tool.poetry.dependencies]
 python = ">=3.10"

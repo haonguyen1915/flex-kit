@@ -1,0 +1,5 @@
+{
+  "hosts": ["claude", "codex"],
+  "skillsDir": ".flexkit/skills",
+  "agentsDir": ".flexkit/agents"
+}

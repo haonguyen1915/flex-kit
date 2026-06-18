@@ -8,6 +8,7 @@ import typer
 
 from flex_kit.doctor import doctor as run_doctor
 from flex_kit.gen import gen as run_gen
+from flex_kit.init import init as run_init
 
 app = typer.Typer(
     name="flex-kit",
@@ -15,6 +16,24 @@ app = typer.Typer(
     no_args_is_help=True,
     add_completion=False,
 )
+
+
+@app.command()
+def init(
+    project: Path = typer.Option(Path.cwd, "--project", "-p", help="Project root."),
+    force: bool = typer.Option(False, "--force", help="Overwrite an existing .flexkit/."),
+    no_gen: bool = typer.Option(False, "--no-gen", help="Scaffold only, skip gen."),
+) -> None:
+    """Scaffold .flexkit/ from the starter template, then gen the host surfaces."""
+    root = project.resolve()
+    result = run_init(root, force=force, run_gen=not no_gen)
+    typer.echo(f"flex-kit init: created {result.flexkit_dir}")
+    if result.gen is not None:
+        g = result.gen
+        typer.echo(
+            f"  gen: {g.skills} skills + {g.agents} agents -> [{', '.join(g.hosts)}]"
+        )
+    typer.echo("Edit .flexkit/skills/ then run `flex-kit gen`.")
 
 
 @app.command()
