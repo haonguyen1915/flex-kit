@@ -21,6 +21,7 @@ def test_gen_writes_skills_for_both_hosts(tmp_path: Path) -> None:
     root = _project(tmp_path)
     result = gen(root)
     assert result.skills == 1
+    assert result.agents == 1
     assert result.hosts == ["claude", "codex"]
 
     claude = (root / ".claude/skills/sample-skill/SKILL.md").read_text()
@@ -35,6 +36,28 @@ def test_gen_writes_skills_for_both_hosts(tmp_path: Path) -> None:
     # References copied verbatim to both.
     assert (root / ".claude/skills/sample-skill/references/extra.md").exists()
     assert (root / ".agents/skills/sample-skill/references/extra.md").exists()
+
+
+def test_gen_writes_agents_for_both_hosts(tmp_path: Path) -> None:
+    root = _project(tmp_path)
+    gen(root)
+
+    claude_agent = (root / ".claude/agents/sample-agent.md").read_text()
+    codex_agent = (root / ".codex/agents/sample-agent.toml").read_text()
+
+    # Claude agent: markdown .md, model alias passed through, skills catalog injected.
+    assert "model: opus" in claude_agent
+    assert "- sample-skill:" in claude_agent  # <!-- SKILLS --> replaced
+    assert "<!-- SKILLS -->" not in claude_agent
+
+    # Codex agent: TOML, model mapped, description stripped, skills catalog injected.
+    assert 'model = "gpt-5.5"' in codex_agent
+    assert "developer_instructions = '''" in codex_agent
+    assert "- sample-skill:" in codex_agent
+    assert (
+        'description = "An agent that reviews things - with code and angle brackets."'
+        in codex_agent
+    )
 
 
 def test_doctor_clean_after_gen(tmp_path: Path) -> None:
