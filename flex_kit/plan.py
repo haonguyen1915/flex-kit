@@ -144,6 +144,33 @@ def active_plan(root: Path) -> Plan | None:
     return _parse(plan_dir) if (plan_dir / "plan.md").exists() else None
 
 
+_SPEC_FILES = {
+    "proposal.md": (
+        "# Proposal\n\n## Problem\n\n## Desired Outcome\n\n## Constraints\n\n"
+        "## Options Considered\n\n## Chosen Direction\n"
+    ),
+    "design.md": (
+        "# Design\n\n## Scope\n\n## System Shape\n\n## Data And Contracts\n\n"
+        "## Validation Plan\n\n## Risks\n"
+    ),
+    "tasks.md": "# Tasks\n\n- [ ] first task\n",
+}
+
+
+def scaffold_spec(root: Path) -> Plan:
+    """Create spec/{proposal,design,tasks}.md under the active plan (design-first)."""
+    plan = active_plan(root)
+    if plan is None:
+        raise FileNotFoundError("No active plan to scaffold a spec for")
+    spec_dir = plan.dir / "spec"
+    spec_dir.mkdir(exist_ok=True)
+    for name, content in _SPEC_FILES.items():
+        f = spec_dir / name
+        if not f.exists():
+            f.write_text(content, encoding="utf-8")
+    return plan
+
+
 def close_plan(root: Path, confirm: bool = False) -> Plan:
     plan = active_plan(root)
     if plan is None:

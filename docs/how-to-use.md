@@ -159,10 +159,18 @@ flex-kit doctor            # validate + catch drift     (run before committing)
 
 # work - in Claude Code (slash commands), or the same via the CLI in a terminal
 /flex-plan <task>          # start tracked work        (cli: flex-kit plan "<task>")
+/flex-change <task>        # design-first: plan + spec (proposal/design/tasks) before code
 /flex-status /flex-next-step  # where am I? what's next?  (cli: flex-kit status / next-step)
-/flex-implement            # deliver the plan + verify-fix loop
+/flex-implement            # deliver the plan: implement -> test + review -> fix -> repeat
+/flex-review [target]      # standalone review of the current diff (no plan needed)
 /flex-close                # archive when done         (cli: flex-kit close --confirm)
 ```
+
+The delivery loop (`/flex-implement`) verifies with **two agents in parallel** -
+`reviewer` (correctness/convention) and `tester` (runs the project's tests) - and a
+failing test counts as a finding to fix. For large/ambiguous work, start with
+`/flex-change` to settle a spec (`spec/proposal.md` -> `design.md` -> `tasks.md`)
+before implementing.
 
 ## 8. Where things live
 

@@ -5,11 +5,11 @@ description: Run a post-implementation review-and-fix loop - review the change, 
 
 # Verify-Fix Loop
 
-A reusable "review then fix" loop that catches issues before delivery. It
-coordinates two agents this project provides - `implementer` and `reviewer` -
-through files, and relies on the host (Claude Code / Codex) to spawn them. There
-is no orchestration engine here: the host runs the subagents, this skill is the
-protocol the main agent follows.
+A reusable "verify then fix" loop that catches issues before delivery. It
+coordinates the agents this project provides - `implementer`, `reviewer`, and
+`tester` - through files, and relies on the host (Claude Code / Codex) to spawn
+them. There is no orchestration engine here: the host runs the subagents, this
+skill is the protocol the main agent follows.
 
 ## When To Use
 
@@ -20,24 +20,27 @@ a convergence-driven loop before presenting results.
 
 1. **Hand off context.** Write `handoffs/review-input.md` with: the goal, files
    changed, checks already run, key decisions, and what to read first.
-2. **Review.** Spawn the `reviewer` agent. It reads `handoffs/review-input.md`,
-   reviews the change, and writes `handoffs/review-verdict.md` with: a verdict
-   (`approve` | `revise`), critical/high finding counts, and fix recommendations.
-3. **Decide.**
-   - `approve`, or only low/medium findings -> exit the loop.
-   - critical or high findings -> continue to step 4.
-4. **Fix and re-review.** Spawn the `implementer` agent with
-   `handoffs/review-verdict.md` in scope; it addresses every critical/high
-   finding. Then return to step 2. After `maxIterations` cycles, stop and hand the
-   remaining findings to the user.
+2. **Verify (in parallel).** Spawn the `reviewer` and `tester` agents together,
+   each reading `handoffs/review-input.md`:
+   - `reviewer` writes `handoffs/review-verdict.md` - a verdict (`approve` |
+     `revise`), critical/high finding counts, and fix recommendations.
+   - `tester` writes `handoffs/test-report.md` - `pass` | `fail` and any failing
+     tests.
+3. **Merge and decide.** A `revise` verdict OR any failing test means continue to
+   step 4. `approve` with only low/medium findings and all tests passing means exit.
+4. **Fix and re-verify.** Spawn the `implementer` agent with the verdict and test
+   report in scope; it addresses every critical/high finding and failing test. Then
+   return to step 2. After `maxIterations` cycles, stop and hand what remains to the
+   user.
 
 ## Parameters
 
 | Parameter | Default | Meaning |
 |---|---|---|
 | `reviewer` | `reviewer` | the agent that reviews and writes the verdict |
+| `tester` | `tester` | the agent that runs the project's tests |
 | `implementer` | `implementer` | the agent that applies fixes |
-| `maxIterations` | 2 | advisory cap on fix-review cycles before pausing for the user |
+| `maxIterations` | 2 | advisory cap on fix-verify cycles before pausing for the user |
 | `severityThreshold` | `high` | minimum finding severity that triggers another fix iteration |
 
 ## Rules

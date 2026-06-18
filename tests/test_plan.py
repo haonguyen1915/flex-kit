@@ -49,3 +49,16 @@ def test_close_requires_confirm_then_archives(tmp_path: Path) -> None:
 def test_close_without_active_errors(tmp_path: Path) -> None:
     with pytest.raises(FileNotFoundError):
         plan_mod.close_plan(tmp_path, confirm=True)
+
+
+def test_scaffold_spec_creates_three_files(tmp_path: Path) -> None:
+    plan_mod.create_plan(tmp_path, "big feature", mode="design", now=datetime(2026, 6, 18, 9, 0))
+    p = plan_mod.scaffold_spec(tmp_path)
+    for name in ("proposal.md", "design.md", "tasks.md"):
+        assert (p.dir / "spec" / name).exists()
+    assert "## Chosen Direction" in (p.dir / "spec/proposal.md").read_text()
+
+
+def test_scaffold_spec_without_active_errors(tmp_path: Path) -> None:
+    with pytest.raises(FileNotFoundError):
+        plan_mod.scaffold_spec(tmp_path)

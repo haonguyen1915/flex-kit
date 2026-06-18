@@ -149,6 +149,14 @@ def next_step(project: Path = typer.Option(Path.cwd, "--project", "-p")) -> None
 
 
 @app.command()
+def spec(project: Path = typer.Option(Path.cwd, "--project", "-p")) -> None:
+    """Scaffold spec/{proposal,design,tasks}.md for the active plan (design-first)."""
+    p = plan_mod.scaffold_spec(project.resolve())
+    typer.echo(f"scaffolded spec/ for plan {p.id}")
+    typer.echo(f"  fill {p.dir}/spec/proposal.md -> design.md -> tasks.md")
+
+
+@app.command()
 def close(
     confirm: bool = typer.Option(False, "--confirm", help="Archive the plan."),
     project: Path = typer.Option(Path.cwd, "--project", "-p"),
