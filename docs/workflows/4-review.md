@@ -23,8 +23,10 @@ tree; có target thì review cái đó.
 
 ```
 /flex-review [target]
- 1. SCOPE   ghi handoffs/review-input.md (phạm vi diff + cần focus gì)
+ 1. SCOPE   ghi handoffs/review-input.md theo template trong skill verify-fix-loop
+            (goal, files changed, checks run, key decisions, read-these-first)
  2. REVIEW  spawn `reviewer` -> handoffs/review-verdict.md (verdict + findings)
+                              + bản bền reports/review-<ts>.md
  3. REPORT  surface findings. Mời fix bằng `implementer`, hoặc giao user.
             (chỉ review: không đổi code trừ khi bạn yêu cầu)
 ```
@@ -39,8 +41,9 @@ Tuyến tính, một phát - không loop, không phụ thuộc plan. Nó tái d�
 
 | File | Vai trò |
 |---|---|
-| `handoffs/review-input.md` | phạm vi diff giao cho reviewer |
-| `handoffs/review-verdict.md` | verdict + findings của reviewer |
+| `handoffs/review-input.md` | phạm vi diff giao cho reviewer (theo template skill) |
+| `handoffs/review-verdict.md` | verdict + findings hiện hành của reviewer |
+| `reports/review-<ts>.md` | bản sao bền có timestamp |
 
 Nếu không có plan active, các file này ghi ở `handoffs/` của repo root. Không đọc/ghi
 plan state - flow này cố ý stateless.

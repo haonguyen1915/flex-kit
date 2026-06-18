@@ -42,9 +42,9 @@ This creates `.flexkit/` (your source) and generates the host surfaces:
 ```
 .flexkit/                      # SOURCE - you edit this
   flexkit.config.json
-  skills/   skill-creator/  verify-fix-loop/
-  agents/   reviewer.md  implementer.md
-  commands/ implement.md
+  skills/   skill-creator/  verify-fix-loop/  decision-interview/
+  agents/   reviewer.md  implementer.md  tester.md
+  commands/ flex-plan.md  flex-implement.md  flex-fix.md  ...
 .claude/                       # GENERATED - never edit
   skills/  agents/  commands/  settings.json   (hooks wired here)
 .agents/skills/                # GENERATED - Codex reads skills here
@@ -162,15 +162,18 @@ flex-kit doctor            # validate + catch drift     (run before committing)
 /flex-change <task>        # design-first: plan + spec (proposal/design/tasks) before code
 /flex-status /flex-next-step  # where am I? what's next?  (cli: flex-kit status / next-step)
 /flex-implement            # deliver the plan: implement -> test + review -> fix -> repeat
+/flex-fix <bug>            # quick bug-to-patch path (reproduce -> diagnose -> patch -> verify)
 /flex-review [target]      # standalone review of the current diff (no plan needed)
 /flex-close                # archive when done         (cli: flex-kit close --confirm)
 ```
 
 The delivery loop (`/flex-implement`) verifies with **two agents in parallel** -
 `reviewer` (correctness/convention) and `tester` (runs the project's tests) - and a
-failing test counts as a finding to fix. For large/ambiguous work, start with
-`/flex-change` to settle a spec (`spec/proposal.md` -> `design.md` -> `tasks.md`)
-before implementing.
+failing test counts as a finding to fix. It drives checkpoints with a small grammar:
+**[A] Approve / [R] Revise** at hard gates, **[C] Continue** for soft nudges. For
+large/ambiguous work, start with `/flex-change` - it runs a `decision-interview` to
+settle the direction, then a spec (`spec/proposal.md` -> `design.md` -> `tasks.md`)
+before implementing. For a small bug, `/flex-fix` stays in patch mode.
 
 ## 8. Where things live
 

@@ -23,6 +23,10 @@ review, và cuối cùng là các vòng đầy đủ ghép tất cả lại.
 Vội? Đọc **1 → 2 → 6**; đó là xương sống (build surface, track việc, chạy delivery
 loop). Phần còn lại lấp runtime, review, và đường spec-first.
 
+Hai command không có doc riêng vì chỉ là biến thể gọn của delivery: **`/flex-fix`**
+(bug nhỏ: reproduce → diagnose → patch ở mode `patch` → verify) và skill
+**`decision-interview`** (gỡ quyết định mơ hồ đầu `/flex-change`).
+
 ## Một nguyên tắc xuyên suốt mọi flow
 
 > flex-kit là **build-time**; **host** (Claude Code) là **run-time**. flex-kit sinh ra

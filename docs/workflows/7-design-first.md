@@ -14,6 +14,7 @@ lái các bước dưới; phần scaffold spec là một lệnh CLI (`flex-kit 
 
 | Bước | Actor |
 |---|---|
+| Gỡ quyết định (nếu mơ hồ) | **agent chính** áp skill `decision-interview` cùng user |
 | Tạo plan + scaffold spec | **agent chính** chạy CLI (`flex-kit plan` / `flex-kit spec`) |
 | Điền proposal / design / tasks | **agent chính**, user duyệt |
 | Implement (sau duyệt) | loop [delivery](6-delivery.md) (`implementer` / `reviewer` / `tester`) |
@@ -24,13 +25,15 @@ Không subagent nào chạy trong pha design - chỉ agent chính + user.
 
 ```
 /flex-change <task>
+ 0. FRAME    việc mơ hồ/cross-cutting? áp skill decision-interview để chốt hướng +
+             ghi lý do vào decisions.md  (bỏ qua nếu hướng đã rõ)
  1. PLAN     flex-kit plan "<task>" --mode design          (CLI)
  2. SCAFFOLD flex-kit spec                                  (CLI)
              -> plans/active/<id>/spec/{proposal,design,tasks}.md
  3. FILL     proposal.md  (Problem -> Chosen Direction)
              design.md    (System Shape, Data And Contracts, Validation Plan, Risks)
-             tasks.md      (checklist)
- 4. APPROVE  user duyệt design  <-- hard gate
+             tasks.md      (checklist); log quyết định vào decisions.md
+ 4. APPROVE  present [A] Approve / [R] Revise  <-- hard gate, không sang code tới khi A
  5. HAND OFF suy plan.md ## Steps từ spec/tasks.md
  6. BUILD    /flex-implement   -> delivery loop
 ```
@@ -50,6 +53,7 @@ trọng nó.
 | `plans/active/<id>/spec/proposal.md` | problem + chosen direction |
 | `plans/active/<id>/spec/design.md` | system shape, contracts, validation plan, risks |
 | `plans/active/<id>/spec/tasks.md` | checklist task trở thành plan steps |
+| `plans/active/<id>/decisions.md` | nhật ký quyết định từ decision-interview + lúc fill spec |
 
 Spec bền trên đĩa, nên design sống sót qua reset và là tham chiếu delivery loop build
 theo.
