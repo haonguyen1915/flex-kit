@@ -5,11 +5,12 @@ Operating notes for working on the **flex-kit** codebase. (For end-user docs see
 
 ## What flex-kit is
 
-A single-source kit for AI-agent **skills + agents**: author once in a project's
-`.flexkit/`, generate native surfaces for **Claude Code** and **Codex**, and
-validate they never drift. It is a faithful, right-sized clone of prep-kit's *core*
-concept (manifest/source → build → validate), deliberately without prep-kit's
-plan, hook, runtime-pack, persona, or model-routing layers.
+A single-source kit for AI-agent **skills + agents + commands**: author once in a
+project's `.flexkit/`, generate native surfaces for **Claude Code** and **Codex**,
+validate they never drift - plus a full agent **operating system** (plans, modes,
+hooks, autonomous delivery) on top. It is a faithful clone of prep-kit's operating
+model with a cleaner neutral-source design; it omits prep-kit's persona,
+model-routing, semantic-memory layers and ships no domain content.
 
 ## The model
 
@@ -40,8 +41,27 @@ plan, hook, runtime-pack, persona, or model-routing layers.
 | `emit.py` | `OutFile` - the unit of host output |
 | `build.py` | `emit_for_host(host, skills, agents)` - shared by gen + the sync check |
 | `hosts/{claude,codex}.py` | host adapters: `emit_skill` / `emit_agent` → `list[OutFile]` |
+| `commands.py` | discover + parse source commands (Claude slash-command surface) |
 | `gen.py` / `init.py` / `add.py` | the three write commands |
 | `doctor.py` + `checks/` | validation; `registry.py` wires hosts + checks |
+| `plan.py` | plan lifecycle + `plans/active`→`archive` + `.flexkit/state.json` |
+| `modes.py` | patch/build/design + escalation budgets |
+| `hooks.py` | runtime hook logic (session-start / user-prompt / pre-tool) |
+
+## Operating system
+
+On top of build/sync, flex-kit clones prep-kit's runtime - all driven by the host's
+native subagents + prose, never a flex-kit engine:
+
+- **Plans** (`plan.py`): `flex-kit plan/status/next-step/close`. Durable state in
+  `plans/active/<id>/plan.md`; the active plan id is in `.flexkit/state.json`.
+- **Modes** (`modes.py`): the plan's declared mode; `effective_mode()` escalates it
+  when step/file counts exceed the budget. `status` surfaces the escalation.
+- **Hooks** (`hooks.py` + `flex-kit hook <event>`): wired into `.claude/settings.json`
+  by the claude host's `emit_global()`. session-start (orient + compaction re-orient),
+  user-prompt (deduped plan reminder), pre-tool (secret guard). Codex has no hooks.
+- **Autonomous delivery**: the bundled `implement` command (templates base) ties the
+  plan + `verify-fix-loop` skill + reviewer/implementer agents into one flow.
 
 ## templates vs packs
 

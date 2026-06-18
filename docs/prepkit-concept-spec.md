@@ -6,7 +6,16 @@
 > `/Users/haonv/workspace/Projects/Personal/TOOLS/prep-kit` (version 1.61.2),
 > read on 2026-06-18. Items we could not confirm are marked **[?]**.
 
-## Scope decisions (resolved 2026-06-18)
+## Scope decisions (resolved 2026-06-18; OS scope confirmed later same day)
+
+> **Update:** the original "right-sized to stages 1-4" decision below was **reversed**.
+> flex-kit now clones prep-kit's **full operating model** - plans, modes, hooks, and
+> autonomous delivery (stages 5-9) - because the automation is the actual requirement.
+> What stays out: **domain content** (the 218 prep-kit skills; you add your own),
+> personas, model-routing, semantic memory. The two structural improvements below
+> (convention-discovery, neutral source) and the Python-native hooks (`flex-kit hook
+> <event>`, one binary vs prep-kit's ~32 `.cjs`) are kept. The original text is left
+> intact for the record.
 
 flex-kit clones the **concept/mechanism**, not prep-kit bug-for-bug. Resolved:
 

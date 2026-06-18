@@ -70,6 +70,27 @@ flex-kit ships two kinds of bundled content. The dividing question:
 | `flex-kit add <pack>` | copy a bundled pack's skills/agents into `.flexkit/`, then `gen` |
 | `flex-kit gen` | source → host surfaces (`.claude/`, `.agents/skills/`, `.codex/agents/`) |
 | `flex-kit doctor` | run validation checks (source-valid, skill-contract, skill-refs, generated-in-sync) |
+| `flex-kit plan "<task>"` | create a tracked plan under `plans/active/` (the active plan) |
+| `flex-kit status` / `next-step` | show the active plan + effective mode, or the next step |
+| `flex-kit close [--confirm]` | archive the active plan to `plans/archive/` |
+| `flex-kit hook <event>` | runtime hook entrypoint, wired into `.claude/settings.json` |
+
+## Operating system
+
+`flex-kit init` scaffolds more than skills - it lays down a working agent OS on top
+of the host's native subagents:
+
+- **Plans** - durable, multi-step work state (`plans/active/<id>/plan.md`). Survives
+  context resets; `status` / `next-step` always know where work stands.
+- **Modes** - `patch` / `build` / `design`. A plan that grows past its budget
+  escalates (`patch -> build`) so a small fix can't silently balloon.
+- **Hooks** (Claude Code) - `flex-kit hook <event>` wired into `.claude/settings.json`:
+  session-start injects branch + plan orientation (and re-orients after compaction),
+  a per-prompt reminder tracks plan progress, and a pre-tool guard blocks
+  secret/credential access. One Python binary, no scattered scripts.
+- **Autonomous delivery** - the bundled `implement` command walks the active plan and
+  runs the `verify-fix-loop` (reviewer/implementer subagents) until the change is
+  clean. The host runs it; flex-kit supplies the plan, agents, and protocol.
 
 ## How it stays extensible
 
@@ -88,10 +109,11 @@ A host adapter exposes `ID`, `SKILLS_DIR`/`AGENTS_DIR`, and `emit_skill` /
 
 ## Scope
 
-flex-kit clones prep-kit's **core concept** (single source → generate per host →
-validate), kept intentionally small. Out of scope: plan lifecycle, hooks, packs as
-a runtime system, personas, model-routing. See
-[`docs/prepkit-concept-spec.md`](docs/prepkit-concept-spec.md).
+flex-kit clones prep-kit's full **operating model** - build/sync, plans, modes,
+hooks, and autonomous delivery - with a cleaner neutral-source design and hooks as
+one Python binary instead of scattered scripts. It deliberately ships **no domain
+content** (you add your own skills) and omits prep-kit's persona, model-routing, and
+semantic-memory layers. See [`docs/prepkit-concept-spec.md`](docs/prepkit-concept-spec.md).
 
 ## Develop
 
