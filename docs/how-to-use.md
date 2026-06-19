@@ -109,23 +109,30 @@ wrap them in skills. Put them under `docs/` (configurable via `docsDir` in
 (`architecture.md`, `conventions/`, `domain/`, `adr/`) - it's non-destructive (skips an
 existing `docs/`; `--force` only adds missing files, never overwrites):
 
-```
-docs/
-  architecture.md      # first `# ` heading becomes the title
-  api-spec.md
-  billing.md
+A doc opts into the agent index with a frontmatter signal:
+
+```markdown
+---
+inject: true
+description: REST API conventions - error format, pagination, versioning.
+---
+
+# API Conventions
+...
 ```
 
-On `flex-kit gen`, an **index** of these (path + title) is injected at the `<!-- DOCS -->`
-marker in the `planner`, `implementer`, and `reviewer` agents - so they know what specs
-exist and `Read` the relevant one on demand (only the index is injected, not the
-content, so a big docs/ never bloats context). The docs stay where they are; editing
-them and re-genning refreshes the index.
+On `flex-kit gen`, **only docs with `inject: true`** have their index entry (path +
+`description`, falling back to the `# ` heading) injected at the `<!-- DOCS -->` marker
+in the `planner`, `implementer`, and `reviewer` agents - so they know what specs exist
+and `Read` the relevant one on demand. **Default is not to index** (notes/drafts without
+the signal add no noise); only the index is injected, never the content, so a big docs/
+won't bloat context. The docs stay where they are; editing and re-genning refreshes the
+index.
 
 ```
 ## Project Docs          ← generated into .claude/agents/planner.md
-- docs/architecture.md - System Architecture
-- docs/api-spec.md - API Contract
+- docs/architecture.md - System architecture - layers, modules, boundaries.
+- docs/conventions/api.md - REST API conventions - error format, pagination, versioning.
 ```
 
 So the flow uses them automatically: `planner` plans to follow the relevant spec,

@@ -37,20 +37,23 @@ model-routing, semantic-memory layers and ships no domain content.
 
 | File | Role |
 |---|---|
-| `main.py` | Typer CLI: `init` / `add` / `gen` / `doctor` |
-| `config.py` | load `.flexkit/flexkit.config.json` (hosts, skillsDir, agentsDir, docsDir) |
+| `main.py` | Typer CLI: init / init-docs / add / remove / gen / codex-review / doctor / plan / status / next-step / spec / close / statusline / hook |
+| `config.py` | load `.flexkit/flexkit.config.json` (hosts, skillsDir, agentsDir, commandsDir, docsDir) |
 | `skills.py` / `agents.py` | discover + parse source skills / agents |
-| `docs.py` | discover project docs (`docs/`) + inject their index at `<!-- DOCS -->` |
+| `commands.py` | discover + parse source commands (Claude slash-command surface) |
+| `docs.py` | discover `inject: true` project docs + inject their index at `<!-- DOCS -->`; scaffold the docs/ skeleton |
 | `frontmatter.py` | parse + shared transforms (em-dash normalize, strip markup, wrap) |
 | `emit.py` | `OutFile` - the unit of host output |
-| `build.py` | `emit_for_host(host, skills, agents)` - shared by gen + the sync check |
-| `hosts/{claude,codex}.py` | host adapters: `emit_skill` / `emit_agent` → `list[OutFile]` |
-| `commands.py` | discover + parse source commands (Claude slash-command surface) |
-| `gen.py` / `init.py` / `add.py` | the three write commands |
+| `build.py` | `emit_for_host(host, skills, agents, commands, docs)` - shared by gen + the sync check |
+| `hosts/{claude,codex}.py` | host adapters: `emit_skill` / `emit_agent` / `emit_command` → `list[OutFile]` |
+| `gen.py` / `init.py` / `add.py` | the write commands (gen tracks output in `record.py`) |
+| `record.py` | the set of files gen produced (`.flexkit/.generated.json`); lets gen clean orphans without wiping unmanaged files |
 | `doctor.py` + `checks/` | validation; `registry.py` wires hosts + checks |
+| `codex_review.py` | cross-model review: shell to `codex exec` for an independent second opinion |
 | `plan.py` | plan lifecycle + `plans/active`→`archive` + `.flexkit/state.json` |
 | `modes.py` | patch/build/design + escalation budgets |
-| `hooks.py` | runtime hook logic (session-start / user-prompt / pre-tool) |
+| `hooks.py` | runtime hooks: session-start / user-prompt / pre-tool / subagent-start/stop + the status bar |
+| `ui.py` | CLI output helpers - a thin rich wrapper (TTY-aware) |
 
 ## Operating system
 
@@ -110,10 +113,18 @@ plan|facilitation|router"` → should reach 0.
 ## Commands
 
 ```bash
-flex-kit init [dir]           # scaffold .flexkit/ + gen
+# build / content
+flex-kit init [--force]       # scaffold .flexkit/ + gen
 flex-kit init-docs [--force]  # scaffold a docs/ skeleton (non-destructive)
-flex-kit add <pack> [dir]     # copy a pack into .flexkit/ + gen
-flex-kit gen [--project dir]  # source → host surfaces
-flex-kit doctor [--project dir]
+flex-kit add <pack> [--force] # copy a pack into .flexkit/ + gen   (add: list packs)
+flex-kit remove <pack>        # remove a pack from .flexkit/ + gen
+flex-kit gen [--dry-run]      # source → host surfaces
+flex-kit doctor               # validate source + that surfaces are in sync
+# plan lifecycle
+flex-kit plan "<task>" [--mode patch|build|design]  # create + activate a plan
+flex-kit status | next-step | spec | close [--confirm]
+# review / runtime (mostly host-invoked)
+flex-kit codex-review [--type plan|diff|file] [--dry-run]   # cross-model review
+flex-kit statusline | hook <event>                          # status bar + hooks
 make install | test | check | publish
 ```
