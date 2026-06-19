@@ -33,15 +33,19 @@ class AddResult:
     gen: GenResult | None = None
 
 
-def add(project_root: Path, pack: str, force: bool = False, run_gen: bool = True) -> AddResult:
+def _require_flexkit(project_root: Path) -> None:
+    if not (project_root / ".flexkit").exists():
+        raise FileNotFoundError(f"No .flexkit/ in {project_root} - run `flex-kit init` first")
+
+
+def _copy_pack(project_root: Path, pack: str, force: bool) -> tuple[list[str], list[str]]:
+    """Copy one pack's items into .flexkit/ (no gen). Returns (added, skipped) rel paths."""
     src = PACKS_DIR / pack
     if not src.is_dir():
         raise FileNotFoundError(f"Unknown pack '{pack}'. Available: {', '.join(list_packs())}")
     flexkit = project_root / ".flexkit"
-    if not flexkit.exists():
-        raise FileNotFoundError(f"No .flexkit/ in {project_root} - run `flex-kit init` first")
-
-    result = AddResult(pack=pack)
+    added: list[str] = []
+    skipped: list[str] = []
     for kind in _KINDS:
         src_kind = src / kind
         if not src_kind.is_dir():
@@ -50,14 +54,33 @@ def add(project_root: Path, pack: str, force: bool = False, run_gen: bool = True
             dest = flexkit / kind / item.name
             rel = f"{kind}/{item.name}"
             if dest.exists() and not force:
-                result.skipped.append(rel)
+                skipped.append(rel)
                 continue
             if dest.exists():
                 shutil.rmtree(dest) if dest.is_dir() else dest.unlink()
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copytree(item, dest) if item.is_dir() else shutil.copyfile(item, dest)
-            result.added.append(rel)
+            added.append(rel)
+    return added, skipped
 
+
+def add(project_root: Path, pack: str, force: bool = False, run_gen: bool = True) -> AddResult:
+    _require_flexkit(project_root)
+    added, skipped = _copy_pack(project_root, pack, force)
+    result = AddResult(pack=pack, added=added, skipped=skipped)
+    if run_gen:
+        result.gen = gen(project_root)
+    return result
+
+
+def add_all(project_root: Path, force: bool = False, run_gen: bool = True) -> AddResult:
+    """Add every bundled pack, then gen once (not once per pack)."""
+    _require_flexkit(project_root)
+    result = AddResult(pack="--all")
+    for pack in list_packs():
+        added, skipped = _copy_pack(project_root, pack, force)
+        result.added.extend(added)
+        result.skipped.extend(skipped)
     if run_gen:
         result.gen = gen(project_root)
     return result

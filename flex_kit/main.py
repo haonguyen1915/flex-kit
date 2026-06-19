@@ -12,6 +12,7 @@ from flex_kit import codex_review as codex_review_mod
 from flex_kit import hooks as hooks_mod
 from flex_kit import plan as plan_mod
 from flex_kit.add import add as run_add
+from flex_kit.add import add_all as run_add_all
 from flex_kit.add import list_packs
 from flex_kit.add import remove as run_remove
 from flex_kit.doctor import doctor as run_doctor
@@ -51,15 +52,22 @@ def add(
     project: Path = typer.Option(Path.cwd, "--project", "-p", help="Project root."),
     force: bool = typer.Option(False, "--force", help="Overwrite skills/agents of the same id."),
     no_gen: bool = typer.Option(False, "--no-gen", help="Copy only, skip gen."),
+    all_packs: bool = typer.Option(False, "--all", help="Add every bundled pack, then gen once."),
 ) -> None:
     """Add a bundled pack's skills/agents into .flexkit/, then gen."""
-    if not pack:
+    if all_packs:
+        result = run_add_all(project.resolve(), force=force, run_gen=not no_gen)
+        label = "--all"
+    elif not pack:
         typer.echo("Available packs:")
         for p in list_packs():
             typer.echo(f"  {p}")
+        typer.echo("Add one with `flex-kit add <pack>`, or all with `flex-kit add --all`.")
         return
-    result = run_add(project.resolve(), pack, force=force, run_gen=not no_gen)
-    typer.echo(f"flex-kit add {pack}: {len(result.added)} added, {len(result.skipped)} skipped")
+    else:
+        result = run_add(project.resolve(), pack, force=force, run_gen=not no_gen)
+        label = pack
+    typer.echo(f"flex-kit add {label}: {len(result.added)} added, {len(result.skipped)} skipped")
     for rel in result.added:
         typer.echo(f"  + {rel}")
     for rel in result.skipped:
