@@ -12,6 +12,7 @@ include = [
 [tool.poetry.dependencies]
 python = ">=3.10"
 typer = ">=0.12.0"
+rich = ">=13.0.0"  # already pulled by typer; declared since ui.py imports it directly
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.0.0,<9"
