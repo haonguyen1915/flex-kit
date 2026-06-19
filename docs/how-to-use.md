@@ -53,13 +53,27 @@ This creates `.flexkit/` (your source) and generates the host surfaces:
 
 Now **open Claude Code in this directory**. The hooks are already wired.
 
+**Already have a `.flexkit/`?** (adopting a project a teammate set up, or a fresh clone)
+- don't run `init` again. Just materialize and check the host surfaces:
+
+```bash
+flex-kit gen       # (re)generate .claude/ + .agents/ from the committed .flexkit/
+flex-kit doctor
+```
+
+`flex-kit init` refuses when `.flexkit/` exists; `flex-kit init --force` **wipes** it and
+re-scaffolds from the template (throwing away your skills/agents/commands) - use it only
+to start over.
+
 ## 3. Author a skill (the core loop)
 
 A skill teaches the agent one job. Two ways to get one:
 
 **a) Pull a bundled pack:**
 ```bash
-flex-kit add api-design        # copies api-design-pattern into .flexkit/ + re-gens
+flex-kit add                   # (no args) list the available packs
+flex-kit add api-design        # copy one pack into .flexkit/ + re-gen
+flex-kit add --all             # copy every bundled pack, then gen once
 ```
 
 **b) Write your own:**
@@ -93,10 +107,13 @@ Scenario: *"add a login endpoint."* Everything below is typed **in Claude Code**
 slash commands; each one drives the underlying `flex-kit` CLI for you.
 
 ```
-/flex-plan add login endpoint --mode build
+/flex-plan add login endpoint
 ```
-Creates the plan and scaffolds a `## Steps` checklist from the task. Review/adjust the
-steps in `plans/active/<id>/plan.md`.
+The **front door**: it routes first (if the request is really a bug or design work it
+sends you to `/flex-fix` or `/flex-change`), then spawns the `planner` agent to draft
+`plans/active/<id>/plan.md` - Goal, a structured `## Steps` checklist with acceptance,
+Files In Scope, Risks. It ends with a checkpoint: `[A] Approve -> /flex-implement`,
+`[D] Approve -> /flex-implement --full`, or `[R] Revise`.
 
 ```
 /flex-status
@@ -108,9 +125,9 @@ escalated, e.g. `patch -> build`, it tells you.)
 /flex-implement
 ```
 Implements the next step - or all steps with `/flex-implement --full` - then runs the
-**verify-fix loop**: spawns the `reviewer` subagent, and on critical/high findings
-spawns `implementer` to fix and re-reviews, a couple of rounds. Each step it finishes
-gets ticked `- [x]` in `plan.md`.
+**verify-fix loop**: spawns `reviewer` and `tester` in parallel; a `revise` verdict or a
+failing test sends `implementer` to fix, then re-verifies, a couple of rounds. Each step
+it finishes gets ticked `- [x]` in `plan.md`.
 
 ```
 /flex-close
@@ -152,7 +169,7 @@ This stops a "quick fix" from silently turning into a large change.
 
 ```bash
 # content
-flex-kit add <pack>        # pull a domain pack into .flexkit/
+flex-kit add <pack>        # pull a domain pack into .flexkit/  (--all for every pack)
 # ...edit .flexkit/...     # author skills / agents / commands
 flex-kit gen               # regenerate host surfaces  (run after every edit)
 flex-kit doctor            # validate + catch drift     (run before committing)
