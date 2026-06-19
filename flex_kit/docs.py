@@ -8,10 +8,12 @@ exist and can read the relevant one on demand - no context bloat from full conte
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+import shutil
+from dataclasses import dataclass, field
 from pathlib import Path
 
 DOCS_MARKER = "<!-- DOCS -->"
+_TEMPLATE_DOCS_DIR = Path(__file__).parent / "templates" / "docs"
 
 
 @dataclass
@@ -49,3 +51,42 @@ def inject_docs(body: str, docs: list[Doc]) -> str:
     if DOCS_MARKER not in body:
         return body
     return body.replace(DOCS_MARKER, doc_catalog(docs))
+
+
+@dataclass
+class ScaffoldResult:
+    docs_dir: str
+    created: list[str] = field(default_factory=list)
+    skipped: list[str] = field(default_factory=list)
+    bailed: bool = False  # docs/ already had content and --force was not given
+    existing_count: int = 0
+
+
+def scaffold_docs(project_root: Path, docs_dir: str, force: bool = False) -> ScaffoldResult:
+    """Write a docs/ skeleton (architecture, conventions, domain, adr).
+
+    Never overwrites: existing files are skipped. If `docs_dir` already has content and
+    `force` is not set, bails (so an organized docs/ is not cluttered); `force` then
+    additively merges only the missing skeleton files.
+    """
+    target = project_root / docs_dir
+    result = ScaffoldResult(docs_dir=docs_dir)
+
+    existing = [p for p in target.rglob("*") if p.is_file()] if target.exists() else []
+    if existing and not force:
+        result.bailed = True
+        result.existing_count = len(existing)
+        return result
+
+    for src in sorted(_TEMPLATE_DOCS_DIR.rglob("*")):
+        if not src.is_file():
+            continue
+        rel = (Path(docs_dir) / src.relative_to(_TEMPLATE_DOCS_DIR)).as_posix()
+        dest = project_root / rel
+        if dest.exists():
+            result.skipped.append(rel)
+            continue
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(src, dest)
+        result.created.append(rel)
+    return result

@@ -16,6 +16,8 @@ from flex_kit.add import add as run_add
 from flex_kit.add import add_all as run_add_all
 from flex_kit.add import list_packs
 from flex_kit.add import remove as run_remove
+from flex_kit.config import load_config
+from flex_kit.docs import scaffold_docs
 from flex_kit.doctor import doctor as run_doctor
 from flex_kit.gen import gen as run_gen
 from flex_kit.init import init as run_init
@@ -93,6 +95,33 @@ def remove(
         ui.detail("-", rel)
     if result.gen is not None:
         ui.detail("gen:", f"{result.gen.skills} skills + {result.gen.agents} agents")
+
+
+@app.command("init-docs")
+def init_docs(
+    project: Path = typer.Option(Path.cwd, "--project", "-p", help="Project root."),
+    force: bool = typer.Option(
+        False, "--force", help="Merge missing skeleton files into an existing docs/."
+    ),
+) -> None:
+    """Scaffold a docs/ skeleton (architecture, conventions, domain, adr) for agents."""
+    root = project.resolve()
+    try:
+        docs_dir = load_config(root).docs_dir
+    except FileNotFoundError:
+        docs_dir = "docs"
+    result = scaffold_docs(root, docs_dir, force=force)
+    if result.bailed:
+        ui.warn(f"{result.docs_dir}/ already has {result.existing_count} file(s) - skipped.")
+        ui.hint("Add the missing scaffold files anyway with `flex-kit init-docs --force`.")
+        return
+    tag = " (force)" if force else ""
+    ui.success(f"init-docs{tag}: {len(result.created)} created, {len(result.skipped)} skipped")
+    for rel in result.created:
+        ui.detail("+", rel)
+    for rel in result.skipped:
+        ui.detail("=", f"{rel} (exists)")
+    ui.hint("Fill these in, then `flex-kit gen` to index them into the agents.")
 
 
 @app.command()

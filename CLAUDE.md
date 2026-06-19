@@ -107,6 +107,7 @@ plan|facilitation|router"` → should reach 0.
 
 ```bash
 flex-kit init [dir]           # scaffold .flexkit/ + gen
+flex-kit init-docs [--force]  # scaffold a docs/ skeleton (non-destructive)
 flex-kit add <pack> [dir]     # copy a pack into .flexkit/ + gen
 flex-kit gen [--project dir]  # source → host surfaces
 flex-kit doctor [--project dir]

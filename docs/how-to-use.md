@@ -105,7 +105,9 @@ That `edit source → gen → doctor` loop is the whole content workflow. Agents
 
 Your project's specs and conventions can stay as **plain markdown** - you don't have to
 wrap them in skills. Put them under `docs/` (configurable via `docsDir` in
-`flexkit.config.json`):
+`flexkit.config.json`). Starting from scratch? `flex-kit init-docs` scaffolds a skeleton
+(`architecture.md`, `conventions/`, `domain/`, `adr/`) - it's non-destructive (skips an
+existing `docs/`; `--force` only adds missing files, never overwrites):
 
 ```
 docs/
