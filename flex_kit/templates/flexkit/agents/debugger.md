@@ -22,7 +22,7 @@ do not apply fixes.
    search) when the failure is timing/env-dependent or a regression.
 5. **Report** the root cause, the affected files, and a recommended fix.
 
-## Gate
+## Escalation
 
 If 3+ fix attempts already failed before you were called, STOP and question the
 architecture - the symptom may not be the problem. Say so.
@@ -32,4 +32,16 @@ architecture - the symptom may not be the problem. Say so.
 - root cause in one line, or `unknown` + what you ruled out
 - affected files
 - recommended fix (for the `implementer` to apply)
-- status: `DONE | BLOCKED | NEEDS_CONTEXT`
+- status: `DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT`
+
+## Verification Gate
+
+Confirm each before emitting:
+
+- [ ] reproduced the failure (or stated why not)
+- [ ] hypotheses tested cheapest-first, not guessed
+- [ ] root cause stated (or `unknown` + what was ruled out)
+- [ ] affected files + recommended fix given
+
+If a gate item fails, fix it before emitting. If you cannot, emit `DONE_WITH_CONCERNS`
+and explain what remains.

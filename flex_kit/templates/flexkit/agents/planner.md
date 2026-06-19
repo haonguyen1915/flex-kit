@@ -61,5 +61,16 @@ dispatches to (scope-challenge, solution-design, validation-interview, red-team-
 
 Report the plan path and a one-line summary, mirror `## Open Questions` as
 `Questions for You`, then end with `Status: DONE | DONE_WITH_CONCERNS | BLOCKED |
-NEEDS_CONTEXT`. Don't emit a status until every build/design step has
-Files/Action/Acceptance/Done and `## Risks` is non-empty.
+NEEDS_CONTEXT`.
+
+## Verification Gate
+
+Confirm each before emitting a status:
+
+- [ ] every build/design step has Files / Action / Acceptance / Done
+- [ ] `## Risks` is non-empty
+- [ ] `## Open Questions` filled (or `None`)
+- [ ] plan path + one-line summary reported
+
+If a gate item fails, fix it before emitting. If you cannot, emit `DONE_WITH_CONCERNS`
+and explain what remains.

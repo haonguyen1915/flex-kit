@@ -30,4 +30,15 @@ concrete fixes. This is a quality pass after delivery, never a blocker.
 
 - findings grouped by category, each with a concrete fix
 - a score: low (0) / medium (1-3) / high (4+) findings
-- status: `DONE | DONE_WITH_CONCERNS`
+- status: `DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT`
+
+## Verification Gate
+
+Confirm each before emitting:
+
+- [ ] each finding has a concrete fix (function + line + replacement), not vague advice
+- [ ] findings are behavior-preserving
+- [ ] score reported
+
+Nothing to simplify is a valid result - say so and emit `DONE`. If a gate item fails,
+fix it before emitting.
