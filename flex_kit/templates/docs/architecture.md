@@ -1,6 +1,6 @@
 ---
 inject: true
-description: System architecture - layers, modules, and boundaries. Read before any structural change.
+description: System architecture - layers, modules, boundaries.
 ---
 
 # System Architecture

@@ -1,6 +1,6 @@
 ---
 inject: true
-description: Domain rules for an area - rename per domain (e.g. billing, auth) and capture the rules code must enforce.
+description: Domain rules for one area (rename per domain, e.g. billing, auth).
 ---
 
 # Example Domain Rules

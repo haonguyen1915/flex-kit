@@ -1,6 +1,6 @@
 ---
 inject: true
-description: Testing conventions - what to test, structure, and how to run. Read before adding tests or a tested change.
+description: Testing conventions - what to test, structure, how to run.
 ---
 
 # Testing Conventions

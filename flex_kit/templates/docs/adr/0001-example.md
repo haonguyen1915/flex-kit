@@ -1,6 +1,6 @@
 ---
 inject: true
-description: Architecture Decision Record - copy this file per decision (context, decision, consequences).
+description: Architecture Decision Record template (copy per decision).
 ---
 
 # ADR 0001 - Example Decision
