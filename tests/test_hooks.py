@@ -29,6 +29,47 @@ def test_session_start_reports_active_plan(tmp_path: Path) -> None:
     assert "next: two" in line
 
 
+def test_status_line_no_plan(tmp_path: Path) -> None:
+    line = hooks.status_line(tmp_path)
+    assert "flex-kit" in line
+    assert "plan none" in line
+    assert "gate n/a" in line
+    assert "runtime idle" in line
+    assert "agents none" in line
+
+
+def test_status_line_reports_plan_progress(tmp_path: Path) -> None:
+    p = plan_mod.create_plan(tmp_path, "Add Auth", now=datetime(2026, 6, 18, 9, 0))
+    md = p.dir / "plan.md"
+    md.write_text(md.read_text().replace("- [ ] first step", "- [x] one\n- [ ] two"))
+    line = hooks.status_line(tmp_path)
+    assert "build 1/2" in line
+    assert "next: two" in line
+
+
+def test_runtime_goes_live_with_subagents(tmp_path: Path) -> None:
+    assert "runtime idle" in hooks.status_line(tmp_path)
+    hooks.subagent_start(tmp_path)
+    hooks.subagent_start(tmp_path)  # two in parallel (reviewer + tester)
+    assert "runtime active" in hooks.status_line(tmp_path)
+    hooks.subagent_stop(tmp_path)
+    assert "runtime active" in hooks.status_line(tmp_path)  # one still running
+    hooks.subagent_stop(tmp_path)
+    assert "runtime idle" in hooks.status_line(tmp_path)
+
+
+def test_status_line_uses_host_payload(tmp_path: Path) -> None:
+    payload = {
+        "model": {"display_name": "Opus 4.8"},
+        "cost": {"total_cost_usd": 3.4851, "total_duration_ms": 92040000},
+        "context_window": {"context_window_size": 1_000_000, "used_percentage": 11},
+    }
+    line = hooks.status_line(tmp_path, payload)
+    assert "Opus 4.8" in line
+    assert "ctx" in line and "11%" in line
+    assert "$3.4851" in line
+
+
 def test_user_prompt_reminds_then_dedupes(tmp_path: Path) -> None:
     p = plan_mod.create_plan(tmp_path, "task", now=datetime(2026, 6, 18, 9, 0))
     first = hooks.user_prompt(tmp_path)
@@ -59,6 +100,7 @@ def test_gen_wires_hooks_into_settings(tmp_path: Path) -> None:
     gen(root)
 
     settings = json.loads((root / ".claude/settings.json").read_text())
+    assert settings["statusLine"]["command"] == "flex-kit statusline"
     events = settings["hooks"]
     assert {"SessionStart", "UserPromptSubmit", "PreToolUse"} <= set(events)
     assert "compact" in events["SessionStart"][0]["matcher"]  # survives compaction

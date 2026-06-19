@@ -22,6 +22,13 @@ AGENTS_DIR = ".claude/agents"
 COMMANDS_DIR = ".claude/commands"
 SETTINGS_FILE = ".claude/settings.json"
 
+_STATUS_LINE = {
+    # A persistent status bar at the bottom of Claude Code: branch + plan + next step.
+    "type": "command",
+    "command": "flex-kit statusline",
+    "padding": 0,
+}
+
 _HOOKS = {
     # "compact" re-orients after compaction - flex-kit's state is durable in plans/,
     # so re-running session-start is enough; no separate snapshot hook is needed.
@@ -33,6 +40,13 @@ _HOOKS = {
     ],
     "UserPromptSubmit": [
         {"hooks": [{"type": "command", "command": "flex-kit hook user-prompt"}]}
+    ],
+    # Track live runtime: a subagent starting/stopping flips the status bar's runtime.
+    "SubagentStart": [
+        {"matcher": "*", "hooks": [{"type": "command", "command": "flex-kit hook subagent-start"}]}
+    ],
+    "SubagentStop": [
+        {"matcher": "*", "hooks": [{"type": "command", "command": "flex-kit hook subagent-stop"}]}
     ],
     "PreToolUse": [
         {
@@ -79,6 +93,6 @@ def emit_command(command: Command, skills: list[Skill]) -> list[OutFile]:
 
 
 def emit_global() -> list[OutFile]:
-    """Host-level output not tied to a single capability: the hooks wiring."""
-    content = json.dumps({"hooks": _HOOKS}, indent=2) + "\n"
+    """Host-level output not tied to a single capability: status line + hooks wiring."""
+    content = json.dumps({"statusLine": _STATUS_LINE, "hooks": _HOOKS}, indent=2) + "\n"
     return [OutFile(SETTINGS_FILE, content)]

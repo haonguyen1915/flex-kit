@@ -221,6 +221,26 @@ def close(
 
 
 @app.command()
+def statusline(project: Path = typer.Option(Path.cwd, "--project", "-p")) -> None:
+    """Print the status for the Claude Code status bar (wired in settings.json)."""
+    # Claude pipes session JSON on stdin (model, workspace, cost, context_window).
+    root = project.resolve()
+    payload: dict = {}
+    if not sys.stdin.isatty():
+        raw = sys.stdin.read()
+        if raw.strip():
+            try:
+                payload = json.loads(raw)
+            except json.JSONDecodeError:
+                payload = {}
+    cwd = (payload.get("workspace") or {}).get("current_dir") or payload.get("cwd")
+    if cwd:
+        root = Path(cwd)
+    # Plain print (not typer.echo): keep the ANSI colors the host renders in the bar.
+    print(hooks_mod.status_line(root, payload))
+
+
+@app.command()
 def hook(
     event: str = typer.Argument(..., help="session-start | pre-tool"),
     project: Path = typer.Option(Path.cwd, "--project", "-p"),
@@ -239,6 +259,10 @@ def hook(
 
     if event == "session-start":
         typer.echo(hooks_mod.session_start(root))
+    elif event == "subagent-start":
+        hooks_mod.subagent_start(root)
+    elif event == "subagent-stop":
+        hooks_mod.subagent_stop(root)
     elif event == "user-prompt":
         line = hooks_mod.user_prompt(root)
         if line:
