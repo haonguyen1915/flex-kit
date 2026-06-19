@@ -1,3 +1,8 @@
+---
+inject: true
+description: REST API conventions - resource naming, methods, error format, pagination, versioning. Read when adding or reviewing an endpoint.
+---
+
 # REST API Conventions
 
 ## Resource naming

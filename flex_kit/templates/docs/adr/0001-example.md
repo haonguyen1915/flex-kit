@@ -1,6 +1,9 @@
-# ADR 0001 - Example Decision
+---
+inject: true
+description: Architecture Decision Record - copy this file per decision (context, decision, consequences).
+---
 
-> Architecture Decision Record. Copy this file for each real decision.
+# ADR 0001 - Example Decision
 
 - Status: proposed | accepted | superseded
 - Date: YYYY-MM-DD

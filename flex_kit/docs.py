@@ -12,6 +12,8 @@ import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from flex_kit.frontmatter import parse_skill
+
 DOCS_MARKER = "<!-- DOCS -->"
 _TEMPLATE_DOCS_DIR = Path(__file__).parent / "templates" / "docs"
 
@@ -19,32 +21,56 @@ _TEMPLATE_DOCS_DIR = Path(__file__).parent / "templates" / "docs"
 @dataclass
 class Doc:
     rel: str  # path relative to the project root, e.g. "docs/api-spec.md"
-    title: str  # the file's first `# ` heading, or its filename stem
+    label: str  # the doc's frontmatter `description`, else its `# ` heading, else stem
 
 
-def _title(path: Path) -> str:
-    for line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+_INJECT_VALUES = {"true", "yes", "1", "on"}
+
+
+def _heading(body: str) -> str:
+    for line in body.splitlines():
         if line.startswith("# "):
             return line[2:].strip()
-    return path.stem
+    return ""
+
+
+def _doc(path: Path, project_root: Path) -> Doc | None:
+    """A Doc if the file opts in with frontmatter `inject: true`, else None."""
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    if not text.startswith("---"):
+        return None
+    try:
+        fm, body = parse_skill(text)
+    except ValueError:
+        return None
+    if fm.get("inject", "").strip().lower() not in _INJECT_VALUES:
+        return None
+    label = fm.get("description", "").strip() or _heading(body) or path.stem
+    return Doc(rel=path.relative_to(project_root).as_posix(), label=label)
 
 
 def discover_docs(project_root: Path, docs_dir: str) -> list[Doc]:
-    """All `.md` under `docs_dir`, as (repo-relative path, title). Missing dir -> []."""
+    """Docs under `docs_dir` that opt in with frontmatter `inject: true`.
+
+    Default is NOT to index a doc - only `inject: true` files are injected, so
+    notes/drafts/human-only files don't add noise. Missing dir -> [].
+    """
     root = project_root / docs_dir
     if not root.exists():
         return []
-    return [
-        Doc(rel=path.relative_to(project_root).as_posix(), title=_title(path))
-        for path in sorted(root.rglob("*.md"))
-        if path.is_file()
-    ]
+    docs: list[Doc] = []
+    for path in sorted(root.rglob("*.md")):
+        if path.is_file():
+            doc = _doc(path, project_root)
+            if doc is not None:
+                docs.append(doc)
+    return docs
 
 
 def doc_catalog(docs: list[Doc]) -> str:
     if not docs:
-        return "_(no project docs found)_"
-    return "\n".join(f"- {d.rel} - {d.title}" for d in docs)
+        return "_(none - add `inject: true` to a doc's frontmatter to index it)_"
+    return "\n".join(f"- {d.rel} - {d.label}" for d in docs)
 
 
 def inject_docs(body: str, docs: list[Doc]) -> str:

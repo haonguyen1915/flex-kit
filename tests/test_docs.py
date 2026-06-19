@@ -8,15 +8,18 @@ from flex_kit.docs import discover_docs, inject_docs, scaffold_docs
 from flex_kit.init import init
 
 
-def test_discover_docs_reads_path_and_title(tmp_path: Path) -> None:
+def test_discover_indexes_only_inject_true(tmp_path: Path) -> None:
     (tmp_path / "docs").mkdir()
-    (tmp_path / "docs/api-spec.md").write_text("# API Spec\n\nrules...")
-    (tmp_path / "docs/notitle.md").write_text("no heading here")
+    (tmp_path / "docs/api.md").write_text("---\ninject: true\ndescription: API contract\n---\n\n# API\n")
+    (tmp_path / "docs/heading.md").write_text("---\ninject: true\n---\n\n# Heading Only\n")
+    (tmp_path / "docs/notes.md").write_text("# Random notes\nnot for agents")  # no inject
 
-    docs = discover_docs(tmp_path, "docs")
-    by_rel = {d.rel: d.title for d in docs}
-    assert by_rel["docs/api-spec.md"] == "API Spec"
-    assert by_rel["docs/notitle.md"] == "notitle"  # falls back to filename stem
+    by_rel = {d.rel: d.label for d in discover_docs(tmp_path, "docs")}
+    assert by_rel == {
+        "docs/api.md": "API contract",  # label = description
+        "docs/heading.md": "Heading Only",  # falls back to the `# ` heading
+    }
+    assert "docs/notes.md" not in by_rel  # not opted in -> excluded (no noise)
 
 
 def test_discover_docs_missing_dir_is_empty(tmp_path: Path) -> None:
@@ -26,7 +29,7 @@ def test_discover_docs_missing_dir_is_empty(tmp_path: Path) -> None:
 def test_inject_docs_only_when_marker_present() -> None:
     docs = discover_docs(Path("."), "does-not-exist")  # -> []
     assert inject_docs("no marker here", docs) == "no marker here"
-    assert "no project docs" in inject_docs("before <!-- DOCS --> after", docs)
+    assert "inject: true" in inject_docs("before <!-- DOCS --> after", docs)
 
 
 def test_scaffold_docs_into_empty(tmp_path: Path) -> None:
@@ -34,7 +37,8 @@ def test_scaffold_docs_into_empty(tmp_path: Path) -> None:
     assert not result.bailed
     assert "docs/architecture.md" in result.created
     assert "docs/conventions/api.md" in result.created
-    assert (tmp_path / "docs/architecture.md").read_text().startswith("# System Architecture")
+    arch = (tmp_path / "docs/architecture.md").read_text()
+    assert "inject: true" in arch and "# System Architecture" in arch
 
 
 def test_scaffold_docs_bails_when_nonempty(tmp_path: Path) -> None:
@@ -59,14 +63,16 @@ def test_scaffold_docs_force_merges_without_overwriting(tmp_path: Path) -> None:
 def test_gen_injects_doc_index_into_agents(tmp_path: Path) -> None:
     init(tmp_path)  # scaffolds + gens; planner has a <!-- DOCS --> marker
     (tmp_path / "docs").mkdir(exist_ok=True)
-    (tmp_path / "docs/architecture.md").write_text("# System Architecture\n")
+    (tmp_path / "docs/architecture.md").write_text(
+        "---\ninject: true\ndescription: System architecture overview\n---\n\n# System Architecture\n"
+    )
     from flex_kit.gen import gen
 
     gen(tmp_path)
 
     planner = (tmp_path / ".claude/agents/planner.md").read_text()
-    assert "docs/architecture.md - System Architecture" in planner
+    assert "docs/architecture.md - System architecture overview" in planner
     assert "<!-- DOCS -->" not in planner  # marker was replaced
     # Codex agent gets the same index.
     codex = (tmp_path / ".codex/agents/planner.toml").read_text()
-    assert "docs/architecture.md - System Architecture" in codex
+    assert "docs/architecture.md - System architecture overview" in codex

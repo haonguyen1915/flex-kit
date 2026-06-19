@@ -1,7 +1,11 @@
+---
+inject: true
+description: System architecture - layers, modules, and boundaries. Read before any structural change.
+---
+
 # System Architecture
 
-> The system's shape - layers, modules, boundaries. Agents read this before any
-> structural change. Keep it short and current.
+> The system's shape - layers, modules, boundaries. Keep it short and current.
 
 ## Layers
 _(e.g. api -> service -> repository -> db; what each layer may and may not do)_
