@@ -5,10 +5,22 @@ gen/doctor.
 
 from __future__ import annotations
 
-from flex_kit.checks import generated_in_sync, skill_contract, skill_refs, source_valid
+from flex_kit.checks import (
+    agent_contract,
+    generated_in_sync,
+    skill_contract,
+    skill_refs,
+    source_valid,
+)
 from flex_kit.hosts import claude, codex
 
 HOSTS = {claude.ID: claude, codex.ID: codex}
 
 # Tool-provided checks. Project-specific checks load from .flexkit/checks/.
-CHECKS = [source_valid.CHECK, skill_contract.CHECK, skill_refs.CHECK, generated_in_sync.CHECK]
+CHECKS = [
+    source_valid.CHECK,
+    skill_contract.CHECK,
+    agent_contract.CHECK,
+    skill_refs.CHECK,
+    generated_in_sync.CHECK,
+]
