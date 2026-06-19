@@ -1,22 +1,42 @@
 ---
 name: flex-review
-description: Review the current change with the reviewer agent, without needing a plan. Use to get a standalone code review of the working-tree diff or a target.
-argument-hint: [target] [--codex]
+description: Review a code change - the working tree, a branch/PR, a commit, or a commit range - with the reviewer agent, no plan needed. Use for a standalone code review.
+argument-hint: [target | <sha> | since <sha>] [--codex]
 ---
 
-Review the current change ($ARGUMENTS if given, otherwise the working-tree git
-diff) - standalone, no plan required.
+Standalone code review of **$ARGUMENTS** - no plan required.
 
-1. Write `handoffs/review-input.md` using the template in the `verify-fix-loop`
-   skill: goal, files changed, checks already run, key decisions, and a prioritized
-   read-these-first list.
-2. Spawn the `reviewer` agent; it writes `handoffs/review-verdict.md` (verdict +
-   critical/high counts + fix recommendations) and a durable, timestamped
-   `reports/review-<timestamp>.md`.
-3. `--codex`: also run `flex-kit codex-review --type diff` for an independent
-   cross-model opinion and merge its critical/high findings into the verdict (skip if
-   the `codex` CLI is absent).
-4. Report the findings. Offer to fix them with the `implementer` agent, or hand them
-   to the user.
+## 1. Detect scope
 
-This is review-only - do not modify code unless the user asks.
+Pick the diff from what the user asked; ask with clickable options if it's unclear:
+
+| The user said... | Review |
+|---|---|
+| nothing / "my changes" / "working tree" | uncommitted: staged + unstaged + untracked (default) |
+| a branch / "this PR" / "vs main" | the branch vs its base (`git diff <base>...HEAD`) |
+| a commit SHA / "commit <sha>" | that one commit (`git show <sha>`) |
+| "since <sha>" / "<sha> to HEAD" | the range (`git diff <sha>..HEAD`) |
+
+## 2. Review
+
+1. Write the scope into `handoffs/review-input.md` using the `verify-fix-loop` skill's
+   template (goal, files changed, checks run, read-these-first).
+2. Spawn the `reviewer` agent -> `handoffs/review-verdict.md` (verdict + findings) and a
+   durable `reports/review-<timestamp>.md`.
+3. `--codex`: also run `flex-kit codex-review --type diff` and merge its critical/high
+   findings (host `reviewer` stays authoritative; skip if `codex` is absent).
+
+## 3. Report
+
+Present the findings grouped, most severe first:
+
+- **Summary** - one line + the scope reviewed.
+- **🔴 Bugs** - wrong behavior or regressions.
+- **🟡 Risks** - could break under load, concurrency, or edge cases.
+- **⚠️ Must fix** - spec or convention violations (cite the doc/skill).
+- **💡 Nice to have** - improvements, not blockers.
+- **🟢 Coverage gaps** - changed behavior with no test.
+- **Verdict** - approve / revise, with the critical + high count.
+
+Offer to fix the findings with the `implementer`, or hand them to the user. Review-only -
+don't change code unless asked.
