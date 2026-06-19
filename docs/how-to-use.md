@@ -101,6 +101,36 @@ flex-kit doctor    # verify everything is in sync (fails if you hand-edited gene
 That `edit source → gen → doctor` loop is the whole content workflow. Agents
 (`.flexkit/agents/<id>.md`) and commands (`.flexkit/commands/<id>.md`) work the same.
 
+### Point agents at your project's specs/docs
+
+Your project's specs and conventions can stay as **plain markdown** - you don't have to
+wrap them in skills. Put them under `docs/` (configurable via `docsDir` in
+`flexkit.config.json`):
+
+```
+docs/
+  architecture.md      # first `# ` heading becomes the title
+  api-spec.md
+  billing.md
+```
+
+On `flex-kit gen`, an **index** of these (path + title) is injected at the `<!-- DOCS -->`
+marker in the `planner`, `implementer`, and `reviewer` agents - so they know what specs
+exist and `Read` the relevant one on demand (only the index is injected, not the
+content, so a big docs/ never bloats context). The docs stay where they are; editing
+them and re-genning refreshes the index.
+
+```
+## Project Docs          ← generated into .claude/agents/planner.md
+- docs/architecture.md - System Architecture
+- docs/api-spec.md - API Contract
+```
+
+So the flow uses them automatically: `planner` plans to follow the relevant spec,
+`implementer` follows it, `reviewer` flags deviations. For a convention you want
+*bundled and reused across projects*, author a skill (with `references/`) instead; for
+*living repo docs*, this `docs/` index is the lighter path.
+
 ## 4. Do real work with the OS - all inside Claude Code
 
 Scenario: *"add a login endpoint."* Everything below is typed **in Claude Code** as
@@ -197,6 +227,7 @@ before implementing. For a small bug, `/flex-fix` stays in patch mode.
 | Path | What | Edit? |
 |---|---|---|
 | `.flexkit/` | your source (skills / agents / commands / config) | **yes** |
+| `docs/` | project specs/conventions (indexed into agents via `<!-- DOCS -->`) | **yes** |
 | `plans/active/` `plans/archive/` | your tracked work | yes (the plan.md) |
 | `.flexkit/state.json` | active-plan pointer + hook dedup | no (managed) |
 | `.claude/` `.agents/` `.codex/` | generated host surfaces | **never** (run `gen`) |

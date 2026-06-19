@@ -35,8 +35,9 @@ model-routing, semantic-memory layers and ships no domain content.
 | File | Role |
 |---|---|
 | `main.py` | Typer CLI: `init` / `add` / `gen` / `doctor` |
-| `config.py` | load `.flexkit/flexkit.config.json` (hosts, skillsDir, agentsDir) |
+| `config.py` | load `.flexkit/flexkit.config.json` (hosts, skillsDir, agentsDir, docsDir) |
 | `skills.py` / `agents.py` | discover + parse source skills / agents |
+| `docs.py` | discover project docs (`docs/`) + inject their index at `<!-- DOCS -->` |
 | `frontmatter.py` | parse + shared transforms (em-dash normalize, strip markup, wrap) |
 | `emit.py` | `OutFile` - the unit of host output |
 | `build.py` | `emit_for_host(host, skills, agents)` - shared by gen + the sync check |
