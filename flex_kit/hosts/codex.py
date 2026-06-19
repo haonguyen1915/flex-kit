@@ -10,6 +10,7 @@ em/en dashes normalized, kept on a single line (no YAML block scalar required).
 from __future__ import annotations
 
 from flex_kit.agents import Agent, inject_skills
+from flex_kit.docs import Doc, inject_docs
 from flex_kit.emit import OutFile
 from flex_kit.frontmatter import normalize_common, serialize_frontmatter, strip_markup
 from flex_kit.skills import Skill
@@ -54,9 +55,9 @@ def _toml_basic(s: str) -> str:
     return s.replace("\\", "\\\\").replace('"', '\\"')
 
 
-def emit_agent(agent: Agent, skills: list[Skill]) -> list[OutFile]:
+def emit_agent(agent: Agent, skills: list[Skill], docs: list[Doc]) -> list[OutFile]:
     fm = agent.frontmatter
-    body = inject_skills(agent.body, skills).rstrip()
+    body = inject_docs(inject_skills(agent.body, skills), docs).rstrip()
     lines = [
         f'name = "{_toml_basic(fm["name"])}"',
         f'description = "{_toml_basic(_clean(fm["description"]))}"',

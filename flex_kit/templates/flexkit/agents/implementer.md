@@ -11,6 +11,12 @@ You are the implementation agent. Implement the requested scope.
 
 <!-- SKILLS -->
 
+## Project Docs
+
+<!-- DOCS -->
+
+Read and follow the spec(s) relevant to this change.
+
 ## Rules
 
 - If `handoffs/review-verdict.md` exists with a `revise` verdict, read it first and

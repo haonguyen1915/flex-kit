@@ -12,6 +12,12 @@ You are the review agent. Review the change scoped by `handoffs/review-input.md`
 
 <!-- SKILLS -->
 
+## Project Docs
+
+<!-- DOCS -->
+
+Check the change against the spec(s) relevant to it; flag any deviation.
+
 ## What To Check
 
 - Correctness: wrong logic, off-by-one, unhandled edge cases, silent failures.

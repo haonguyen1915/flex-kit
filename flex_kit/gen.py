@@ -11,6 +11,7 @@ from flex_kit.agents import discover_agents
 from flex_kit.build import emit_for_host
 from flex_kit.commands import discover_commands
 from flex_kit.config import load_config
+from flex_kit.docs import discover_docs
 from flex_kit.registry import HOSTS
 from flex_kit.skills import discover_skills
 
@@ -29,6 +30,7 @@ def gen(project_root: Path, dry_run: bool = False, out_root: Path | None = None)
     skills = discover_skills(project_root, config.skills_dir)
     agents = discover_agents(project_root, config.agents_dir)
     commands = discover_commands(project_root, config.commands_dir)
+    docs = discover_docs(project_root, config.docs_dir)
     out_root = out_root or project_root
     per_host: Counter[str] = Counter()
 
@@ -43,7 +45,7 @@ def gen(project_root: Path, dry_run: bool = False, out_root: Path | None = None)
             if base:
                 shutil.rmtree(out_root / base, ignore_errors=True)
 
-        for f in emit_for_host(host, skills, agents, commands):
+        for f in emit_for_host(host, skills, agents, commands, docs):
             per_host[host_name] += 1
             if dry_run:
                 continue

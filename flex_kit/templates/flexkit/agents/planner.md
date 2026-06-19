@@ -14,6 +14,12 @@ empty one). Plan only - never implement.
 
 Use the ones whose description fits the task; don't load them all.
 
+## Project Docs
+
+<!-- DOCS -->
+
+Read the spec(s) relevant to the task before planning; plan to follow them.
+
 ## Plan
 
 Scout the files the task touches first, then fill `plan.md`:

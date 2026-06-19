@@ -10,6 +10,7 @@ _DEFAULT_HOSTS = ["claude", "codex"]
 _DEFAULT_SKILLS_DIR = ".flexkit/skills"
 _DEFAULT_AGENTS_DIR = ".flexkit/agents"
 _DEFAULT_COMMANDS_DIR = ".flexkit/commands"
+_DEFAULT_DOCS_DIR = "docs"  # project specs/conventions, indexed into agents via <!-- DOCS -->
 
 
 @dataclass
@@ -18,6 +19,7 @@ class Config:
     skills_dir: str = _DEFAULT_SKILLS_DIR
     agents_dir: str = _DEFAULT_AGENTS_DIR
     commands_dir: str = _DEFAULT_COMMANDS_DIR
+    docs_dir: str = _DEFAULT_DOCS_DIR
 
 
 def load_config(project_root: Path) -> Config:
@@ -30,4 +32,5 @@ def load_config(project_root: Path) -> Config:
         skills_dir=raw.get("skillsDir", _DEFAULT_SKILLS_DIR),
         agents_dir=raw.get("agentsDir", _DEFAULT_AGENTS_DIR),
         commands_dir=raw.get("commandsDir", _DEFAULT_COMMANDS_DIR),
+        docs_dir=raw.get("docsDir", _DEFAULT_DOCS_DIR),
     )

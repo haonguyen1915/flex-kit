@@ -16,7 +16,7 @@ def _run(ctx: Ctx) -> list[Finding]:
         host = ctx.hosts[host_name]
         expected: set[str] = set()
 
-        for f in emit_for_host(host, ctx.skills, ctx.agents, ctx.commands):
+        for f in emit_for_host(host, ctx.skills, ctx.agents, ctx.commands, ctx.docs):
             expected.add(f.path)
             dest = ctx.project_root / f.path
             if not dest.exists():

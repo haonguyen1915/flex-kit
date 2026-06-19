@@ -27,6 +27,7 @@ def _ctx(*skills: Skill) -> Ctx:
         skills=list(skills),
         agents=[],
         commands=[],
+        docs=[],
         hosts={},
     )
 
