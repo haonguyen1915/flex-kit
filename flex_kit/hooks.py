@@ -21,31 +21,50 @@ from flex_kit import plan as plan_mod
 _RUNTIME_TTL = timedelta(minutes=5)
 
 
-def subagent_start(root: Path) -> None:
+def _running_map(state: dict) -> dict[str, str]:
+    raw = state.get("running_agents") or {}
+    return {str(k): str(v) for k, v in raw.items()}
+
+
+def subagent_start(root: Path, payload: dict | None = None) -> None:
+    """SubagentStart: record the agent (`agent_type`) by its `agent_id`."""
+    payload = payload or {}
     state = plan_mod._read_state(root)
-    state["running"] = int(state.get("running", 0)) + 1
+    agents = _running_map(state)
+    key = str(payload.get("agent_id") or len(agents))
+    agents[key] = str(payload.get("agent_type") or "agent")
+    state["running_agents"] = agents
     state["running_at"] = datetime.now().isoformat(timespec="seconds")
     plan_mod._write_state(root, state)
 
 
-def subagent_stop(root: Path) -> None:
+def subagent_stop(root: Path, payload: dict | None = None) -> None:
+    payload = payload or {}
     state = plan_mod._read_state(root)
-    state["running"] = max(0, int(state.get("running", 0)) - 1)
+    agents = _running_map(state)
+    key = payload.get("agent_id")
+    if key is not None and str(key) in agents:
+        agents.pop(str(key))
+    elif agents:
+        agents.pop(next(iter(agents)))
+    state["running_agents"] = agents
     plan_mod._write_state(root, state)
 
 
-def _runtime(root: Path) -> str:
+def _running_agents(root: Path) -> list[str]:
+    """Names of subagents running now (empty when idle, or when the data is stale)."""
     state = plan_mod._read_state(root)
-    if int(state.get("running", 0)) <= 0:
-        return "idle"
+    agents = _running_map(state)
+    if not agents:
+        return []
     at = state.get("running_at")
     if at:
         try:
             if datetime.now() - datetime.fromisoformat(at) > _RUNTIME_TTL:
-                return "idle"  # stale - a Stop was likely missed
+                return []  # stale - a Stop was likely missed
         except ValueError:
             pass
-    return "active"
+    return list(agents.values())
 
 _SECRET = re.compile(
     r"\.env(\.|$)|\.env\.(production|prod|staging|live)|\.pem$|\.key$|credentials|"
@@ -214,9 +233,12 @@ def status_line(root: Path, payload: dict | None = None) -> str:
     escalated = bool(p and p.mode_verdict.reason)
     gate_color = _C["yellow"] if escalated else _C["dim"]
     bottom.append(f"{gate_color}gate {'scope' if escalated else 'n/a'}{_C['reset']}")
-    rt = _runtime(root)
-    rt_color = _C["green"] if rt == "active" else _C["dim"]
-    bottom.append(f"{rt_color}runtime {rt}{_C['reset']}")
+    running = _running_agents(root)
+    if running:
+        names = ", ".join(dict.fromkeys(running))  # de-dup, keep order
+        bottom.append(f"{_C['green']}runtime active: {names}{_C['reset']}")
+    else:
+        bottom.append(f"{_C['dim']}runtime idle{_C['reset']}")
     cost = payload.get("cost") or {}
     if cost.get("total_cost_usd") is not None:
         bottom.append(f"{_C['dim']}${cost['total_cost_usd']:.4f}{_C['reset']}")

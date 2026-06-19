@@ -50,11 +50,21 @@ def test_status_line_reports_plan_progress(tmp_path: Path) -> None:
 def test_runtime_goes_live_with_subagents(tmp_path: Path) -> None:
     assert "runtime idle" in hooks.status_line(tmp_path)
     hooks.subagent_start(tmp_path)
-    hooks.subagent_start(tmp_path)  # two in parallel (reviewer + tester)
+    hooks.subagent_start(tmp_path)  # two in parallel
     assert "runtime active" in hooks.status_line(tmp_path)
     hooks.subagent_stop(tmp_path)
     assert "runtime active" in hooks.status_line(tmp_path)  # one still running
     hooks.subagent_stop(tmp_path)
+    assert "runtime idle" in hooks.status_line(tmp_path)
+
+
+def test_runtime_shows_agent_names(tmp_path: Path) -> None:
+    hooks.subagent_start(tmp_path, {"agent_id": "a1", "agent_type": "reviewer"})
+    hooks.subagent_start(tmp_path, {"agent_id": "a2", "agent_type": "tester"})
+    assert "runtime active: reviewer, tester" in hooks.status_line(tmp_path)
+    hooks.subagent_stop(tmp_path, {"agent_id": "a1"})  # reviewer done
+    assert "runtime active: tester" in hooks.status_line(tmp_path)
+    hooks.subagent_stop(tmp_path, {"agent_id": "a2"})
     assert "runtime idle" in hooks.status_line(tmp_path)
 
 

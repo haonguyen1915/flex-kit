@@ -260,9 +260,9 @@ def hook(
     if event == "session-start":
         typer.echo(hooks_mod.session_start(root))
     elif event == "subagent-start":
-        hooks_mod.subagent_start(root)
+        hooks_mod.subagent_start(root, payload)
     elif event == "subagent-stop":
-        hooks_mod.subagent_stop(root)
+        hooks_mod.subagent_stop(root, payload)
     elif event == "user-prompt":
         line = hooks_mod.user_prompt(root)
         if line:
