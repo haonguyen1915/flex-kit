@@ -87,6 +87,10 @@ không bao giờ từ memory.
 ## Review / Codex
 
 Review là subagent **`reviewer`** spawn trên host; file verdict của nó là authoritative
-và một lần `tester` fail tính là finding phải fix. Muốn ý kiến độc lập từ model khác,
-chạy [`/flex-codex-review`](5-codex-review.md) và merge findings critical/high vào
-`review-verdict.md`.
+và một lần `tester` fail tính là finding phải fix.
+
+Muốn ý kiến độc lập từ **model khác ngay trong loop**: chạy `/flex-implement --codex` →
+verify-fix loop bật `codexReview`, gọi `flex-kit codex-review --type diff` và **merge**
+finding critical/high vào `review-verdict.md` (reviewer host vẫn authoritative; bỏ qua
+nếu `codex` CLI không có). Tùy chọn, **off mặc định** — vì `codex exec` là process ngoài,
+chậm/tốn hơn. Cách thủ công tách rời vẫn là [`/flex-codex-review`](5-codex-review.md).

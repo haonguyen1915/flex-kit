@@ -208,7 +208,8 @@ flex-kit doctor            # validate + catch drift     (run before committing)
 /flex-plan <task>          # start tracked work        (cli: flex-kit plan "<task>")
 /flex-change <task>        # design-first: plan + spec (proposal/design/tasks) before code
 /flex-status /flex-next-step  # where am I? what's next?  (cli: flex-kit status / next-step)
-/flex-implement            # deliver the plan: implement -> test + review -> fix -> repeat
+/flex-implement [--full]   # deliver the plan: implement -> test + review -> fix -> repeat
+                           #   add --codex for a cross-model second opinion in the loop
 /flex-fix <bug>            # quick bug-to-patch path (reproduce -> diagnose -> patch -> verify)
 /flex-review [target]      # standalone review of the current diff (no plan needed)
 /flex-close                # archive when done         (cli: flex-kit close --confirm)
