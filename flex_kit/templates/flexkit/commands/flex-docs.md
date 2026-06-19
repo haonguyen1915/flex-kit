@@ -28,6 +28,19 @@ Include a fact only if it is **all** of these - otherwise leave it out or delete
 Fewer, sharper docs beat many. Human-only docs (guides, onboarding) get **no** `inject:`
 signal, so they never enter the agent index.
 
+## Good vs bad
+
+GOOD - a project invariant the code assumes but states nowhere:
+- "Money is stored as integer cents, never floats." - one wrong float corrupts data.
+- "Repository methods return `Result<T>`; they never raise." - reviewer can enforce it.
+- "Webhooks must be idempotent - dedupe by `event_id` in `webhook_events`." - easy to miss.
+
+BAD - drop these:
+- "Use meaningful variable names." - general advice the model already knows.
+- "The login route is `POST /auth/login`." - restates code that rots; read the router.
+- "We should add more tests." - aspiration, not a spec to follow.
+- "We use Python 3.10." - obvious from config; nothing to enforce per change.
+
 ## Flow
 
 1. **Audit.** Read the existing `docs/` + the code. List gaps: stale / wrong /
