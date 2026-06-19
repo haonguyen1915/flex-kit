@@ -76,10 +76,14 @@ def test_doctor_detects_handedit(tmp_path: Path) -> None:
     assert "generated-in-sync" in ids
 
 
-def test_doctor_detects_stray_file(tmp_path: Path) -> None:
+def test_doctor_flags_orphan_but_ignores_unmanaged(tmp_path: Path) -> None:
     root = _project(tmp_path)
     gen(root)
-    (root / ".agents/skills/stray-extra.md").write_text("stray\n")
+    # A hand-authored file gen never produced is left alone (not flagged).
+    (root / ".agents/skills/handmade.md").write_text("mine\n")
+    assert not any("stray" in f.msg for r in doctor(root) for f in r.findings)
+    # Removing the source orphans its generated output -> flagged until the next gen.
+    shutil.rmtree(root / ".flexkit/skills/sample-skill")
     msgs = [f.msg for r in doctor(root) for f in r.findings]
     assert any("stray" in m for m in msgs)
 

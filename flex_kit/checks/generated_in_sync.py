@@ -1,21 +1,24 @@
 """The host surfaces must equal what `gen` would produce right now.
 
-A mismatch means someone hand-edited a generated file, added a stray file, or
-forgot to re-run gen after editing the source - the drift this kit prevents.
+A mismatch means someone hand-edited a generated file or forgot to re-run gen after
+editing the source - the drift this kit prevents. A file gen produced before but no
+longer produces (an orphan from a rename/removal) is also flagged. Files gen never
+produced - hand-authored, other tools - are left alone.
 """
 
 from __future__ import annotations
 
 from flex_kit.build import emit_for_host
 from flex_kit.checks import Check, Ctx, Finding
+from flex_kit.record import read_record
 
 
 def _run(ctx: Ctx) -> list[Finding]:
     findings: list[Finding] = []
+    expected: set[str] = set()
+
     for host_name in ctx.config.hosts:
         host = ctx.hosts[host_name]
-        expected: set[str] = set()
-
         for f in emit_for_host(host, ctx.skills, ctx.agents, ctx.commands, ctx.docs):
             expected.add(f.path)
             dest = ctx.project_root / f.path
@@ -33,19 +36,10 @@ def _run(ctx: Ctx) -> list[Finding]:
             elif f.copy_from is not None and dest.read_bytes() != f.copy_from.read_bytes():
                 findings.append(Finding("error", f"{host_name}: {f.path} out of sync - run gen"))
 
-        # Stray files: anything in the host's owned roots that gen would not write.
-        roots = [getattr(host, a, None) for a in ("SKILLS_DIR", "AGENTS_DIR", "COMMANDS_DIR")]
-        for base in filter(None, roots):
-            root = ctx.project_root / base
-            if not root.exists():
-                continue
-            for p in root.rglob("*"):
-                if p.is_file():
-                    rel = p.relative_to(ctx.project_root).as_posix()
-                    if rel not in expected:
-                        findings.append(
-                            Finding("error", f"{host_name}: {rel} is stray (not produced by gen)")
-                        )
+    # Orphans: files gen produced last run but no longer produces, still on disk.
+    for rel in sorted(read_record(ctx.project_root) - expected):
+        if (ctx.project_root / rel).is_file():
+            findings.append(Finding("error", f"{rel} is stray (gen would remove it) - run gen"))
     return findings
 
 

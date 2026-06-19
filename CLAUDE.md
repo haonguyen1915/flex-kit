@@ -23,7 +23,10 @@ model-routing, semantic-memory layers and ships no domain content.
   output. No host is privileged (this is the key improvement over prep-kit, which
   authors in `.claude/skills/`).
 - **Never hand-edit generated dirs.** `doctor`'s `generated-in-sync` check
-  re-renders and compares, and flags stray/hand-edited files.
+  re-renders and compares, and flags hand-edited files + orphans. `gen` overwrites
+  its own output and removes only files it previously produced (tracked in
+  `.flexkit/.generated.json`) - **files it never generated** (hand-authored skills,
+  another tool's output) in the host dirs are **left untouched**, not wiped.
 - **Codex skills go to `.agents/skills/`** (Codex natively scans it), NOT
   `.codex/skills/`. `.codex/` holds only agent `.toml`.
 - **Convention-discovery, not a registry.** Skills/agents are discovered by scanning
