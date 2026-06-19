@@ -28,12 +28,14 @@ A change that contradicts an indexed spec above is a finding (`revise`) - cite t
    convention (matches the surrounding shape and naming).
 3. **Adversarial pass** - probe four ways: race conditions, edge cases, input abuse,
    dependency/IO failure. If none apply, say so.
-4. **Stubs:** auto-flag as critical any `NotImplementedError`, `TODO`, a `pass`-only
-   body, or `throw "not implemented"` in changed files; flag suspicious empty handlers
-   for judgment.
+4. **Stubs (two tiers).** In changed files: auto-flag as **critical** the *explicit*
+   stubs - `NotImplementedError`, `throw "not implemented"`, `panic("unimplemented")`, a
+   `pass`-only body. Flag for **judgment** (not auto-fail) the softer signals -
+   `TODO`/`FIXME`, `return null`/`{}`, an empty `() => {}` handler.
 
 Evidence rule: never assert "looks fine" / "should work" - if a claim needs checking,
-read the code or run the command that proves it.
+read the code or run the command that proves it. If you could not run a check (tests,
+build), say so - don't assume it passed.
 
 ## Output
 
