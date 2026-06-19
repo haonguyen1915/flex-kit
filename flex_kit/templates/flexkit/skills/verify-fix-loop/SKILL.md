@@ -77,5 +77,8 @@ Do not mark the loop complete until ALL of these hold:
 
 - Agents communicate only through `handoffs/` files, never directly.
 - The reviewer's verdict is authoritative; a failing `tester` run is a finding.
+- Mind the verifier `Status`: `BLOCKED` or `NEEDS_CONTEXT` stops the loop and surfaces to
+  the user (do not keep iterating); `DONE_WITH_CONCERNS` may exit but carry the concerns
+  forward.
 - Never skip the handoff write - the verifiers need scoped context to be useful.
 - Exit only when the Exit gates hold, or the user stops the loop.
