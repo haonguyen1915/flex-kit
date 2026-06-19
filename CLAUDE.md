@@ -67,8 +67,9 @@ native subagents + prose, never a flex-kit engine:
 ## templates vs packs
 
 - `templates/flexkit/` = **base**, scaffolded by `init` on every project. Put here
-  only domain-**neutral** "how to work" content (skill-creator, verify-fix-loop +
-  reviewer/implementer). Keep it minimal - it ships always.
+  only domain-**neutral** "how to work" content (the planner/implementer/reviewer/
+  tester/debugger/simplifier agents, verify-fix-loop + planning-methodology skills).
+  Keep it minimal - it ships always.
 - `packs/<name>/` = **opt-in** domain knowledge, copied in by `add`. Design domains
   (api-design) stay language-agnostic; implementation domains split by language
   (`backend-rust`). **When unsure, put it in a pack**, not base.

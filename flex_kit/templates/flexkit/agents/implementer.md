@@ -24,3 +24,5 @@ Read and follow the spec(s) relevant to this change.
 - Make the smallest change that satisfies the goal; do not refactor unrelated code.
 - Leave no stubs or TODOs in the changed files.
 - Report the files changed and the checks run so the reviewer can scope its review.
+- Before reporting done, confirm: it builds/lints, no stubs/TODOs remain, and you have
+  written the goal + files + checks for the reviewer to scope from.

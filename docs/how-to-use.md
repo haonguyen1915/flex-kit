@@ -212,8 +212,9 @@ flex-kit doctor            # validate + catch drift     (run before committing)
 /flex-status /flex-next-step  # where am I? what's next?  (cli: flex-kit status / next-step)
 /flex-implement [--full]   # deliver the plan: implement -> test + review -> fix -> repeat
                            #   add --codex for a cross-model second opinion in the loop
-/flex-fix <bug>            # quick bug-to-patch path (reproduce -> diagnose -> patch -> verify)
+/flex-fix <bug>            # quick bug-to-patch path (debugger -> patch -> verify)
 /flex-review [target]      # standalone review of the current diff (no plan needed)
+/flex-simplify [target]    # post-delivery cleanup: dead code / over-abstraction / redundancy
 /flex-close                # archive when done         (cli: flex-kit close --confirm)
 ```
 

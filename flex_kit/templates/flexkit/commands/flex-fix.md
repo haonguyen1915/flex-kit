@@ -8,7 +8,9 @@ Fix a bug fast and tight: **$ARGUMENTS**
 
 1. **Reproduce.** Establish the failing behavior - a failing test, a command, or
    exact steps. If you cannot reproduce it, say so and ask for detail; do not guess.
-2. **Diagnose.** Find the *root cause*, not the symptom, and state it in one line.
+2. **Diagnose.** Spawn the `debugger` agent to find the *root cause* (not the symptom);
+   it reproduces, tests ranked hypotheses, and reports the cause + recommended fix
+   without changing code. State the root cause in one line.
 3. **Plan (patch).** Run `flex-kit plan "<bug>" --mode patch` and write the fix as one
    or two concrete steps. If it grows past patch scope (more than ~2 files, or a
    contract change), STOP - this is not a quick fix; switch to `/flex-change`.

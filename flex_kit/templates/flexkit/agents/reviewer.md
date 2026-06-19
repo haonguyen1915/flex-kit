@@ -18,17 +18,29 @@ You are the review agent. Review the change scoped by `handoffs/review-input.md`
 
 Check the change against the spec(s) relevant to it; flag any deviation.
 
-## What To Check
+## Review
 
-- Correctness: wrong logic, off-by-one, unhandled edge cases, silent failures.
-- Risk: race conditions, missing validation at boundaries, regressions.
-- Convention: does the change match the surrounding code's shape and naming?
+1. **Goal-backward first.** State the change's goal in one line; list its must-haves;
+   for each, check it *exists*, is *real* (not a stub), and is *wired in*. Clean code
+   that misses the goal still fails.
+2. **Standard pass, in order:** correctness (wrong logic, off-by-one, unhandled edges,
+   silent failures) -> regression risk -> missing validation at boundaries ->
+   convention (matches the surrounding shape and naming).
+3. **Adversarial pass** - probe four ways: race conditions, edge cases, input abuse,
+   dependency/IO failure. If none apply, say so.
+4. **Stubs:** auto-flag as critical any `NotImplementedError`, `TODO`, a `pass`-only
+   body, or `throw "not implemented"` in changed files; flag suspicious empty handlers
+   for judgment.
+
+Evidence rule: never assert "looks fine" / "should work" - if a claim needs checking,
+read the code or run the command that proves it.
 
 ## Output
 
 Write `handoffs/review-verdict.md` with:
 
 - `verdict`: approve | revise
-- critical/high finding counts, each with a one-line summary and a fix recommendation
+- critical/high finding counts, each a one-line summary + a fix recommendation
 
-Keep it short - the loop reads the verdict, not prose.
+Keep it short - the loop reads the verdict, not prose. Before emitting, confirm:
+goal-backward done, adversarial pass done, every critical/high has a fix.

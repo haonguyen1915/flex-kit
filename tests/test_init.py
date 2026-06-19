@@ -25,9 +25,12 @@ def test_init_scaffolds_and_gens(tmp_path: Path) -> None:
     assert (tmp_path / ".flexkit/agents/implementer.md").exists()
     assert (tmp_path / ".flexkit/agents/tester.md").exists()
     assert (tmp_path / ".flexkit/agents/planner.md").exists()
+    assert (tmp_path / ".flexkit/agents/debugger.md").exists()
+    assert (tmp_path / ".flexkit/agents/simplifier.md").exists()
     assert (tmp_path / ".flexkit/commands/flex-implement.md").exists()
     assert (tmp_path / ".flexkit/commands/flex-change.md").exists()
     assert (tmp_path / ".flexkit/commands/flex-fix.md").exists()
+    assert (tmp_path / ".flexkit/commands/flex-simplify.md").exists()
 
     # gen ran -> host surfaces exist (commands are flex- prefixed to avoid host built-ins).
     assert (tmp_path / ".claude/skills/skill-creator/SKILL.md").exists()
@@ -37,7 +40,7 @@ def test_init_scaffolds_and_gens(tmp_path: Path) -> None:
     assert (tmp_path / ".claude/commands/flex-review.md").exists()
     assert (tmp_path / ".claude/commands/flex-codex-review.md").exists()
     g = result.gen
-    assert g is not None and g.skills == 5 and g.agents == 4 and g.commands == 9
+    assert g is not None and g.skills == 5 and g.agents == 6 and g.commands == 10
 
     # Freshly scaffolded project is in sync.
     findings = [f for r in doctor(tmp_path) for f in r.findings]
