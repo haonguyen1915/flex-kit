@@ -9,3 +9,7 @@ build/
 .venv/
 .idea/
 .vscode/
+.agents
+.codex
+.flexkit
+.claude
