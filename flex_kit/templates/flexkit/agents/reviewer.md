@@ -12,11 +12,11 @@ You are the review agent. Review the change scoped by `handoffs/review-input.md`
 
 <!-- SKILLS -->
 
-## Project Docs
+## Project Docs (specs to follow)
 
 <!-- DOCS -->
 
-Check the change against the spec(s) relevant to it; flag any deviation.
+A change that contradicts an indexed spec above is a finding (`revise`) - cite the doc.
 
 ## Review
 

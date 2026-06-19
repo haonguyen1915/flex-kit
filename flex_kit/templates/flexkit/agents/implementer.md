@@ -11,11 +11,11 @@ You are the implementation agent. Implement the requested scope.
 
 <!-- SKILLS -->
 
-## Project Docs
+## Project Docs (specs to follow)
 
 <!-- DOCS -->
 
-Read and follow the spec(s) relevant to this change.
+Read and follow any indexed spec relevant to this change.
 
 ## Rules
 

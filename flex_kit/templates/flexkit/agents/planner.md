@@ -14,11 +14,11 @@ empty one). Plan only - never implement.
 
 Use the ones whose description fits the task; don't load them all.
 
-## Project Docs
+## Project Docs (specs to follow)
 
 <!-- DOCS -->
 
-Read the spec(s) relevant to the task before planning; plan to follow them.
+Read any indexed spec relevant to the task; plan to follow it.
 
 ## Plan
 
