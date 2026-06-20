@@ -11,9 +11,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+from flex_kit.docs import DOCS_MARKER
 from flex_kit.frontmatter import parse_skill, replace_marker
 
 SKILLS_MARKER = "<!-- SKILLS -->"
+AGENTS_MARKER = "<!-- AGENTS -->"
 
 
 @dataclass
@@ -52,3 +54,20 @@ def skill_catalog(skills) -> str:
 
 def inject_skills(body: str, skills) -> str:
     return replace_marker(body, SKILLS_MARKER, skill_catalog(skills))
+
+
+def agent_catalog(agents: list[Agent]) -> str:
+    """One line per agent (id, lane, `[docs]` if it can receive injected docs, lead)
+    injected at AGENTS_MARKER - so a command choosing `inject:` targets sees the real
+    roster instead of hardcoded names."""
+    lines = []
+    for a in agents:
+        lane = a.frontmatter.get("lane", "")
+        tag = f" ({lane})" if lane else ""
+        docs = " [docs]" if DOCS_MARKER in a.body else ""
+        lines.append(f"- {a.id}{tag}{docs}: {_lead(a.frontmatter.get('description', ''))}")
+    return "\n".join(lines)
+
+
+def inject_agents(body: str, agents: list[Agent]) -> str:
+    return replace_marker(body, AGENTS_MARKER, agent_catalog(agents))

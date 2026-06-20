@@ -29,7 +29,7 @@ def emit_for_host(
             out.extend(host.emit_agent(agent, skills, docs))
     if commands and hasattr(host, "emit_command"):
         for command in commands:
-            out.extend(host.emit_command(command, skills, docs))
+            out.extend(host.emit_command(command, skills, agents, docs))
     if hasattr(host, "emit_global"):
         out.extend(host.emit_global())
     return out

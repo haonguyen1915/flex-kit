@@ -60,6 +60,11 @@ Folder tendencies are *typical*, not rules: a `conventions/` doc that genuinely 
 everywhere is `all`; a `domain/` fact only the implementer touches is `implementer`. Read
 the content, then decide who needs it.
 
+Target by id or lane from this project's actual roster (`[docs]` = the agent has a
+`<!-- DOCS -->` marker, so a doc can reach it; targeting one without it warns in `doctor`):
+
+<!-- AGENTS -->
+
 ## Good vs bad
 
 GOOD - a project invariant the code assumes but states nowhere:

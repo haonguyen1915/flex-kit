@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import json
 
-from flex_kit.agents import Agent, inject_skills
+from flex_kit.agents import Agent, inject_agents, inject_skills
 from flex_kit.commands import Command
 from flex_kit.docs import Doc, inject_docs
 from flex_kit.emit import OutFile
@@ -83,13 +83,17 @@ def emit_agent(agent: Agent, skills: list[Skill], docs: list[Doc]) -> list[OutFi
     return [OutFile(f"{AGENTS_DIR}/{agent.id}.md", content)]
 
 
-def emit_command(command: Command, skills: list[Skill], docs: list[Doc]) -> list[OutFile]:
+def emit_command(
+    command: Command, skills: list[Skill], agents: list[Agent], docs: list[Doc]
+) -> list[OutFile]:
     fm = command.frontmatter
     # Claude commands key off the filename, so `name` is dropped from frontmatter.
     entries = [("description", normalize_common(fm["description"]))]
     if fm.get("argument-hint"):
         entries.append(("argument-hint", fm["argument-hint"]))
-    body = inject_docs(inject_skills(command.body, skills), docs, frozenset({command.id}))
+    body = inject_skills(command.body, skills)
+    body = inject_docs(body, docs, frozenset({command.id}))
+    body = inject_agents(body, agents)
     content = f"---\n{serialize_frontmatter(entries)}\n---\n\n{body.rstrip()}\n"
     return [OutFile(f"{COMMANDS_DIR}/{command.id}.md", content)]
 

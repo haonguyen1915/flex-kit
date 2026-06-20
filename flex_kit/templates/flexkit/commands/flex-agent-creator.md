@@ -44,6 +44,11 @@ Tail order when present: `## Output` -> `## Verification Gate` -> `## Context Ha
 
 The base `reviewer` / `tester` / `implementer` agents are the reference shape - match them.
 
+This project's current agents (id, lane, `[docs]` = has a `<!-- DOCS -->` marker) - audit
+against this roster, and match a sibling in the same lane when creating one:
+
+<!-- AGENTS -->
+
 ## Good vs bad (description)
 
 The description is injected into other agents, so it must read as a routing label.
