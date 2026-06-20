@@ -51,10 +51,12 @@ BAD - drop these:
 3. **Filter.** Apply the criteria above; drop everything that fails any of them.
 4. **Plan + confirm.** Present the plan - files to add / update / remove, one line of
    reason each. **Wait for approval before writing.**
-5. **Write.** Use frontmatter `inject: true` + a `description` - the index label
+5. **Write.** Use frontmatter `inject: <target>` + a `description` - the index label
    injected into the agents, so keep it concise: a short line, just enough to route, no
-   padding. Place docs under `architecture.md` / `conventions/` / `domain/` / `adr/`;
-   scaffold missing structure with `flex-kit init-docs`.
+   padding. `inject: true` / `all` reaches every agent; narrow it with agent ids or lanes
+   (`inject: reviewer`, `inject: reviewer, implementer`, `inject: review`) so a spec only
+   loads where it's relevant. Place docs under `architecture.md` / `conventions/` /
+   `domain/` / `adr/`; scaffold missing structure with `flex-kit init-docs`.
 6. **Verify.** Re-check each claim against the code, then `flex-kit gen` + `flex-kit doctor`.
 
 ## Rules

@@ -77,7 +77,8 @@ def emit_agent(agent: Agent, skills: list[Skill], docs: list[Doc]) -> list[OutFi
     entries = [("name", fm["name"]), ("description", normalize_common(fm["description"]))]
     if fm.get("model"):
         entries.append(("model", fm["model"]))
-    body = inject_docs(inject_skills(agent.body, skills), docs)
+    consumer = frozenset({agent.id, fm.get("lane", "")}) - {""}
+    body = inject_docs(inject_skills(agent.body, skills), docs, consumer)
     content = f"---\n{serialize_frontmatter(entries)}\n---\n\n{body.rstrip()}\n"
     return [OutFile(f"{AGENTS_DIR}/{agent.id}.md", content)]
 
@@ -88,7 +89,7 @@ def emit_command(command: Command, skills: list[Skill], docs: list[Doc]) -> list
     entries = [("description", normalize_common(fm["description"]))]
     if fm.get("argument-hint"):
         entries.append(("argument-hint", fm["argument-hint"]))
-    body = inject_docs(inject_skills(command.body, skills), docs)
+    body = inject_docs(inject_skills(command.body, skills), docs, frozenset({command.id}))
     content = f"---\n{serialize_frontmatter(entries)}\n---\n\n{body.rstrip()}\n"
     return [OutFile(f"{COMMANDS_DIR}/{command.id}.md", content)]
 

@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from flex_kit.frontmatter import parse_skill
+from flex_kit.frontmatter import parse_skill, replace_marker
 
 SKILLS_MARKER = "<!-- SKILLS -->"
 
@@ -51,6 +51,4 @@ def skill_catalog(skills) -> str:
 
 
 def inject_skills(body: str, skills) -> str:
-    if SKILLS_MARKER not in body:
-        return body
-    return body.replace(SKILLS_MARKER, skill_catalog(skills))
+    return replace_marker(body, SKILLS_MARKER, skill_catalog(skills))

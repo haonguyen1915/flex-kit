@@ -28,8 +28,28 @@ def test_discover_docs_missing_dir_is_empty(tmp_path: Path) -> None:
 
 def test_inject_docs_only_when_marker_present() -> None:
     docs = discover_docs(Path("."), "does-not-exist")  # -> []
-    assert inject_docs("no marker here", docs) == "no marker here"
-    assert "inject: true" in inject_docs("before <!-- DOCS --> after", docs)
+    consumer = frozenset({"reviewer"})
+    assert inject_docs("no marker here", docs, consumer) == "no marker here"
+    # a standalone marker line is replaced...
+    assert "inject:" in inject_docs("before\n<!-- DOCS -->\nafter", docs, consumer)
+    # ...but an inline mention in prose is left untouched (markers are line-level)
+    prose = "see the `<!-- DOCS -->` marker"
+    assert inject_docs(prose, docs, consumer) == prose
+
+
+def test_inject_targets_by_agent_and_lane(tmp_path: Path) -> None:
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs/r.md").write_text("---\ninject: reviewer\ndescription: review spec\n---\n# R\n")
+    (tmp_path / "docs/b.md").write_text("---\ninject: build\ndescription: build spec\n---\n# B\n")
+    (tmp_path / "docs/a.md").write_text("---\ninject: all\ndescription: everyone\n---\n# A\n")
+    docs = discover_docs(tmp_path, "docs")
+    marker = "<!-- DOCS -->"
+
+    reviewer = inject_docs(marker, docs, frozenset({"reviewer", "review"}))
+    assert "docs/r.md" in reviewer and "docs/a.md" in reviewer and "docs/b.md" not in reviewer
+
+    planner = inject_docs(marker, docs, frozenset({"planner", "build"}))
+    assert "docs/b.md" in planner and "docs/a.md" in planner and "docs/r.md" not in planner
 
 
 def test_scaffold_docs_into_empty(tmp_path: Path) -> None:

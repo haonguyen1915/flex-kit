@@ -87,3 +87,16 @@ def wrap(s: str, width: int) -> list[str]:
 def serialize_frontmatter(entries: list[tuple[str, str]]) -> str:
     """Serialize ordered frontmatter pairs to a ``---``-less YAML block."""
     return "\n".join(f"{k}: {v}" for k, v in entries)
+
+
+def replace_marker(body: str, marker: str, replacement: str) -> str:
+    """Replace ``marker`` with ``replacement`` only where it stands alone on a line.
+
+    Inline mentions of the marker in prose (e.g. a command that documents the
+    ``<!-- DOCS -->`` syntax) are left untouched - only a line that *is* the marker
+    is a real injection point.
+    """
+    lines = body.split("\n")
+    if not any(line.strip() == marker for line in lines):
+        return body
+    return "\n".join(replacement if line.strip() == marker else line for line in lines)

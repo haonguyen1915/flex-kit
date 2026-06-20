@@ -57,7 +57,8 @@ def _toml_basic(s: str) -> str:
 
 def emit_agent(agent: Agent, skills: list[Skill], docs: list[Doc]) -> list[OutFile]:
     fm = agent.frontmatter
-    body = inject_docs(inject_skills(agent.body, skills), docs).rstrip()
+    consumer = frozenset({agent.id, fm.get("lane", "")}) - {""}
+    body = inject_docs(inject_skills(agent.body, skills), docs, consumer).rstrip()
     lines = [
         f'name = "{_toml_basic(fm["name"])}"',
         f'description = "{_toml_basic(_clean(fm["description"]))}"',

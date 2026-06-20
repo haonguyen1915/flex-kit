@@ -12,9 +12,10 @@ import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from flex_kit.frontmatter import parse_skill
+from flex_kit.frontmatter import parse_skill, replace_marker
 
 DOCS_MARKER = "<!-- DOCS -->"
+ALL = "all"  # a target that reaches every doc consumer
 _TEMPLATE_DOCS_DIR = Path(__file__).parent / "templates" / "docs"
 
 
@@ -22,9 +23,11 @@ _TEMPLATE_DOCS_DIR = Path(__file__).parent / "templates" / "docs"
 class Doc:
     rel: str  # path relative to the project root, e.g. "docs/api-spec.md"
     label: str  # the doc's frontmatter `description`, else its `# ` heading, else stem
+    targets: frozenset[str]  # who gets it: {"all"}, or agent ids / lanes
 
 
-_INJECT_VALUES = {"true", "yes", "1", "on"}
+_ALL_VALUES = {"true", "yes", "1", "on", ALL}
+_FALSE_VALUES = {"", "false", "no", "0", "off"}
 
 
 def _heading(body: str) -> str:
@@ -34,8 +37,23 @@ def _heading(body: str) -> str:
     return ""
 
 
+def _targets(inject: str) -> frozenset[str] | None:
+    """Parse the `inject` value into target keys, or None if the doc opts out.
+
+    `true` / `all` -> every consumer. A comma list (`reviewer, build`) -> the named
+    agent ids and/or lanes. Falsy or absent -> None (not indexed).
+    """
+    val = inject.strip().lower()
+    if val in _FALSE_VALUES:
+        return None
+    if val in _ALL_VALUES:
+        return frozenset({ALL})
+    keys = frozenset(t.strip() for t in val.split(",") if t.strip())
+    return keys or None
+
+
 def _doc(path: Path, project_root: Path) -> Doc | None:
-    """A Doc if the file opts in with frontmatter `inject: true`, else None."""
+    """A Doc if the file opts in with frontmatter `inject:`, else None."""
     text = path.read_text(encoding="utf-8", errors="ignore")
     if not text.startswith("---"):
         return None
@@ -43,16 +61,17 @@ def _doc(path: Path, project_root: Path) -> Doc | None:
         fm, body = parse_skill(text)
     except ValueError:
         return None
-    if fm.get("inject", "").strip().lower() not in _INJECT_VALUES:
+    targets = _targets(fm.get("inject", ""))
+    if targets is None:
         return None
     label = fm.get("description", "").strip() or _heading(body) or path.stem
-    return Doc(rel=path.relative_to(project_root).as_posix(), label=label)
+    return Doc(rel=path.relative_to(project_root).as_posix(), label=label, targets=targets)
 
 
 def discover_docs(project_root: Path, docs_dir: str) -> list[Doc]:
-    """Docs under `docs_dir` that opt in with frontmatter `inject: true`.
+    """Docs under `docs_dir` that opt in with frontmatter `inject:`.
 
-    Default is NOT to index a doc - only `inject: true` files are injected, so
+    Default is NOT to index a doc - only `inject:` files are injected, so
     notes/drafts/human-only files don't add noise. Missing dir -> [].
     """
     root = project_root / docs_dir
@@ -67,16 +86,21 @@ def discover_docs(project_root: Path, docs_dir: str) -> list[Doc]:
     return docs
 
 
-def doc_catalog(docs: list[Doc]) -> str:
-    if not docs:
-        return "_(none - add `inject: true` to a doc's frontmatter to index it)_"
-    return "\n".join(f"- {d.rel} - {d.label}" for d in docs)
+def _matches(doc: Doc, consumer: frozenset[str]) -> bool:
+    """A doc reaches a consumer when it targets `all` or any of the consumer's keys
+    (its agent id and lane)."""
+    return ALL in doc.targets or bool(doc.targets & consumer)
 
 
-def inject_docs(body: str, docs: list[Doc]) -> str:
-    if DOCS_MARKER not in body:
-        return body
-    return body.replace(DOCS_MARKER, doc_catalog(docs))
+def doc_catalog(docs: list[Doc], consumer: frozenset[str]) -> str:
+    selected = [d for d in docs if _matches(d, consumer)]
+    if not selected:
+        return "_(none - tag a doc `inject: all` or `inject: <agent>` to index it here)_"
+    return "\n".join(f"- {d.rel} - {d.label}" for d in selected)
+
+
+def inject_docs(body: str, docs: list[Doc], consumer: frozenset[str]) -> str:
+    return replace_marker(body, DOCS_MARKER, doc_catalog(docs, consumer))
 
 
 @dataclass

@@ -41,7 +41,7 @@ model-routing, semantic-memory layers and ships no domain content.
 | `config.py` | load `.flexkit/flexkit.config.json` (hosts, skillsDir, agentsDir, commandsDir, docsDir) |
 | `skills.py` / `agents.py` | discover + parse source skills / agents |
 | `commands.py` | discover + parse source commands (Claude slash-command surface) |
-| `docs.py` | discover `inject: true` project docs + inject their index at `<!-- DOCS -->`; scaffold the docs/ skeleton |
+| `docs.py` | discover `inject:`-tagged project docs + inject their index at `<!-- DOCS -->`, routed per consumer (`all` / agent id / lane); scaffold the docs/ skeleton |
 | `frontmatter.py` | parse + shared transforms (em-dash normalize, strip markup, wrap) |
 | `emit.py` | `OutFile` - the unit of host output |
 | `build.py` | `emit_for_host(host, skills, agents, commands, docs)` - shared by gen + the sync check |
