@@ -1,6 +1,6 @@
 ---
 name: flex-docs
-description: Create, update, or refine the project's docs/ - agent-facing specs derived from the codebase, in the inject:true + description format. Use to set up or maintain the docs that planner/implementer/reviewer follow.
+description: Create, update, or refine the project's docs/ - agent-facing specs derived from the codebase, in the inject: + description format. Use to set up or maintain the docs the agents follow.
 argument-hint: [audit|create|update|refine]
 ---
 
@@ -11,8 +11,8 @@ Create, update, or refine `docs/` for: **$ARGUMENTS** (default: `audit`).
 `docs/` carries the **project-specific knowledge an agent needs to code correctly** -
 the decisions and invariants the code assumes but states nowhere in one place. It is
 *not* a tutorial, *not* general best practice, *not* a restatement of what the code
-already shows. The goal is the smallest set of specs that keep planner/implementer/
-reviewer consistent with how this project actually works.
+already shows. The goal is the smallest set of specs that keep the agents consistent with
+how this project actually works.
 
 ## What earns a doc (criteria)
 
@@ -49,21 +49,22 @@ walkthrough or code sample -> a **guide**.
 ## Who to inject (judge per doc, from the content)
 
 `inject:` follows **who actually acts on the doc's content** - decided per doc by reading
-it, never a fixed rule from its folder. Ask: whose work changes if they read this?
+it, never a fixed rule from its folder. Target by id or lane from this project's roster
+(`[docs]` = the agent has a `<!-- DOCS -->` marker, so a doc can reach it - targeting one
+without it warns in `doctor`):
+
+<!-- AGENTS -->
+
+Ask: whose work changes if they read this? Then pick from the roster above:
 
 - a fact every agent must honor (an invariant, a decision) -> `all`
-- a rule only writers and reviewers apply -> `implementer, reviewer`
+- a rule only the writers and the reviewer apply -> the build-lane agents + `reviewer`
 - an inspection lens only the reviewer runs -> `reviewer`
 - a deep how-to too long to inject -> no `inject:` (a skill pulls it on demand)
 
 Folder tendencies are *typical*, not rules: a `conventions/` doc that genuinely matters
-everywhere is `all`; a `domain/` fact only the implementer touches is `implementer`. Read
-the content, then decide who needs it.
-
-Target by id or lane from this project's actual roster (`[docs]` = the agent has a
-`<!-- DOCS -->` marker, so a doc can reach it; targeting one without it warns in `doctor`):
-
-<!-- AGENTS -->
+everywhere is `all`; a `domain/` fact only one writer touches is just that agent. Read the
+content, then pick the target from the roster.
 
 ## Good vs bad
 
