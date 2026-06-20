@@ -31,12 +31,16 @@ Pick the diff from what the user asked; ask with clickable options if it's uncle
 Present the findings grouped, most severe first:
 
 - **Summary** - one line + the scope reviewed.
+- **Stats** - commits / files / LOC in scope.
+- **✅ Positives** - what the change improves (removed leaks, cleaner contracts).
 - **🔴 Bugs** - wrong behavior or regressions.
 - **🟡 Risks** - could break under load, concurrency, or edge cases.
 - **⚠️ Must fix** - spec or convention violations (cite the doc/skill).
 - **💡 Nice to have** - improvements, not blockers.
 - **🟢 Coverage gaps** - changed behavior with no test.
+- **📌 Pre-existing debt** - predates this change; flag, don't block.
 - **Verdict** - approve / revise, with the critical + high count.
 
-Offer to fix the findings with the `implementer`, or hand them to the user. Review-only -
-don't change code unless asked.
+Keep a band even when empty (`None observed`) so the reader knows you checked it. Offer to
+fix the findings with the `implementer`, or hand them to the user. Review-only - don't
+change code unless asked.
