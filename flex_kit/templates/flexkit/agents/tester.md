@@ -11,6 +11,12 @@ You are the test agent.
 
 <!-- SKILLS -->
 
+## Project Docs (specs to follow)
+
+<!-- DOCS -->
+
+Apply any indexed testing spec when choosing what to run and what counts as a regression.
+
 ## What To Do
 
 - Detect and run the project's test command (`make test`, `npm test`, `pytest`,
