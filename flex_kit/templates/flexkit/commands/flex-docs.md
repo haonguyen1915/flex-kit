@@ -25,8 +25,40 @@ Include a fact only if it is **all** of these - otherwise leave it out or delete
 - **Stable** - an invariant or convention, not a detail that rots every change.
 - **Not duplicated** - not already in a skill or `CLAUDE.md`.
 
-Fewer, sharper docs beat many. Human-only docs (guides, onboarding) get **no** `inject:`
-signal, so they never enter the agent index.
+Fewer, sharper docs beat many. Human-only docs (onboarding, contributor runbooks) get
+**no** `inject:` signal, so they never enter the agent index.
+
+## Doc kinds (the concept = the question it answers)
+
+The folder classifies the *concept*, not the audience. The same topic can appear as a
+rule, a lens, and a how-to - different kinds, not duplication.
+
+| Kind | Answers |
+|---|---|
+| `architecture.md` | the codebase map - layers, modules, boundaries |
+| `adr/` | **WHY** - a decision + its rationale |
+| `domain/` | **INVARIANT** - a fact the code must always hold |
+| `conventions/` | **RULE** - the enforceable bar for *writing* code (naming, error/API shape) |
+| `review/` | **LENS** - what to *inspect* + known pitfalls (not new rules) |
+| `guides/` | **HOW** - deep, procedural, code-sampled reference |
+
+Classifying test: a one-sentence "must / must not" -> a **rule** (`conventions/`); a "when
+reviewing, watch for…" or a past mistake -> a **lens** (`review/`); anything needing a
+walkthrough or code sample -> a **guide**.
+
+## Who to inject (judge per doc, from the content)
+
+`inject:` follows **who actually acts on the doc's content** - decided per doc by reading
+it, never a fixed rule from its folder. Ask: whose work changes if they read this?
+
+- a fact every agent must honor (an invariant, a decision) -> `all`
+- a rule only writers and reviewers apply -> `implementer, reviewer`
+- an inspection lens only the reviewer runs -> `reviewer`
+- a deep how-to too long to inject -> no `inject:` (a skill pulls it on demand)
+
+Folder tendencies are *typical*, not rules: a `conventions/` doc that genuinely matters
+everywhere is `all`; a `domain/` fact only the implementer touches is `implementer`. Read
+the content, then decide who needs it.
 
 ## Good vs bad
 
@@ -51,12 +83,11 @@ BAD - drop these:
 3. **Filter.** Apply the criteria above; drop everything that fails any of them.
 4. **Plan + confirm.** Present the plan - files to add / update / remove, one line of
    reason each. **Wait for approval before writing.**
-5. **Write.** Use frontmatter `inject: <target>` + a `description` - the index label
-   injected into the agents, so keep it concise: a short line, just enough to route, no
-   padding. `inject: true` / `all` reaches every agent; narrow it with agent ids or lanes
-   (`inject: reviewer`, `inject: reviewer, implementer`, `inject: review`) so a spec only
-   loads where it's relevant. Place docs under `architecture.md` / `conventions/` /
-   `domain/` / `adr/`; scaffold missing structure with `flex-kit init-docs`.
+5. **Write.** Pick the folder from **Doc kinds** (the concept) and the `inject:` target
+   from **Who to inject** (the content). Add a concise `description` - the index label
+   injected into the agents, a short line just enough to route, no padding. Narrow targets
+   are agent ids / lanes (`reviewer`, `reviewer, implementer`, `review`). Scaffold missing
+   structure with `flex-kit init-docs`.
 6. **Verify.** Re-check each claim against the code, then `flex-kit gen` + `flex-kit doctor`.
 
 ## Rules
