@@ -60,6 +60,15 @@ def test_init_refuses_existing_without_force(tmp_path: Path) -> None:
     init(tmp_path, force=True)  # force overwrites cleanly
 
 
+def test_init_force_preserves_generated_record(tmp_path: Path) -> None:
+    init(tmp_path)  # writes .flexkit/.generated.json
+    record = tmp_path / ".flexkit/.generated.json"
+    before = record.read_text()
+    assert before.strip()
+    init(tmp_path, force=True, run_gen=False)  # wipes .flexkit but carries the record across
+    assert record.read_text() == before  # so the next gen can still prune orphaned output
+
+
 def test_init_no_gen(tmp_path: Path) -> None:
     result = init(tmp_path, run_gen=False)
     assert result.gen is None
