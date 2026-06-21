@@ -28,8 +28,28 @@ Frontmatter:
 
 | Field | Rule |
 |---|---|
-| `name` | kebab-case, **== the directory `<id>`** |
+| `name` | kebab-case, **== the directory `<id>`**, and **group-prefixed** (`<group>-<topic>`) - see below |
 | `description` | one line - what it does + **when to use** (`"… Use when <situation>"`); it drives triggering, so keep it trigger-focused, not a feature list |
+
+**Naming & grouping.** Skills `gen`-flatten into one host namespace (`.claude/skills/<id>/`),
+so an id must be globally unique. Convention: a **pack is a discipline group**, and a **skill
+id is `<group>-<topic>`** - e.g. `engineering-design-patterns`, `backend-api-design`. The
+prefix prevents collisions and makes the flat list self-grouping. Groups:
+
+| prefix | scope |
+|---|---|
+| `engineering-` | universal craft (language-agnostic): patterns, architecture, errors, concurrency, testing |
+| `backend-` | server-side: api, data, caching, auth (+ `backend-<lang>` for implementation) |
+| `frontend-` | client-side: components, state, a11y, performance (+ `frontend-<framework>`) |
+| `ai-` | AI/LLM: prompting, RAG, evals, agents, context engineering |
+| `data-` | persistence: schema, migrations, indexing, query tuning |
+| `security-` | hardening, authz, token/key handling, threat modeling |
+| `infra-` | build / ship / run: CI/CD, deploy, observability, IaC |
+| `product-` | discovery, spec, requirements |
+
+The kit's own **base process skills** (`navigator`, `verify-fix-loop`, …) are exempt - they
+are operating-system skills, not a discipline, so they keep bare names. Add new prefixes as
+new disciplines appear; one prefix per pack.
 
 Body - principles, not a rigid template:
 
@@ -46,9 +66,9 @@ Body - principles, not a rigid template:
 ## Flow
 
 1. **Audit.** Read the target skill(s) against the contract. List drift: `name` != dir, a
-   description with no "use when" or that reads as a feature list, a bloated body, a
-   >100-line section that should be a `references/` file, a high-stakes skill with no Red
-   Flags. Report it - do not fix in audit.
+   missing or wrong **group prefix**, a description with no "use when" or that reads as a
+   feature list, a bloated body, a >100-line section that should be a `references/` file, a
+   high-stakes skill with no Red Flags. Report it - do not fix in audit.
 2. **Plan + confirm.** For create / update, present the frontmatter + body outline, one
    line of reason each. **Wait for approval before writing.**
 3. **Write.** Create or edit `.flexkit/skills/<id>/SKILL.md` to the contract. For update,
