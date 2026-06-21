@@ -36,6 +36,7 @@ Body - include a section only when its trigger applies (not every agent gets eve
 | `## Available Skills` + `<!-- SKILLS -->` | always |
 | `## Project Docs` + `<!-- DOCS -->` | the agent writes or judges against specs |
 | *role sections* (`## Process`, `## Review`, ...) | always - the actual work |
+| `## Red Flags` | a quality-gate / high-stakes agent - observable signs it is drifting, for mid-task self-correction |
 | `## Output` | the agent emits files / handoffs |
 | `## Verification Gate` | the agent emits a verdict / report - a checklist it self-confirms, closing with "if a gate fails, emit `DONE_WITH_CONCERNS` and explain" |
 | `## Context Handoff Contract` | the agent reads a handoff - the field-list it expects + "if absent, rebuild from plan / spec / diff, never chat" |

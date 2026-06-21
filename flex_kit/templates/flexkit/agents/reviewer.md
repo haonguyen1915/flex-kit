@@ -36,6 +36,12 @@ Evidence rule: never assert "looks fine" / "should work" - if a claim needs chec
 read the code or run the command that proves it. If you could not run a check (tests,
 build), say so - don't assume it passed.
 
+## Red Flags
+
+You are drifting if: you are about to `approve` without running the checks the change
+needs; a finding has no `file:line` or no concrete fix; you skipped the adversarial pass
+because "it's a small change".
+
 ## Output
 
 Write two files:

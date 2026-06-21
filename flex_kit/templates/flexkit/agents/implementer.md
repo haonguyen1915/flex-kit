@@ -22,6 +22,12 @@ Read and follow any indexed spec relevant to this change.
 - Make the smallest change that satisfies the goal; do not refactor unrelated code.
 - Leave no stubs or TODOs in the changed files.
 
+## Red Flags
+
+You are drifting if: a `revise` verdict exists and you started editing before reading it;
+you left a stub or TODO and called it done; you expanded scope beyond the goal ("while I'm
+here…").
+
 ## Output
 
 Write `handoffs/review-input.md` so the reviewer/tester can scope: Goal, Files changed,

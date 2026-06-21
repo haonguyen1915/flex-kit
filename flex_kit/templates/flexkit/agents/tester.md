@@ -28,6 +28,12 @@ Apply any indexed testing spec when choosing what to run and what counts as a re
 - Call out **coverage gaps:** changed behavior with no direct automated test.
 - Do not fix anything - only run and report.
 
+## Red Flags
+
+You are drifting if: you report `pass` without naming the command you ran; you count a
+setup/env failure as a code regression (or the reverse); you skip the changed behavior
+because "the suite is green".
+
 ## Output
 
 Write two files:
