@@ -22,6 +22,7 @@ from flex_kit.docs import scaffold_docs
 from flex_kit.doctor import doctor as run_doctor
 from flex_kit.gen import gen as run_gen
 from flex_kit.init import init as run_init
+from flex_kit.init import update as run_update
 
 app = typer.Typer(
     name="flex-kit",
@@ -35,6 +36,11 @@ app = typer.Typer(
 def init(
     project: Path = typer.Option(Path.cwd, "--project", "-p", help="Project root."),
     force: bool = typer.Option(False, "--force", help="Overwrite an existing .flexkit/."),
+    update: bool = typer.Option(
+        False,
+        "--update",
+        help="Refresh base agents/skills/commands to the installed version (keeps your own).",
+    ),
     also_gen: bool = typer.Option(
         False, "--gen", help="Also build host surfaces (.claude/, .agents/) after scaffolding."
     ),
@@ -43,8 +49,29 @@ def init(
 
     init does one job: set up the source. It generates nothing by default; run
     `flex-kit gen` (or pass --gen) to build the host surfaces when you're ready.
+
+    --update refreshes only the flex-kit base items (its own agents/skills/commands) to
+    the installed version, overwriting them - everything you added stays untouched.
     """
     root = project.resolve()
+    if update:
+        if force:
+            ui.error("--update and --force cannot be combined.")
+            raise typer.Exit(1)
+        try:
+            up = run_update(root, run_gen=also_gen)
+        except FileNotFoundError as e:
+            ui.error(str(e))
+            raise typer.Exit(1) from None
+        ui.success(f"updated {len(up.updated)} base item(s) to this version")
+        for rel in up.updated:
+            ui.detail("~", rel)
+        if up.gen is not None:
+            g = up.gen
+            ui.detail("gen:", f"{g.skills} skills + {g.agents} agents + {g.commands} commands")
+        elif up.updated:
+            ui.hint("Run `flex-kit gen` to rebuild host surfaces.")
+        return
     flexkit = root / ".flexkit"
     # --force wipes .flexkit/ wholesale; confirm first so a stray --force can't silently
     # destroy uncommitted source. Non-interactive (scripted) runs proceed with a warning.

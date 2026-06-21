@@ -117,6 +117,7 @@ plan|facilitation|router"` → should reach 0.
 ```bash
 # build / content
 flex-kit init [--force] [--gen]  # scaffold .flexkit/ (source only; --gen also builds hosts)
+flex-kit init --update [--gen]   # refresh base agents/skills/commands to the installed version
 flex-kit init-docs [--force]  # scaffold a docs/ skeleton (non-destructive)
 flex-kit add [<pack>] [--gen] # copy pack(s) into .flexkit/ (no arg: interactive picker)
 flex-kit remove <pack> [--gen]  # remove a pack from .flexkit/ (--gen also rebuilds hosts)

@@ -17,10 +17,45 @@ from flex_kit.record import read_record, write_record
 TEMPLATE_DIR = Path(__file__).parent / "templates" / "flexkit"
 
 
+_BASE_KINDS = ("skills", "agents", "commands")
+
+
 @dataclass
 class InitResult:
     flexkit_dir: Path
     gen: GenResult | None
+
+
+@dataclass
+class UpdateResult:
+    updated: list[str]
+    gen: GenResult | None
+
+
+def update(project_root: Path, run_gen: bool = False) -> UpdateResult:
+    """Refresh the flex-kit BASE items (the template's agents/skills/commands) in an
+    existing .flexkit/ to the installed version's prompts, overwriting them. Anything not
+    shipped in the base template - added packs, your own skills/agents - is left entirely
+    untouched. Items the new version dropped are not removed (only add/overwrite), and
+    flexkit.config.json is never touched.
+    """
+    dest = project_root / ".flexkit"
+    if not dest.exists():
+        raise FileNotFoundError(f"No .flexkit/ in {project_root} - run `flex-kit init` first")
+    updated: list[str] = []
+    for kind in _BASE_KINDS:
+        src_kind = TEMPLATE_DIR / kind
+        if not src_kind.is_dir():
+            continue
+        for item in sorted(src_kind.iterdir()):
+            target = dest / kind / item.name
+            if target.exists():
+                shutil.rmtree(target) if target.is_dir() else target.unlink()
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copytree(item, target) if item.is_dir() else shutil.copyfile(item, target)
+            updated.append(f"{kind}/{item.name}")
+    result = gen(project_root) if run_gen else None
+    return UpdateResult(updated=updated, gen=result)
 
 
 def init(project_root: Path, force: bool = False, run_gen: bool = True) -> InitResult:

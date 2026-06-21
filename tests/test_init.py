@@ -8,7 +8,7 @@ import pytest
 from typer.testing import CliRunner
 
 from flex_kit.doctor import doctor
-from flex_kit.init import init
+from flex_kit.init import init, update
 from flex_kit.main import app
 
 _runner = CliRunner()
@@ -96,3 +96,42 @@ def test_cli_init_force_warns_before_wiping_nonempty(tmp_path: Path) -> None:
     assert res.exit_code == 0, res.output
     assert "deletes" in res.output  # warned about the wipe
     assert not (tmp_path / ".flexkit/skills/mine").exists()  # re-scaffolded fresh
+
+
+def test_update_refreshes_base_and_keeps_added_items(tmp_path: Path) -> None:
+    init(tmp_path)
+    # a user-added skill (not part of the base template)
+    custom = tmp_path / ".flexkit/skills/my-custom/SKILL.md"
+    custom.parent.mkdir(parents=True)
+    custom.write_text("mine\n")
+    # a base agent that has drifted from the shipped version
+    planner = tmp_path / ".flexkit/agents/planner.md"
+    planner.write_text("OLD\n")
+
+    result = update(tmp_path)
+
+    assert "agents/planner.md" in result.updated
+    assert planner.read_text() != "OLD\n"  # base item overwritten with this version
+    assert "name: planner" in planner.read_text()
+    assert custom.read_text() == "mine\n"  # added item untouched
+    assert not any(rel.startswith("skills/my-custom") for rel in result.updated)
+
+
+def test_update_requires_flexkit(tmp_path: Path) -> None:
+    with pytest.raises(FileNotFoundError):
+        update(tmp_path)
+
+
+def test_cli_init_update_refreshes_base_source_only(tmp_path: Path) -> None:
+    init(tmp_path)
+    planner = tmp_path / ".flexkit/agents/planner.md"
+    planner.write_text("OLD\n")
+    res = _runner.invoke(app, ["init", "--update", "--project", str(tmp_path)])
+    assert res.exit_code == 0, res.output
+    assert planner.read_text() != "OLD\n"
+
+
+def test_cli_init_update_rejects_force(tmp_path: Path) -> None:
+    init(tmp_path)
+    res = _runner.invoke(app, ["init", "--update", "--force", "--project", str(tmp_path)])
+    assert res.exit_code != 0
