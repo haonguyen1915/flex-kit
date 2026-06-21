@@ -27,7 +27,7 @@ def test_command_generates_for_claude_only(tmp_path: Path) -> None:
     text = cmd.read_text()
     assert "argument-hint: [task]" in text
     assert "name:" not in text.split("---")[1]  # name dropped (filename is the command)
-    assert "- sample-skill:" in text  # <!-- SKILLS --> injected
+    assert "`sample-skill`" in text  # <!-- SKILLS --> injected (compact name list)
     assert "<!-- SKILLS -->" not in text
 
     # Codex has no command surface.

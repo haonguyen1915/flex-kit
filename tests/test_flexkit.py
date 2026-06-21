@@ -47,13 +47,13 @@ def test_gen_writes_agents_for_both_hosts(tmp_path: Path) -> None:
 
     # Claude agent: markdown .md, model alias passed through, skills catalog injected.
     assert "model: opus" in claude_agent
-    assert "- sample-skill:" in claude_agent  # <!-- SKILLS --> replaced
+    assert "`sample-skill`" in claude_agent  # <!-- SKILLS --> replaced (compact name list)
     assert "<!-- SKILLS -->" not in claude_agent
 
     # Codex agent: TOML, model mapped, description stripped, skills catalog injected.
     assert 'model = "gpt-5.5"' in codex_agent
     assert "developer_instructions = '''" in codex_agent
-    assert "- sample-skill:" in codex_agent
+    assert "`sample-skill`" in codex_agent
     assert (
         'description = "An agent that reviews things - with code and angle brackets."'
         in codex_agent

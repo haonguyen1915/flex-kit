@@ -48,8 +48,17 @@ def _lead(desc: str) -> str:
 
 
 def skill_catalog(skills) -> str:
-    """A one-line-per-skill catalog (id + lead clause) injected at SKILLS_MARKER."""
-    return "\n".join(f"- {s.id}: {_lead(s.frontmatter.get('description', ''))}" for s in skills)
+    """A compact inline list of domain-skill names (`a`, `b`) injected at SKILLS_MARKER.
+
+    Two deliberate trims: (1) `process-*` orchestration skills are excluded - they are the
+    main agent's / a command's protocols, wired explicitly where used, not skills a
+    subagent applies to code; (2) no descriptions - the host already surfaces each skill's
+    name + description, so the catalog only needs to point at which skills exist.
+    """
+    domain = [s for s in skills if not s.id.startswith("process-")]
+    if not domain:
+        return "_(none yet - add domain packs with `flex-kit add`)_"
+    return ", ".join(f"`{s.id}`" for s in domain)
 
 
 def inject_skills(body: str, skills) -> str:
