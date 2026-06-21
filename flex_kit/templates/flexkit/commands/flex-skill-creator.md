@@ -36,8 +36,9 @@ Body - principles, not a rigid template:
 - **One skill = one job.**
 - **Token-conscious** - every section must change the agent's behavior; if removing it
   wouldn't, cut it. Process over reference dumps, specific over general.
-- **Progressive disclosure** - keep `SKILL.md` tight (aim < ~150 lines); move a section past
-  ~100 lines into `references/<topic>.md`, linked from the body, loaded on demand.
+- **Progressive disclosure** - `SKILL.md` is loaded whenever the skill triggers, so keep it
+  tight (aim under ~250 lines); `references/` is the on-demand overflow - move any section
+  past ~100 lines into `references/<topic>.md`, linked from the body.
 - **High-stakes skills** (a quality gate, a destructive op) earn a short `## Red Flags`
   (observable signs it is being violated) and/or `## Rationalizations` (the costly excuses
   + their rebuttals).
