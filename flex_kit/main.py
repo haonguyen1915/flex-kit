@@ -35,11 +35,25 @@ app = typer.Typer(
 def init(
     project: Path = typer.Option(Path.cwd, "--project", "-p", help="Project root."),
     force: bool = typer.Option(False, "--force", help="Overwrite an existing .flexkit/."),
-    no_gen: bool = typer.Option(False, "--no-gen", help="Scaffold only, skip gen."),
+    also_gen: bool = typer.Option(
+        False, "--gen", help="Also build host surfaces (.claude/, .agents/) after scaffolding."
+    ),
 ) -> None:
-    """Scaffold .flexkit/ from the starter template, then gen the host surfaces."""
+    """Scaffold .flexkit/ from the starter template - source only, no gen.
+
+    init does one job: set up the source. It generates nothing by default; run
+    `flex-kit gen` (or pass --gen) to build the host surfaces when you're ready.
+    """
     root = project.resolve()
-    result = run_init(root, force=force, run_gen=not no_gen)
+    flexkit = root / ".flexkit"
+    # --force wipes .flexkit/ wholesale; confirm first so a stray --force can't silently
+    # destroy uncommitted source. Non-interactive (scripted) runs proceed with a warning.
+    if force and flexkit.exists() and any(flexkit.iterdir()):
+        ui.warn(f"--force deletes {flexkit} and everything under it, then re-scaffolds.")
+        if sys.stdin.isatty() and sys.stdout.isatty() and not typer.confirm("Continue?"):
+            ui.hint("Aborted - nothing changed.")
+            raise typer.Exit(1)
+    result = run_init(root, force=force, run_gen=also_gen)
     ui.success(f"created {result.flexkit_dir}")
     if result.gen is not None:
         g = result.gen
@@ -48,7 +62,9 @@ def init(
             f"{g.skills} skills + {g.agents} agents + {g.commands} commands "
             f"-> [{', '.join(g.hosts)}]",
         )
-    ui.hint("Edit .flexkit/skills/ then run `flex-kit gen`.")
+        ui.hint("Edit .flexkit/skills/ then run `flex-kit gen`.")
+    else:
+        ui.hint("Edit .flexkit/, then run `flex-kit gen` to build host surfaces.")
 
 
 def _select_packs(root: Path) -> list[str] | None:

@@ -5,9 +5,13 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from typer.testing import CliRunner
 
 from flex_kit.doctor import doctor
 from flex_kit.init import init
+from flex_kit.main import app
+
+_runner = CliRunner()
 
 
 def test_init_scaffolds_and_gens(tmp_path: Path) -> None:
@@ -61,3 +65,25 @@ def test_init_no_gen(tmp_path: Path) -> None:
     assert result.gen is None
     assert (tmp_path / ".flexkit/skills/process-navigator/SKILL.md").exists()
     assert not (tmp_path / ".claude").exists()
+
+
+def test_cli_init_scaffolds_source_only_by_default(tmp_path: Path) -> None:
+    res = _runner.invoke(app, ["init", "--project", str(tmp_path)])
+    assert res.exit_code == 0, res.output
+    assert (tmp_path / ".flexkit/skills/process-navigator/SKILL.md").exists()
+    assert not (tmp_path / ".claude").exists()  # gen does not run by default
+
+
+def test_cli_init_gen_flag_builds_hosts(tmp_path: Path) -> None:
+    res = _runner.invoke(app, ["init", "--gen", "--project", str(tmp_path)])
+    assert res.exit_code == 0, res.output
+    assert (tmp_path / ".claude/skills/process-navigator/SKILL.md").exists()
+
+
+def test_cli_init_force_warns_before_wiping_nonempty(tmp_path: Path) -> None:
+    _runner.invoke(app, ["init", "--project", str(tmp_path)])
+    (tmp_path / ".flexkit/skills/mine").mkdir()  # local source the user added
+    res = _runner.invoke(app, ["init", "--force", "--project", str(tmp_path)])
+    assert res.exit_code == 0, res.output
+    assert "deletes" in res.output  # warned about the wipe
+    assert not (tmp_path / ".flexkit/skills/mine").exists()  # re-scaffolded fresh
