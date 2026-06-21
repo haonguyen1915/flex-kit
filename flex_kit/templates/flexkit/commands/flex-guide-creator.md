@@ -57,6 +57,12 @@ agent-specific context - it doesn't copy it), and anything a `docs/` spec alread
 
 ## Project rules / gotchas
 - the handful of non-obvious invariants an agent gets wrong unprompted
+
+## Continuous improvement  (mandatory - keep this section verbatim)
+- On hitting a serious anti-pattern or a clear convention violation while working, fix the
+  *source* of the rule, not just the local code - then **propose** (don't auto-apply):
+  - generic / reusable -> a `.flexkit/` skill, agent, or command (so every run benefits)
+  - project-specific -> a `docs/` spec (so the reviewer enforces it next time)
 ```
 
 Aim for ~60 lines, hard cap ~300. Fewer, sharper lines beat coverage.
@@ -75,6 +81,9 @@ Aim for ~60 lines, hard cap ~300. Fewer, sharper lines beat coverage.
 ## Rules
 
 - Curate every line - the guide loads into every session; noise degrades all of them.
+- The **Continuous improvement** section is mandatory - always include it; it is the one
+  non-optional block (every other line stays by-relevance). It routes a found violation to
+  the right source: generic -> `.flexkit/`, project-specific -> `docs/`.
 - Point, don't copy: `file:line` + links to docs / skills over inlined snippets that rot.
 - No code style, no exhaustive command dumps, nothing `docs/` already owns.
 - `CLAUDE.md` and `AGENTS.md` stay identical.
