@@ -75,9 +75,10 @@ A skill teaches the agent one job. Two ways to get one:
 
 **a) Pull a bundled pack:**
 ```bash
-flex-kit add                   # (no args) list the available packs
-flex-kit add api-design        # copy one pack into .flexkit/ + re-gen
-flex-kit add --all             # copy every bundled pack, then gen once
+flex-kit add                   # (no args) interactive multi-select picker
+flex-kit add api-design        # copy one pack into .flexkit/ (source only; --gen to build)
+flex-kit add --all --gen       # copy every bundled pack and build host surfaces
+flex-kit gen                   # ...or build the hosts in a separate step
 ```
 
 **b) Write your own:**

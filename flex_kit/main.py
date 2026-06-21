@@ -96,16 +96,19 @@ def add(
     pack: str = typer.Argument(None, help="Pack to add. Omit for an interactive picker."),
     project: Path = typer.Option(Path.cwd, "--project", "-p", help="Project root."),
     force: bool = typer.Option(False, "--force", help="Overwrite skills/agents of the same id."),
-    no_gen: bool = typer.Option(False, "--no-gen", help="Copy only, skip gen."),
-    all_packs: bool = typer.Option(False, "--all", help="Add every bundled pack, then gen once."),
+    also_gen: bool = typer.Option(
+        False, "--gen", help="Also build host surfaces after copying into .flexkit/."
+    ),
+    all_packs: bool = typer.Option(False, "--all", help="Add every bundled pack."),
 ) -> None:
-    """Add bundled packs' skills/agents into .flexkit/, then gen.
+    """Add bundled packs' skills/agents into .flexkit/ (source only, no gen).
 
     With no pack argument, opens an interactive multi-select (one or many packs);
-    falls back to a plain listing when stdout is not a terminal.
+    falls back to a plain listing when stdout is not a terminal. Pass --gen to build
+    the host surfaces in the same step, or run `flex-kit gen` afterwards.
     """
     if all_packs:
-        result = run_add_all(project.resolve(), force=force, run_gen=not no_gen)
+        result = run_add_all(project.resolve(), force=force, run_gen=also_gen)
         label = "--all"
     elif not pack:
         root = project.resolve()
@@ -119,10 +122,10 @@ def add(
         if not selected:
             ui.hint("No packs selected.")
             return
-        result = run_add_packs(root, selected, force=force, run_gen=not no_gen)
+        result = run_add_packs(root, selected, force=force, run_gen=also_gen)
         label = ", ".join(selected)
     else:
-        result = run_add(project.resolve(), pack, force=force, run_gen=not no_gen)
+        result = run_add(project.resolve(), pack, force=force, run_gen=also_gen)
         label = pack
     ui.success(f"add {label}: {len(result.added)} added, {len(result.skipped)} skipped")
     for rel in result.added:
@@ -131,16 +134,20 @@ def add(
         ui.detail("=", f"{rel} (exists - use --force)")
     if result.gen is not None:
         ui.detail("gen:", f"{result.gen.skills} skills + {result.gen.agents} agents")
+    elif result.added:
+        ui.hint("Run `flex-kit gen` to build host surfaces.")
 
 
 @app.command()
 def remove(
     pack: str = typer.Argument(..., help="Pack to remove from .flexkit/."),
     project: Path = typer.Option(Path.cwd, "--project", "-p"),
-    no_gen: bool = typer.Option(False, "--no-gen", help="Delete only, skip gen."),
+    also_gen: bool = typer.Option(
+        False, "--gen", help="Also rebuild host surfaces after removing from .flexkit/."
+    ),
 ) -> None:
-    """Remove a pack's skills/agents from .flexkit/ (the un-add), then gen."""
-    result = run_remove(project.resolve(), pack, run_gen=not no_gen)
+    """Remove a pack's skills/agents from .flexkit/ (the un-add), source only - no gen."""
+    result = run_remove(project.resolve(), pack, run_gen=also_gen)
     ui.success(
         f"remove {pack}: {len(result.removed)} removed, {len(result.missing)} not present"
     )
@@ -148,6 +155,8 @@ def remove(
         ui.detail("-", rel)
     if result.gen is not None:
         ui.detail("gen:", f"{result.gen.skills} skills + {result.gen.agents} agents")
+    elif result.removed:
+        ui.hint("Run `flex-kit gen` to clean the host surfaces.")
 
 
 @app.command("init-docs")

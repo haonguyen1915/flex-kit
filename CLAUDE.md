@@ -117,8 +117,8 @@ plan|facilitation|router"` → should reach 0.
 # build / content
 flex-kit init [--force] [--gen]  # scaffold .flexkit/ (source only; --gen also builds hosts)
 flex-kit init-docs [--force]  # scaffold a docs/ skeleton (non-destructive)
-flex-kit add <pack> [--force] # copy a pack into .flexkit/ + gen   (add: list packs)
-flex-kit remove <pack>        # remove a pack from .flexkit/ + gen
+flex-kit add [<pack>] [--gen] # copy pack(s) into .flexkit/ (no arg: interactive picker)
+flex-kit remove <pack> [--gen]  # remove a pack from .flexkit/ (--gen also rebuilds hosts)
 flex-kit gen [--dry-run]      # source → host surfaces
 flex-kit doctor               # validate source + that surfaces are in sync
 # plan lifecycle
