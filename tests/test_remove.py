@@ -13,15 +13,15 @@ from flex_kit.init import init
 
 def test_remove_undoes_add(tmp_path: Path) -> None:
     init(tmp_path)
-    add(tmp_path, "api-design")
-    assert (tmp_path / ".flexkit/skills/api-design-pattern").exists()
+    add(tmp_path, "backend")
+    assert (tmp_path / ".flexkit/skills/backend-restful-api").exists()
 
-    result = remove(tmp_path, "api-design")
-    assert "skills/api-design-pattern" in result.removed
-    assert not (tmp_path / ".flexkit/skills/api-design-pattern").exists()
+    result = remove(tmp_path, "backend")
+    assert "skills/backend-restful-api" in result.removed
+    assert not (tmp_path / ".flexkit/skills/backend-restful-api").exists()
     # Regenerated: the host surfaces are gone too.
-    assert not (tmp_path / ".claude/skills/api-design-pattern").exists()
-    assert not (tmp_path / ".agents/skills/api-design-pattern").exists()
+    assert not (tmp_path / ".claude/skills/backend-restful-api").exists()
+    assert not (tmp_path / ".agents/skills/backend-restful-api").exists()
 
     findings = [f for r in doctor(tmp_path) for f in r.findings]
     assert findings == [], findings
@@ -29,8 +29,8 @@ def test_remove_undoes_add(tmp_path: Path) -> None:
 
 def test_remove_reports_missing_when_not_added(tmp_path: Path) -> None:
     init(tmp_path)
-    result = remove(tmp_path, "api-design")
-    assert "skills/api-design-pattern" in result.missing
+    result = remove(tmp_path, "backend")
+    assert "skills/backend-restful-api" in result.missing
     assert result.removed == []
 
 

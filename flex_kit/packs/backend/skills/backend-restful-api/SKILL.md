@@ -1,5 +1,5 @@
 ---
-name: api-design-pattern
+name: backend-restful-api
 description: REST API design conventions that apply regardless of language or framework - resource naming, HTTP methods, status codes, RFC 7807 errors, pagination, versioning, async tasks, caching, and security. Use when designing new endpoints or reviewing an API contract.
 ---
 
