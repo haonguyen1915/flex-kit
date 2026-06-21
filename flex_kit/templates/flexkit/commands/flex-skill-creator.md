@@ -21,7 +21,8 @@ generated-in-sync) stay in `flex-kit doctor` - audit defers to it, never restate
 ```
 .flexkit/skills/<id>/
   SKILL.md       required: frontmatter (name, description) + a markdown body
-  references/    optional: long material, copied verbatim to every host
+  references/    optional: long-form docs / checklists, read on demand
+  scripts/       optional: executable code for a deterministic step (run it, don't reason it)
 ```
 
 Frontmatter:
@@ -29,7 +30,7 @@ Frontmatter:
 | Field | Rule |
 |---|---|
 | `name` | kebab-case, **== the directory `<id>`**, and **group-prefixed** (`<group>-<topic>`) - see below |
-| `description` | one line - what it does + **when to use** (`"… Use when <situation>"`); it drives triggering, so keep it trigger-focused, not a feature list |
+| `description` | third-person summary of *what it does* + **concrete trigger phrases the user would actually say** (`"… Use when the user asks to X, Y, or mentions Z"`) + **exclusions** (`"not for W"`). It is the discovery hook (always in the system prompt), so: trigger-focused not a feature list, ≤ 1024 chars, and **no process steps** - put those in the body, or the agent follows the summary instead of the skill |
 
 **Naming & grouping.** Skills `gen`-flatten into one host namespace (`.claude/skills/<id>/`),
 so an id must be globally unique. Convention: a **pack is a discipline group**, and a **skill
@@ -42,33 +43,54 @@ prefix prevents collisions and makes the flat list self-grouping. Groups:
 | `backend-` | server-side: api, data, caching, auth (+ `backend-<lang>` for implementation) |
 | `frontend-` | client-side: components, state, a11y, performance (+ `frontend-<framework>`) |
 | `ai-` | AI/LLM: prompting, RAG, evals, agents, context engineering |
-| `data-` | persistence: schema, migrations, indexing, query tuning |
+| `database-` | persistence design (engine-agnostic): schema, indexing, migrations, transactions, query tuning |
 | `security-` | hardening, authz, token/key handling, threat modeling |
 | `infra-` | build / ship / run: CI/CD, deploy, observability, IaC |
 | `product-` | discovery, spec, requirements |
 
 The kit's own **base process skills** (`navigator`, `verify-fix-loop`, …) are exempt - they
-are operating-system skills, not a discipline, so they keep bare names. Add new prefixes as
-new disciplines appear; one prefix per pack.
+are operating-system skills, not a discipline, so they keep bare names.
+
+**Two more axes - language & framework.** Discipline groups above are language-agnostic;
+tech-specific content gets its own prefix on a parallel axis, one prefix per pack:
+
+- **Language**: `rust-`, `go-`, `python-`, `typescript-`, `java-` - idioms, naming, syntax.
+- **Framework**: `svelte-`, `react-`, `vue-`, `django-` - that framework's APIs and patterns.
+- **Engine** (database): `postgresql-`, `mysql-`, `mongodb-`, `redis-`, `sqlite-` - that engine's features and idioms.
+
+They compose: a Rust + Tauri + Postgres service adds `engineering` + `backend` + `database`
++ `rust` + `tauri` + `postgresql`.
+
+**Split rule.** A rule true in *every* language / engine -> a **discipline** skill
+(`engineering-error-handling`, `database-schema-design`). *How a specific tech expresses it*
+(an idiom, a feature, syntax, naming) -> a **language / framework / engine** skill
+(`rust-error-handling`, `svelte-error-handling`, `postgresql-jsonb`). Cross-reference between
+layers; never duplicate.
 
 Body - principles, not a rigid template:
 
 - **One skill = one job.**
 - **Token-conscious** - every section must change the agent's behavior; if removing it
   wouldn't, cut it. Process over reference dumps, specific over general.
-- **Progressive disclosure** - `SKILL.md` is loaded whenever the skill triggers, so keep it
-  tight (aim under ~250 lines); `references/` is the on-demand overflow - move any section
-  past ~100 lines into `references/<topic>.md`, linked from the body.
-- **High-stakes skills** (a quality gate, a destructive op) earn a short `## Red Flags`
-  (observable signs it is being violated) and/or `## Rationalizations` (the costly excuses
-  + their rebuttals).
+- **Imperative + the why.** Write steps as instructions ("Run X", "Verify Y") and give the
+  reason, not a bare rule - the agent generalizes from *why* better than from rote MUST/NEVER.
+- **Progressive disclosure (3 tiers).** Content loads at three times: **metadata** (name +
+  description, *always* in the system prompt - keep it tiny), **instructions** (the `SKILL.md`
+  body, loaded when the skill triggers - keep it tight, aim under ~250 lines), **resources**
+  (`references/`, `scripts/`, loaded on demand - effectively unbounded). Move any section past
+  ~100 lines into `references/<topic>.md` and link it; put a deterministic step in `scripts/`.
+- **High-stakes skills** (a quality gate, a destructive op, a skip-prone multi-step process)
+  earn a short `## Red Flags` (observable signs it is being violated) and/or
+  `## Rationalizations` - a 2-column table `excuse -> why that's wrong`, with a rebuttal that
+  bites (`"I'll add tests later" -> "the bug ships; later never comes"`). Low-stakes advisory
+  skills omit both.
 
 ## Flow
 
 1. **Audit.** Read the target skill(s) against the contract. List drift: `name` != dir, a
-   missing or wrong **group prefix**, a description with no "use when" or that reads as a
-   feature list, a bloated body, a >100-line section that should be a `references/` file, a
-   high-stakes skill with no Red Flags. Report it - do not fix in audit.
+   missing or wrong **group prefix**, a vague description (no concrete trigger phrases, or it
+   carries process steps), a bloated body, a >100-line section that should be a `references/`
+   file, a high-stakes skill with no Red Flags. Report it - do not fix in audit.
 2. **Plan + confirm.** For create / update, present the frontmatter + body outline, one
    line of reason each. **Wait for approval before writing.**
 3. **Write.** Create or edit `.flexkit/skills/<id>/SKILL.md` to the contract. For update,
