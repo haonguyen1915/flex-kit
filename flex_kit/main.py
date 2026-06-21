@@ -14,7 +14,8 @@ from flex_kit import plan as plan_mod
 from flex_kit import ui
 from flex_kit.add import add as run_add
 from flex_kit.add import add_all as run_add_all
-from flex_kit.add import list_packs
+from flex_kit.add import add_packs as run_add_packs
+from flex_kit.add import installed_packs, list_packs
 from flex_kit.add import remove as run_remove
 from flex_kit.config import load_config
 from flex_kit.docs import scaffold_docs
@@ -50,24 +51,60 @@ def init(
     ui.hint("Edit .flexkit/skills/ then run `flex-kit gen`.")
 
 
+def _select_packs(root: Path) -> list[str] | None:
+    """Interactive multi-select of packs. Returns the chosen packs, [] if the user
+    picked none / cancelled, or None when there is no interactive terminal (the caller
+    then falls back to a plain listing)."""
+    if not (sys.stdin.isatty() and sys.stdout.isatty()):
+        return None
+    try:
+        import questionary
+    except ModuleNotFoundError:
+        return None
+    packs = list_packs()
+    if not packs:
+        return []
+    installed = installed_packs(root)
+    choices = [
+        questionary.Choice(title=f"{p}  (added)" if p in installed else p, value=p)
+        for p in packs
+    ]
+    picked = questionary.checkbox(
+        "Select packs to add (space toggles, enter confirms):", choices=choices
+    ).ask()
+    return picked or []
+
+
 @app.command()
 def add(
-    pack: str = typer.Argument(None, help="Pack to add. Omit to list available packs."),
+    pack: str = typer.Argument(None, help="Pack to add. Omit for an interactive picker."),
     project: Path = typer.Option(Path.cwd, "--project", "-p", help="Project root."),
     force: bool = typer.Option(False, "--force", help="Overwrite skills/agents of the same id."),
     no_gen: bool = typer.Option(False, "--no-gen", help="Copy only, skip gen."),
     all_packs: bool = typer.Option(False, "--all", help="Add every bundled pack, then gen once."),
 ) -> None:
-    """Add a bundled pack's skills/agents into .flexkit/, then gen."""
+    """Add bundled packs' skills/agents into .flexkit/, then gen.
+
+    With no pack argument, opens an interactive multi-select (one or many packs);
+    falls back to a plain listing when stdout is not a terminal.
+    """
     if all_packs:
         result = run_add_all(project.resolve(), force=force, run_gen=not no_gen)
         label = "--all"
     elif not pack:
-        ui.header("Available packs")
-        for p in list_packs():
-            ui.detail("·", p)
-        ui.hint("Add one with `flex-kit add <pack>`, or all with `flex-kit add --all`.")
-        return
+        root = project.resolve()
+        selected = _select_packs(root)
+        if selected is None:  # not a TTY -> just list what's available
+            ui.header("Available packs")
+            for p in list_packs():
+                ui.detail("·", p)
+            ui.hint("Add with `flex-kit add <pack>`, `--all`, or run `flex-kit add` to pick.")
+            return
+        if not selected:
+            ui.hint("No packs selected.")
+            return
+        result = run_add_packs(root, selected, force=force, run_gen=not no_gen)
+        label = ", ".join(selected)
     else:
         result = run_add(project.resolve(), pack, force=force, run_gen=not no_gen)
         label = pack

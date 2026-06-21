@@ -90,9 +90,10 @@ native subagents + prose, never a flex-kit engine:
 
 ## Conventions
 
-- **Minimal runtime deps**: Typer + `rich` only - and `rich` is already pulled by
-  Typer, so this adds no footprint. CLI output goes through `flex_kit/ui.py` (a thin
-  rich wrapper). Keep parsing/IO logic pure stdlib; don't add new third-party deps.
+- **Small, purposeful runtime deps**: Typer + `rich` (CLI/UI; `rich` rides along with
+  Typer) + `questionary` (interactive pickers, e.g. `flex-kit add` with no args). Keep
+  the set lean - prefer stdlib for parsing/IO - but a focused dep that clearly improves
+  UX is fine. CLI output goes through `flex_kit/ui.py` (a thin rich wrapper).
 - Lint/type: `ruff` + `mypy` (line length 100, target py310). Run `make check`.
 - Every feature ships with a test under `tests/` (pytest, fixtures under
   `tests/fixtures/`).

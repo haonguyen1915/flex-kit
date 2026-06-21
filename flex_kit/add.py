@@ -25,6 +25,30 @@ def list_packs() -> list[str]:
     return sorted(p.name for p in PACKS_DIR.iterdir() if p.is_dir())
 
 
+def _pack_rels(pack: str) -> list[str]:
+    """The .flexkit-relative paths a pack provides (skills/<id>, agents/<id>.md)."""
+    src = PACKS_DIR / pack
+    rels: list[str] = []
+    for kind in _KINDS:
+        src_kind = src / kind
+        if src_kind.is_dir():
+            rels += [f"{kind}/{item.name}" for item in src_kind.iterdir()]
+    return rels
+
+
+def installed_packs(project_root: Path) -> set[str]:
+    """Packs whose every item already exists in .flexkit/ (so a re-add is a no-op)."""
+    flexkit = project_root / ".flexkit"
+    if not flexkit.is_dir():
+        return set()
+    out: set[str] = set()
+    for pack in list_packs():
+        rels = _pack_rels(pack)
+        if rels and all((flexkit / rel).exists() for rel in rels):
+            out.add(pack)
+    return out
+
+
 @dataclass
 class AddResult:
     pack: str
@@ -73,17 +97,28 @@ def add(project_root: Path, pack: str, force: bool = False, run_gen: bool = True
     return result
 
 
-def add_all(project_root: Path, force: bool = False, run_gen: bool = True) -> AddResult:
-    """Add every bundled pack, then gen once (not once per pack)."""
+def add_packs(
+    project_root: Path,
+    packs: list[str],
+    force: bool = False,
+    run_gen: bool = True,
+    label: str | None = None,
+) -> AddResult:
+    """Add several packs in one shot, then gen once (not once per pack)."""
     _require_flexkit(project_root)
-    result = AddResult(pack="--all")
-    for pack in list_packs():
+    result = AddResult(pack=label or ", ".join(packs))
+    for pack in packs:
         added, skipped = _copy_pack(project_root, pack, force)
         result.added.extend(added)
         result.skipped.extend(skipped)
     if run_gen:
         result.gen = gen(project_root)
     return result
+
+
+def add_all(project_root: Path, force: bool = False, run_gen: bool = True) -> AddResult:
+    """Add every bundled pack, then gen once (not once per pack)."""
+    return add_packs(project_root, list_packs(), force, run_gen, label="--all")
 
 
 @dataclass
