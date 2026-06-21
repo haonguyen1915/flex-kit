@@ -62,6 +62,12 @@ Do not mark the loop complete until ALL of these hold:
 - no stubs or TODOs remain in the changed files;
 - the reviewer verdict has no unaddressed critical or high findings.
 
+## Red Flags
+
+You are drifting if: you mark the loop complete with an unaddressed critical/high finding
+or a failing test; you keep iterating past `maxIterations` instead of handing what remains
+to the user; you spawned a verifier without writing `handoffs/review-input.md` first.
+
 ## Rationalizations
 
 The loop is cheap; skipping it is where regressions ship. Reject these:
