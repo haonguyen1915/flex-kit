@@ -34,12 +34,13 @@ Frontmatter:
 
 **Naming & grouping.** Skills `gen`-flatten into one host namespace (`.claude/skills/<id>/`),
 so an id must be globally unique. Convention: a **pack is a discipline group**, and a **skill
-id is `<group>-<topic>`** - e.g. `engineering-design-patterns`, `backend-api-design`. The
+id is `<group>-<topic>`** - e.g. `architecture-design-patterns`, `backend-restful-api`. The
 prefix prevents collisions and makes the flat list self-grouping. Groups:
 
 | prefix | scope |
 |---|---|
-| `engineering-` | universal craft (language-agnostic): patterns, architecture, errors, concurrency, testing |
+| `architecture-` | code & system structure: design patterns, layering, domain modeling, boundaries |
+| `engineering-` | implementation craft (language-agnostic): errors, concurrency, testing, observability, performance |
 | `backend-` | server-side: api, data, caching, auth (+ `backend-<lang>` for implementation) |
 | `frontend-` | client-side: components, state, a11y, performance (+ `frontend-<framework>`) |
 | `ai-` | AI/LLM: prompting, RAG, evals, agents, context engineering |

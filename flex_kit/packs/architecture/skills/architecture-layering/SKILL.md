@@ -1,9 +1,9 @@
 ---
-name: engineering-clean-architecture
-description: Structure code by layers with dependencies pointing inward - domain at the core, infrastructure at the edge, behind ports and adapters. Use when organizing modules, placing a new file, or reviewing whether a dependency crosses a layer the wrong way.
+name: architecture-layering
+description: Structure code by layers with dependencies pointing inward - domain core, infrastructure at the edge, ports and adapters. Use when organizing modules, placing a new file, or reviewing whether a dependency crosses a layer the wrong way. Not for choosing a pattern (see architecture-design-patterns) or framework wiring.
 ---
 
-# Clean Architecture
+# Layering
 
 Arrange code so business rules don't depend on details. The one rule: **dependencies point
 inward**. The domain is the core and knows nothing of the database, the web, or the

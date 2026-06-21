@@ -1,6 +1,6 @@
 ---
-name: engineering-design-patterns
-description: Language-agnostic design patterns and anti-over-engineering heuristics - when to apply a pattern (and when not), SOLID pragmatically, coupling/cohesion, composition over inheritance, and the common GoF patterns with their real triggers. Use when choosing or reviewing a code/architecture structure, or resisting premature abstraction.
+name: architecture-design-patterns
+description: Design patterns and anti-over-engineering heuristics, language-agnostic - when to apply a pattern (and when not), SOLID pragmatically, coupling/cohesion, composition over inheritance, GoF patterns with real triggers. Use when choosing a pattern, reviewing a structure, or resisting premature abstraction. Not for naming or a language's idioms (see the language pack).
 ---
 
 # Design Patterns

@@ -1,6 +1,6 @@
 ---
-name: engineering-domain-modeling
-description: Model a domain so the code mirrors the business - entities vs value objects, aggregates and invariants, bounded contexts, and a ubiquitous language. Use when designing or reviewing domain types, or when business rules leak into controllers, DB rows, or the UI.
+name: architecture-domain-modeling
+description: Model a domain so code mirrors the business - entities vs value objects, aggregates and invariants, bounded contexts, ubiquitous language. Use when designing domain types, or when business rules leak into controllers, DB rows, or the UI. Not for DB schema design (see database-) or a language's type syntax.
 ---
 
 # Domain Modeling
