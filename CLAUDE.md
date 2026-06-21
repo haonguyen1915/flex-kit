@@ -47,7 +47,8 @@ model-routing, semantic-memory layers and ships no domain content.
 | `build.py` | `emit_for_host(host, skills, agents, commands, docs)` - shared by gen + the sync check |
 | `hosts/{claude,codex}.py` | host adapters: `emit_skill` / `emit_agent` / `emit_command` → `list[OutFile]` |
 | `gen.py` / `init.py` / `add.py` | the write commands (gen tracks output in `record.py`) |
-| `record.py` | the set of files gen produced (`.flexkit/.generated.json`); lets gen clean orphans without wiping unmanaged files |
+| `record.py` | the set of files gen produced (`.flexkit/.generated.json`); lets gen clean orphans without wiping unmanaged files. `init --force` carries it across the wipe so the next gen can still prune |
+| `catalog.py` | the ids flex-kit can generate (bundled packs + base template); gen's safety net to recognise its own orphaned output even when the record was lost |
 | `doctor.py` + `checks/` | validation; `registry.py` wires hosts + checks |
 | `codex_review.py` | cross-model review: shell to `codex exec` for an independent second opinion |
 | `plan.py` | plan lifecycle + `plans/active`→`archive` + `.flexkit/state.json` |

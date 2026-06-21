@@ -9,6 +9,7 @@ from pathlib import Path
 
 from flex_kit.agents import discover_agents
 from flex_kit.build import emit_for_host
+from flex_kit.catalog import owned_agent_ids, owned_command_ids, owned_skill_ids
 from flex_kit.commands import discover_commands
 from flex_kit.config import load_config
 from flex_kit.docs import discover_docs
@@ -36,6 +37,40 @@ def _prune_empty_dirs(out_root: Path, removed: set[str]) -> None:
             d = d.parent
 
 
+def _catalog_orphans(
+    out_root: Path,
+    host_mods: list,
+    src_skills: set[str],
+    src_agents: set[str],
+    src_commands: set[str],
+) -> set[str]:
+    """Host output for a flex-kit-owned id that is no longer in source - found by the
+    bundled catalog, so gen cleans it even when the `.generated.json` record was lost.
+    Foreign (hand-authored) ids are not in the catalog and so are left untouched."""
+    owned_sk, owned_ag, owned_cmd = owned_skill_ids(), owned_agent_ids(), owned_command_ids()
+    orphans: set[str] = set()
+    for host in host_mods:
+        # Skills: <SKILLS_DIR>/<id>/... (a directory per skill).
+        sdir = getattr(host, "SKILLS_DIR", None)
+        if sdir and (root := out_root / sdir).is_dir():
+            for entry in root.iterdir():
+                if entry.is_dir() and entry.name in owned_sk and entry.name not in src_skills:
+                    orphans |= {
+                        f.relative_to(out_root).as_posix() for f in entry.rglob("*") if f.is_file()
+                    }
+        # Agents / commands: <DIR>/<id>.<ext> (a file per item, id = stem).
+        for attr, owned, src in (
+            ("AGENTS_DIR", owned_ag, src_agents),
+            ("COMMANDS_DIR", owned_cmd, src_commands),
+        ):
+            d = getattr(host, attr, None)
+            if d and (root := out_root / d).is_dir():
+                for entry in root.iterdir():
+                    if entry.is_file() and entry.stem in owned and entry.stem not in src:
+                        orphans.add(entry.relative_to(out_root).as_posix())
+    return orphans
+
+
 def gen(project_root: Path, dry_run: bool = False, out_root: Path | None = None) -> GenResult:
     config = load_config(project_root)
     skills = discover_skills(project_root, config.skills_dir)
@@ -56,9 +91,19 @@ def gen(project_root: Path, dry_run: bool = False, out_root: Path | None = None)
 
     if not dry_run:
         new_paths = {f.path for f in files}
-        # Delete only what gen produced last run and no longer produces (orphans from a
-        # rename/removal). Files we never generated - hand-authored, other tools - stay.
-        orphans = read_record(out_root) - new_paths
+        # Orphans = output we no longer produce, from two sources: (1) the persisted
+        # record of last run, and (2) the bundled catalog (output whose id flex-kit owns
+        # but source dropped) - the catalog net self-heals even when the record was lost.
+        # Files we never generated - hand-authored, other tools - are in neither, so stay.
+        active_hosts = [HOSTS[h] for h in config.hosts if h in HOSTS]
+        catalog = _catalog_orphans(
+            out_root,
+            active_hosts,
+            {s.id for s in skills},
+            {a.id for a in agents},
+            {c.id for c in commands},
+        )
+        orphans = (read_record(out_root) | catalog) - new_paths
         for rel in orphans:
             dest = out_root / rel
             if dest.is_file():
