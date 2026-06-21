@@ -7,11 +7,7 @@ lane: review
 
 You are the test agent.
 
-## Available Skills
-
 <!-- SKILLS -->
-
-## Project Docs (specs to follow)
 
 <!-- DOCS -->
 

@@ -30,8 +30,10 @@ def test_inject_docs_only_when_marker_present() -> None:
     docs = discover_docs(Path("."), "does-not-exist")  # -> []
     consumer = frozenset({"reviewer"})
     assert inject_docs("no marker here", docs, consumer) == "no marker here"
-    # a standalone marker line is replaced...
-    assert "inject:" in inject_docs("before\n<!-- DOCS -->\nafter", docs, consumer)
+    # no docs -> the section is omitted entirely, leaving no tool-specific placeholder
+    out = inject_docs("before\n<!-- DOCS -->\nafter", docs, consumer)
+    assert "<!-- DOCS -->" not in out and "inject:" not in out
+    assert out == "before\n\nafter"
     # ...but an inline mention in prose is left untouched (markers are line-level)
     prose = "see the `<!-- DOCS -->` marker"
     assert inject_docs(prose, docs, consumer) == prose

@@ -48,7 +48,9 @@ def _lead(desc: str) -> str:
 
 
 def skill_catalog(skills) -> str:
-    """A compact inline list of domain-skill names (`a`, `b`) injected at SKILLS_MARKER.
+    """The whole `## Available Skills` section injected at SKILLS_MARKER - or `""` when
+    there are no domain skills, so the section is omitted entirely (the marker owns the
+    heading + note, so an empty project leaves no dangling, tool-specific placeholder).
 
     Two deliberate trims: (1) `process-*` orchestration skills are excluded - they are the
     main agent's / a command's protocols, wired explicitly where used, not skills a
@@ -57,8 +59,13 @@ def skill_catalog(skills) -> str:
     """
     domain = [s for s in skills if not s.id.startswith("process-")]
     if not domain:
-        return "_(none yet - add domain packs with `flex-kit add`)_"
-    return ", ".join(f"`{s.id}`" for s in domain)
+        return ""
+    names = ", ".join(f"`{s.id}`" for s in domain)
+    return (
+        "## Available Skills\n\n"
+        f"{names}\n\n"
+        "Use the ones whose description fits the task; don't load them all."
+    )
 
 
 def inject_skills(body: str, skills) -> str:

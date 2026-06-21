@@ -8,8 +8,6 @@ lane: review
 You are the simplification agent. Find needless complexity in the change and propose
 concrete fixes. This is a quality pass after delivery, never a blocker.
 
-## Available Skills
-
 <!-- SKILLS -->
 
 ## What To Find

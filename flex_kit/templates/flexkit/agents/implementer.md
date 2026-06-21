@@ -7,15 +7,9 @@ lane: build
 
 You are the implementation agent. Implement the requested scope.
 
-## Available Skills
-
 <!-- SKILLS -->
 
-## Project Docs (specs to follow)
-
 <!-- DOCS -->
-
-Read and follow any indexed spec relevant to this change.
 
 ## Rules
 

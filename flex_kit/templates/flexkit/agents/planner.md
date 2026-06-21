@@ -8,17 +8,9 @@ lane: build
 You are the planning agent. Fill the active plan's `plan.md` (the CLI scaffolded an
 empty one). Plan only - never implement.
 
-## Available Skills
-
 <!-- SKILLS -->
 
-Use the ones whose description fits the task; don't load them all.
-
-## Project Docs (specs to follow)
-
 <!-- DOCS -->
-
-Read any indexed spec relevant to the task; plan to follow it.
 
 ## Plan
 

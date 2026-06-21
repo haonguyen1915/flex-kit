@@ -7,15 +7,11 @@ lane: review
 
 You are the review agent.
 
-## Available Skills
-
 <!-- SKILLS -->
-
-## Project Docs (specs to follow)
 
 <!-- DOCS -->
 
-A change that contradicts an indexed spec above is a finding (`revise`) - cite the doc.
+A change that contradicts an indexed spec is a finding (`revise`) - cite the doc.
 
 ## Review
 

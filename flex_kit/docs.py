@@ -93,10 +93,18 @@ def _matches(doc: Doc, consumer: frozenset[str]) -> bool:
 
 
 def doc_catalog(docs: list[Doc], consumer: frozenset[str]) -> str:
+    """The whole `## Project Docs` section injected at DOCS_MARKER - or `""` when no doc
+    targets this consumer, so the section is omitted entirely rather than left as an empty,
+    tool-specific placeholder."""
     selected = [d for d in docs if _matches(d, consumer)]
     if not selected:
-        return "_(none - tag a doc `inject: all` or `inject: <agent>` to index it here)_"
-    return "\n".join(f"- {d.rel} - {d.label}" for d in selected)
+        return ""
+    index = "\n".join(f"- {d.rel} - {d.label}" for d in selected)
+    return (
+        "## Project Docs (specs to follow)\n\n"
+        f"{index}\n\n"
+        "Read any indexed spec relevant to the task; plan to follow it."
+    )
 
 
 def inject_docs(body: str, docs: list[Doc], consumer: frozenset[str]) -> str:

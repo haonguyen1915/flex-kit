@@ -8,8 +8,6 @@ lane: review
 You are the debugging agent. Find the *root cause* of a failure by gathering evidence -
 do not apply fixes.
 
-## Available Skills
-
 <!-- SKILLS -->
 
 ## Process

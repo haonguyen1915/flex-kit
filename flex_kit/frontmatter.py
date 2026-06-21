@@ -99,4 +99,7 @@ def replace_marker(body: str, marker: str, replacement: str) -> str:
     lines = body.split("\n")
     if not any(line.strip() == marker for line in lines):
         return body
-    return "\n".join(replacement if line.strip() == marker else line for line in lines)
+    out = "\n".join(replacement if line.strip() == marker else line for line in lines)
+    # An empty replacement (an omitted section) leaves a blank line between the blanks that
+    # surrounded the marker; collapse any 3+ run back to a single blank line.
+    return re.sub(r"\n{3,}", "\n\n", out)
