@@ -25,10 +25,10 @@ loop). Phần còn lại lấp runtime, review, và đường spec-first.
 
 Vài thứ không có doc riêng vì chỉ là biến thể/phụ trợ của các flow trên:
 **`/flex-fix`** (bug nhỏ: reproduce → diagnose → patch mode → verify), skill
-**`decision-interview`** (gỡ quyết định mơ hồ đầu `/flex-change`), và skill
-**`navigator`** (route task → đúng intent/command/skill/mode trước khi lên plan; chạy
+**`process-decision-interview`** (gỡ quyết định mơ hồ đầu `/flex-change`), và skill
+**`process-navigator`** (route task → đúng intent/command/skill/mode trước khi lên plan; chạy
 đầu `/flex-plan`,`/flex-change` khi hướng chưa rõ - càng nhiều domain càng giá trị), và
-**`planning-methodology`** (kỹ thuật lên plan load theo nhu cầu: scope-challenge,
+**`process-planning-methodology`** (kỹ thuật lên plan load theo nhu cầu: scope-challenge,
 solution-design, validation-interview, red-team-personas; `planner` trỏ tới).
 
 ## Một nguyên tắc xuyên suốt mọi flow

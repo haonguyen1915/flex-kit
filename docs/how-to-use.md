@@ -42,7 +42,7 @@ This creates `.flexkit/` (your source) and generates the host surfaces:
 ```
 .flexkit/                      # SOURCE - you edit this
   flexkit.config.json
-  skills/   skill-creator/  verify-fix-loop/  decision-interview/  navigator/  planning-methodology/
+  skills/   skill-creator/  process-verify-fix-loop/  process-decision-interview/  process-navigator/  process-planning-methodology/
   agents/   planner.md  reviewer.md  implementer.md  tester.md
   commands/ flex-plan.md  flex-implement.md  flex-fix.md  ...
 .claude/                       # GENERATED - never edit
@@ -229,7 +229,7 @@ The delivery loop (`/flex-implement`) verifies with **two agents in parallel** -
 `reviewer` (correctness/convention) and `tester` (runs the project's tests) - and a
 failing test counts as a finding to fix. It drives checkpoints with a small grammar:
 **[A] Approve / [R] Revise** at hard gates, **[C] Continue** for soft nudges. For
-large/ambiguous work, start with `/flex-change` - it runs a `decision-interview` to
+large/ambiguous work, start with `/flex-change` - it runs a `process-decision-interview` to
 settle the direction, then a spec (`spec/proposal.md` -> `design.md` -> `tasks.md`)
 before implementing. For a small bug, `/flex-fix` stays in patch mode.
 

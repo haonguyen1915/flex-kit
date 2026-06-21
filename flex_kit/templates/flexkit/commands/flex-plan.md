@@ -10,12 +10,12 @@ This is the front door for any plan-shaped request - ambiguous or cross-cutting 
 routes onward from here, so you never have to pick the lane yourself.
 
 1. **Route.** If the intent or path is unclear, or several domains could apply, apply
-   the `navigator` skill - it may send you to `/flex-fix`, `/flex-change`, or
+   the `process-navigator` skill - it may send you to `/flex-fix`, `/flex-change`, or
    `/flex-review` instead. Skip when the path is obvious.
 2. **Frame (large/ambiguous only).** For a large, ambiguous, or contract-changing plan,
-   apply the `decision-interview` skill before drafting.
+   apply the `process-decision-interview` skill before drafting.
 3. **Scaffold.** Run `flex-kit plan "<task>"` (add `--mode patch|build|design`; the
-   `planning-methodology` skill's scope-challenge maps complexity to a mode). This
+   `process-planning-methodology` skill's scope-challenge maps complexity to a mode). This
    writes an empty `plan.md` - don't hand-roll the folder.
 4. **Draft.** Spawn the `planner` agent to fill `plan.md` (Goal, Steps, Files, Done,
    Risks, Open Questions). Mirror any `## Open Questions` back as `Questions for You` -

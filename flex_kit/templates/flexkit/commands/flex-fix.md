@@ -16,7 +16,7 @@ Fix a bug fast and tight: **$ARGUMENTS**
    contract change), STOP - this is not a quick fix; switch to `/flex-change`.
 4. **Patch.** Spawn the `implementer` for the minimal change. Add or adjust a test
    that fails before the fix and passes after.
-5. **Verify.** Apply the `verify-fix-loop` skill (`reviewer` + `tester`). When clean,
+5. **Verify.** Apply the `process-verify-fix-loop` skill (`reviewer` + `tester`). When clean,
    summarize the root cause and fix, then offer `/flex-close`.
 
 Keep it minimal: a patch that needs a spec or touches contracts is no longer a fix.

@@ -5,7 +5,7 @@ argument-hint: [--full] [--codex]
 ---
 
 Deliver the active plan. The host runs this flow; flex-kit supplies the plan, the
-agents (`implementer`, `reviewer`, `tester`), and the `verify-fix-loop` protocol.
+agents (`implementer`, `reviewer`, `tester`), and the `process-verify-fix-loop` protocol.
 There is no engine here - you, the agent, follow the steps and spawn the subagents.
 
 ## Interaction grammar
@@ -38,7 +38,7 @@ When a hard checkpoint is required depends on the plan's mode:
      checkpoint first.
    - Append any non-obvious choice to `plans/active/<id>/decisions.md` as
      `## YYYY-MM-DD - <label>` so the rationale survives a reset.
-4. **Verify-fix loop.** Apply the `verify-fix-loop` skill: spawn `reviewer` AND
+4. **Verify-fix loop.** Apply the `process-verify-fix-loop` skill: spawn `reviewer` AND
    `tester` in parallel. A `revise` verdict OR a failing test means fix and re-verify
    (spawn `implementer` with the verdict + test report). Cap at 2 iterations
    (`--full`: 3); at the cap, present what remains with `[A] / [R]` and hand off.

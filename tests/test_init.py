@@ -15,12 +15,12 @@ def test_init_scaffolds_and_gens(tmp_path: Path) -> None:
 
     # Source scaffolded.
     assert (tmp_path / ".flexkit/flexkit.config.json").exists()
-    assert (tmp_path / ".flexkit/skills/navigator/SKILL.md").exists()
-    assert (tmp_path / ".flexkit/skills/verify-fix-loop/SKILL.md").exists()
-    assert (tmp_path / ".flexkit/skills/decision-interview/SKILL.md").exists()
-    assert (tmp_path / ".flexkit/skills/navigator/SKILL.md").exists()
-    assert (tmp_path / ".flexkit/skills/planning-methodology/SKILL.md").exists()
-    assert (tmp_path / ".flexkit/skills/planning-methodology/references/red-team-personas.md").exists()
+    assert (tmp_path / ".flexkit/skills/process-navigator/SKILL.md").exists()
+    assert (tmp_path / ".flexkit/skills/process-verify-fix-loop/SKILL.md").exists()
+    assert (tmp_path / ".flexkit/skills/process-decision-interview/SKILL.md").exists()
+    assert (tmp_path / ".flexkit/skills/process-navigator/SKILL.md").exists()
+    assert (tmp_path / ".flexkit/skills/process-planning-methodology/SKILL.md").exists()
+    assert (tmp_path / ".flexkit/skills/process-planning-methodology/references/red-team-personas.md").exists()
     assert (tmp_path / ".flexkit/agents/reviewer.md").exists()
     assert (tmp_path / ".flexkit/agents/implementer.md").exists()
     assert (tmp_path / ".flexkit/agents/tester.md").exists()
@@ -34,8 +34,8 @@ def test_init_scaffolds_and_gens(tmp_path: Path) -> None:
     assert (tmp_path / ".flexkit/commands/flex-docs.md").exists()
 
     # gen ran -> host surfaces exist (commands are flex- prefixed to avoid host built-ins).
-    assert (tmp_path / ".claude/skills/navigator/SKILL.md").exists()
-    assert (tmp_path / ".agents/skills/verify-fix-loop/SKILL.md").exists()
+    assert (tmp_path / ".claude/skills/process-navigator/SKILL.md").exists()
+    assert (tmp_path / ".agents/skills/process-verify-fix-loop/SKILL.md").exists()
     assert (tmp_path / ".claude/commands/flex-skill-creator.md").exists()
     assert (tmp_path / ".codex/agents/reviewer.toml").exists()
     assert (tmp_path / ".claude/commands/flex-implement.md").exists()
@@ -59,5 +59,5 @@ def test_init_refuses_existing_without_force(tmp_path: Path) -> None:
 def test_init_no_gen(tmp_path: Path) -> None:
     result = init(tmp_path, run_gen=False)
     assert result.gen is None
-    assert (tmp_path / ".flexkit/skills/navigator/SKILL.md").exists()
+    assert (tmp_path / ".flexkit/skills/process-navigator/SKILL.md").exists()
     assert not (tmp_path / ".claude").exists()

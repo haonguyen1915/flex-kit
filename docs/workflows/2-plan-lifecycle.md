@@ -69,7 +69,7 @@ và làm tuần tự; trong danh sách đó, **vài bước là "chạy lệnh C
 các bước rút gọn:
 
 ```
-1. Route (navigator) - mơ hồ → có thể sang /flex-fix, /flex-change, /flex-review.   [AGENT]
+1. Route (process-navigator) - mơ hồ → có thể sang /flex-fix, /flex-change, /flex-review.   [AGENT]
 2. flex-kit plan "<task>" [--mode] -> scaffold plan.md rỗng.                         [CLI]
 3. Spawn `planner` -> draft plan.md (Goal/Steps kèm acceptance/Files/Done/Risks/Q).  [PLANNER]
 4. flex-kit status; mirror Open Questions thành "Questions for You".                  [CLI]

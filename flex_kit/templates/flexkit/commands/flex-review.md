@@ -19,7 +19,7 @@ Pick the diff from what the user asked; ask with clickable options if it's uncle
 
 ## 2. Review
 
-1. Write the scope into `handoffs/review-input.md` using the `verify-fix-loop` skill's
+1. Write the scope into `handoffs/review-input.md` using the `process-verify-fix-loop` skill's
    template (goal, files changed, checks run, read-these-first).
 2. Spawn the `reviewer` agent -> `handoffs/review-verdict.md` (verdict + findings) and a
    durable `reports/review-<timestamp>.md`.

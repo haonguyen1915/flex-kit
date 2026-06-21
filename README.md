@@ -57,7 +57,7 @@ flex-kit ships two kinds of bundled content. The dividing question:
 | What | how to *work* (process / meta) | domain *knowledge* (subject matter) |
 | Scope | domain-neutral | domain- or language-specific |
 | Delivery | always, via `flex-kit init` | on request, via `flex-kit add <pack>` |
-| Examples | `skill-creator`, `verify-fix-loop` + `reviewer`/`implementer` | `api-design`, (later) `backend-rust`, `frontend-svelte` |
+| Examples | `skill-creator`, `process-verify-fix-loop` + `reviewer`/`implementer` | `api-design`, (later) `backend-rust`, `frontend-svelte` |
 
 - **Base** = the tool's opinion about *how to work* - neutral, useful in any
   codebase. Keep it minimal (it ships always and cannot be deselected).
@@ -94,7 +94,7 @@ of the host's native subagents:
   a per-prompt reminder tracks plan progress, and a pre-tool guard blocks
   secret/credential access. One Python binary, no scattered scripts.
 - **Autonomous delivery** - the bundled `/flex-implement` command walks the active plan
-  and runs the `verify-fix-loop` (reviewer/implementer subagents) until the change is
+  and runs the `process-verify-fix-loop` (reviewer/implementer subagents) until the change is
   clean. The host runs it; flex-kit supplies the plan, agents, and protocol. Slash
   commands are `flex-` prefixed (`/flex-plan`, `/flex-status`, `/flex-close`, ...) to
   avoid colliding with the host's built-ins.

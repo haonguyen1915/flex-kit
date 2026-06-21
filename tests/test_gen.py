@@ -24,12 +24,12 @@ def test_gen_preserves_unmanaged_files(tmp_path: Path) -> None:
 
 def test_gen_cleans_orphan_on_source_removal(tmp_path: Path) -> None:
     init(tmp_path)
-    orphan = tmp_path / ".claude/skills/navigator/SKILL.md"
+    orphan = tmp_path / ".claude/skills/process-navigator/SKILL.md"
     assert orphan.exists()
 
-    shutil.rmtree(tmp_path / ".flexkit/skills/navigator")  # remove the source
+    shutil.rmtree(tmp_path / ".flexkit/skills/process-navigator")  # remove the source
     gen(tmp_path)
 
     assert not orphan.exists()  # generated output cleaned
-    assert not (tmp_path / ".claude/skills/navigator").exists()  # empty dir pruned
+    assert not (tmp_path / ".claude/skills/process-navigator").exists()  # empty dir pruned
     assert [f for r in doctor(tmp_path) for f in r.findings] == []

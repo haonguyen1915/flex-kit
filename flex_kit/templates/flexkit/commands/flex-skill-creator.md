@@ -48,9 +48,13 @@ prefix prevents collisions and makes the flat list self-grouping. Groups:
 | `security-` | hardening, authz, token/key handling, threat modeling |
 | `infra-` | build / ship / run: CI/CD, deploy, observability, IaC |
 | `product-` | discovery, spec, requirements |
+| `process-` | the kit's **base operating-system skills**: routing, planning, verifying (`process-navigator`, `process-verify-fix-loop`, …) - the kit's own process layer, prefixed like any other group |
 
-The kit's own **base process skills** (`navigator`, `verify-fix-loop`, …) are exempt - they
-are operating-system skills, not a discipline, so they keep bare names.
+The kit's base operating-system skills carry the **`process-`** prefix - they are not a
+discipline but they are grouped like one, so the rule has no exceptions: **every skill is
+`<group>-<topic>`**. A skill specific to one project (not reusable) uses the **project's own
+slug** as its prefix (`<project>-<topic>`, e.g. `flextable-qa`) - it self-groups and avoids
+colliding with the kit's or another project's skills when sources are unified.
 
 **Two more axes - language & framework.** Discipline groups above are language-agnostic;
 tech-specific content gets its own prefix on a parallel axis, one prefix per pack:

@@ -1,5 +1,5 @@
 ---
-name: decision-interview
+name: process-decision-interview
 description: Resolve the core decision behind ambiguous or cross-cutting work before planning - surface options, challenge weak premises, and settle trade-offs one at a time. Use at the start of design-first work when the right direction is not yet clear.
 ---
 

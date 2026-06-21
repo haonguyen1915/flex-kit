@@ -1,6 +1,6 @@
 ---
 name: implementer
-description: Implement a scoped change, and apply fixes from a review verdict. Used by the verify-fix-loop skill to resolve findings between review iterations.
+description: Implement a scoped change, and apply fixes from a review verdict. Used by the process-verify-fix-loop skill to resolve findings between review iterations.
 model: opus
 lane: build
 ---

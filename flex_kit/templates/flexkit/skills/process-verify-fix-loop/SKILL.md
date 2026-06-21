@@ -1,5 +1,5 @@
 ---
-name: verify-fix-loop
+name: process-verify-fix-loop
 description: Run a post-implementation review-and-fix loop - review the change and run tests, and if there are critical/high findings or failing tests, fix and re-verify until clean or a max iteration count. Use after implementing a scoped change, before calling the work done.
 ---
 

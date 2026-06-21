@@ -1,6 +1,6 @@
 ---
 name: tester
-description: Run the project's tests for a change and report failures. Used by the verify-fix-loop alongside the reviewer to catch regressions before delivery.
+description: Run the project's tests for a change and report failures. Used by the process-verify-fix-loop alongside the reviewer to catch regressions before delivery.
 model: opus
 lane: review
 ---

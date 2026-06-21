@@ -1,5 +1,5 @@
 ---
-name: navigator
+name: process-navigator
 description: Route a task to the right path before planning - classify intent (deliver / fix / design / review / research), pick the command and any domain skills that apply, and recommend a mode. Use at the start of work when the intent or the right path is not obvious, especially across multiple domains.
 ---
 
@@ -25,7 +25,7 @@ Skip it for a clearly-scoped request that already names its own path.
 1. **Classify intent.** Put the task in one lane and route accordingly:
    - *deliver* a planned change -> `/flex-plan`, then `/flex-implement`
    - *fix* a specific bug -> `/flex-fix` (patch mode)
-   - *design* ambiguous or cross-cutting work -> `/flex-change` (runs decision-interview)
+   - *design* ambiguous or cross-cutting work -> `/flex-change` (runs process-decision-interview)
    - *review* existing work -> `/flex-review` (or `/flex-codex-review` for a 2nd model)
    - *research / explain* only -> answer directly, no plan
 2. **Pick the skills.** Scan the skills available to you (this project's skills,

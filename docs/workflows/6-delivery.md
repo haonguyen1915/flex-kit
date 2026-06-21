@@ -20,7 +20,7 @@ dưới đây. (Không có engine; agent thực thi protocol.)
 | Review thay đổi | subagent **`reviewer`** |
 | Chạy test | subagent **`tester`** |
 
-Skill `verify-fix-loop` là protocol agent chính áp ở bước 4.
+Skill `process-verify-fix-loop` là protocol agent chính áp ở bước 4.
 
 ## Grammar tương tác
 
@@ -43,7 +43,7 @@ Mọi điểm dừng dùng một trong ba prompt, để câu trả lời không 
  3. IMPLEMENT   mặc định: spawn `implementer` cho step kế.
                 --full : walk hết step chưa xong, tick - [x] trong plan.md.
                 ghi quyết định không hiển nhiên vào decisions.md (## YYYY-MM-DD - nhãn).
- 4. VERIFY      (verify-fix-loop) spawn `reviewer` VÀ `tester` song song:
+ 4. VERIFY      (process-verify-fix-loop) spawn `reviewer` VÀ `tester` song song:
                   reviewer -> handoffs/review-verdict.md (approve|revise + findings)
                   tester   -> handoffs/test-report.md   (pass|fail)
                   + bản sao bền có timestamp: reports/review-<ts>.md, test-<ts>.md
@@ -60,7 +60,7 @@ Mọi điểm dừng dùng một trong ba prompt, để câu trả lời không 
   skill. **Plan chính là routing.**
 - **Subagent dùng skill nào** do host quyết: body mỗi subagent liệt kê skill có sẵn
   (inject tại `<!-- SKILLS -->`), host load cái nào có `description` khớp task. Không
-  cần navigator/dispatch skill.
+  cần process-navigator/dispatch skill.
 
 ## State / memory
 

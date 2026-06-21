@@ -23,7 +23,7 @@ tree; có target thì review cái đó.
 
 ```
 /flex-review [target]
- 1. SCOPE   ghi handoffs/review-input.md theo template trong skill verify-fix-loop
+ 1. SCOPE   ghi handoffs/review-input.md theo template trong skill process-verify-fix-loop
             (goal, files changed, checks run, key decisions, read-these-first)
  2. REVIEW  spawn `reviewer` -> handoffs/review-verdict.md (verdict + findings)
                               + bản bền reports/review-<ts>.md

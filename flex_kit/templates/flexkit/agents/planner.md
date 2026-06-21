@@ -54,7 +54,7 @@ Example:
 Narrative steps are fine for a small patch; build/design plans use the full format.
 Recommend a mode (patch <=2 files / build / design) and flag if the task overflows it.
 
-For non-trivial work, load the `planning-methodology` skill and apply the reference it
+For non-trivial work, load the `process-planning-methodology` skill and apply the reference it
 dispatches to (scope-challenge, solution-design, validation-interview, red-team-personas).
 
 ## Output

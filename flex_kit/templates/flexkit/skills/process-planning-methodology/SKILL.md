@@ -1,5 +1,5 @@
 ---
-name: planning-methodology
+name: process-planning-methodology
 description: Planning techniques to load on demand - scope challenge, solution design, validation interview, and red-team review. Use while drafting or reviewing a plan to scope tightly, compare approaches, surface risks, and pressure-test the plan before implementation.
 ---
 

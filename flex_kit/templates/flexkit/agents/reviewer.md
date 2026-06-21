@@ -1,6 +1,6 @@
 ---
 name: reviewer
-description: Review a code change for correctness, risk, and convention, then write an approve or revise verdict. Used by the verify-fix-loop skill.
+description: Review a code change for correctness, risk, and convention, then write an approve or revise verdict. Used by the process-verify-fix-loop skill.
 model: opus
 lane: review
 ---
