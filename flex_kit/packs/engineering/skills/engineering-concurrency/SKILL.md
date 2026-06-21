@@ -1,6 +1,6 @@
 ---
 name: engineering-concurrency
-description: Design concurrent and async code that stays correct - sharing state safely, lock discipline, async pitfalls, races, deadlock, and cancellation. Use when adding threads or async, sharing mutable state, or reviewing code for race conditions and deadlocks.
+description: Design correct concurrent and async code, language-agnostic - sharing state safely, lock discipline, races, deadlock, cancellation. Use when designing or reviewing concurrency: shared mutable state, a lock held across an await, race conditions, deadlocks. For a language's primitives (Rust async/Send-Sync, Go channels), use the language pack.
 ---
 
 # Concurrency Design
@@ -33,8 +33,8 @@ local, not spread across call sites.
 
 - A function is only as async as its slowest blocking call - don't block the event loop /
   runtime with sync I/O inside async code.
-- Read reactive or shared inputs **synchronously**; capturing them inside `setTimeout` /
-  `then` / a detached task reads stale or racing values.
+- Read shared inputs **synchronously**; capturing them inside a deferred callback (a timer, a
+  continuation, a detached task) reads a stale or racing value by the time it runs.
 - `await` in a loop serializes; fan out with a join / gather when the work is independent -
   but bound the concurrency so you don't exhaust connections.
 
@@ -62,9 +62,9 @@ local, not spread across call sites.
 
 ## Red Flags
 
-- a lock / guard held across `.await` or a network call
+- a lock / guard held across an `await` or a network call
 - the same shared value locked on some paths, accessed freely on others
-- `setTimeout` / `then` capturing a reactive value that may change underneath
+- a deferred callback (timer / continuation) capturing a shared value that may change underneath
 - two parallel arrays / vectors expected to stay the same length
 - a new field in a shared struct that isn't safe to send across threads
 - an error path that returns while a lock is still held

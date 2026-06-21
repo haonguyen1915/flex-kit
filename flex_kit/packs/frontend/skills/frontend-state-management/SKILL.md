@@ -1,6 +1,6 @@
 ---
 name: frontend-state-management
-description: Decide where UI state lives and how it flows - local vs shared vs server state, derived over duplicated, a single source of truth, and avoiding prop drilling. Use when adding state, choosing a store, or untangling state that's duplicated or out of sync.
+description: Decide where UI state lives and how it flows, framework-agnostic - local vs shared vs server, derived over duplicated, single source of truth, prop drilling. Use when placing state, choosing a store, or untangling duplicated or out-of-sync state. For a framework's reactivity (Svelte runes, React hooks), use the framework pack.
 ---
 
 # Frontend State Management

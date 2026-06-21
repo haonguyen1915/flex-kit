@@ -1,6 +1,6 @@
 ---
 name: frontend-accessibility
-description: Build interfaces usable by everyone - semantic HTML first, ARIA only when needed, full keyboard operation, managed focus, and sufficient contrast. Use when adding interactive UI or custom widgets, or reviewing a change for accessibility.
+description: Build interfaces usable by everyone - semantic HTML first, ARIA only when needed, full keyboard operation, managed focus, sufficient contrast. Use when adding interactive UI, custom widgets, modals, or reviewing a change for accessibility. Not for visual styling (see frontend-styling).
 ---
 
 # Frontend Accessibility

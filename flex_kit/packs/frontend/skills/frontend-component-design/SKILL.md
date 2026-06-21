@@ -1,6 +1,6 @@
 ---
 name: frontend-component-design
-description: Design UI components that compose and stay maintainable - clear prop contracts, single responsibility, controlled vs uncontrolled, container/presentational split, and reuse over reinvention. Use when adding or reviewing a component's shape, props, or boundaries.
+description: Design UI components that compose, framework-agnostic - prop contracts, single responsibility, controlled vs uncontrolled, container/presentational split, reuse over reinvention. Use when shaping or reviewing a component's responsibilities, props, or boundaries. For a framework's component API (Svelte $props, React props), use the framework pack.
 ---
 
 # Frontend Component Design

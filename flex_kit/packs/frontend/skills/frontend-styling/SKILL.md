@@ -1,6 +1,6 @@
 ---
 name: frontend-styling
-description: Style UI maintainably - design tokens over magic values, a theme that covers light and dark, composition over high-specificity overrides, and responsive by default. Use when adding styles, defining a theme, or reviewing CSS for hardcoded values or specificity wars.
+description: Style UI maintainably - design tokens over magic values, a theme covering light and dark, composition over high-specificity overrides, responsive by default. Use when adding styles, defining a theme or tokens, or reviewing CSS for hardcoded values or specificity wars. Not for component structure (see frontend-component-design).
 ---
 
 # Frontend Styling

@@ -1,6 +1,6 @@
 ---
 name: frontend-performance
-description: Keep the UI fast - minimize render work, memoize deliberately, virtualize large lists, lazy-load and split bundles, and avoid layout thrash. Use when a view is janky or slow, or when reviewing a change that touches rendering, lists, or bundle size.
+description: Keep the UI fast, framework-agnostic - minimize render work, memoize deliberately, virtualize lists, lazy-load and split bundles, avoid layout thrash. Use when a view is janky or slow, or reviewing a change that touches rendering, lists, or bundle size. For a framework's render model (Svelte $derived, React memo), use the framework pack.
 ---
 
 # Frontend Performance

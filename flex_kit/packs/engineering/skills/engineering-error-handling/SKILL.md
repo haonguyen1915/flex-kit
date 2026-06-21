@@ -1,18 +1,22 @@
 ---
 name: engineering-error-handling
-description: Design how a system represents, propagates, and recovers from failure - typed results vs exceptions, an error taxonomy, fail-fast vs recover, and never swallowing context. Use when adding error paths, defining an error type, or reviewing how a change handles failure.
+description: Design a system's error strategy, language-agnostic - typed results vs exceptions, an error taxonomy, fail-fast vs recover, boundaries, never swallowing context. Use when deciding how errors are represented and handled across a codebase, or reviewing that design. For a language's idiom (Rust ?/thiserror, Python exceptions), use the matching <lang>-error-handling skill.
 ---
 
 # Error Handling Design
 
-Decide how failure is represented and where it's handled *before* scattering try/catch. The
-failure mode is the silent swallow - an error caught, logged at debug, and turned into a
+Decide how failure is represented and where it's handled *before* scattering error handling.
+The failure mode is the silent swallow - an error caught, logged at debug, and turned into a
 default that corrupts state downstream.
+
+The *language idiom* for this - Rust's `?` + `thiserror`, a TypeScript result type, Python
+exceptions - lives in the matching `<lang>-error-handling` skill; here is the design that
+holds across all of them.
 
 ## Represent errors deliberately
 
-- Prefer **explicit results** (`Result<T, E>` / a typed return) for expected, recoverable
-  failures - they're part of the signature, so callers can't forget them.
+- Prefer an **explicit result** (a typed return value the caller must handle) for expected,
+  recoverable failures - it's part of the signature, so callers can't forget it.
 - Reserve **exceptions / panics** for truly exceptional, unrecoverable conditions (bugs,
   invariant violations). Don't use them for ordinary control flow.
 - Make the error a **type**, not a bare string - a code or enum the caller can branch on,
@@ -37,8 +41,9 @@ default that corrupts state downstream.
 
 - When propagating, **wrap with context** ("loading user 42: <cause>") and keep the cause
   chain - don't replace the original error with a generic one.
-- A `catch` that drops the error, a `?` / `.ok()` that discards the cause, an empty handler -
-  all hide the one fact you'll need at 3am. Log the cause where you handle it, not everywhere.
+- An error dropped on the floor - swallowed in a catch, converted to a bare optional, or an
+  empty handler - hides the one fact you'll need at 3am. Log the cause where you handle it,
+  not everywhere.
 
 ## Boundaries
 
@@ -57,8 +62,8 @@ default that corrupts state downstream.
 
 ## Red Flags
 
-- a `catch` / `except` that logs at debug and returns a default
-- a `?` or `.ok()` discarding the cause; an empty catch block
+- a handler that logs at debug and returns a default
+- the cause discarded - error converted to a bare optional, or an empty catch block
 - error handling used as control flow for an ordinary, expected case
 - a stringly-typed error the caller must pattern-match on text to handle
 - a raw driver or stack error rendered to the end user
