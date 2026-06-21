@@ -62,6 +62,17 @@ Do not mark the loop complete until ALL of these hold:
 - no stubs or TODOs remain in the changed files;
 - the reviewer verdict has no unaddressed critical or high findings.
 
+## Rationalizations
+
+The loop is cheap; skipping it is where regressions ship. Reject these:
+
+- "The change is too small to verify" -> a small diff is exactly where a silent regression
+  hides.
+- "The tests will pass, no need to run them" -> unrun is unknown; the gate needs the
+  command's output, not a prediction.
+- "I'll fix that finding later" -> 'later' ships the bug; a critical/high finding is the
+  loop's job to resolve now.
+
 ## Parameters
 
 | Parameter | Default | Meaning |
