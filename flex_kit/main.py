@@ -39,7 +39,7 @@ def init(
     update: bool = typer.Option(
         False,
         "--update",
-        help="Refresh base agents/skills/commands to the installed version (keeps your own).",
+        help="Refresh flex-kit's base + installed packs to the installed version (keeps your own).",
     ),
     also_gen: bool = typer.Option(
         False, "--gen", help="Also build host surfaces (.claude/, .agents/) after scaffolding."
@@ -50,8 +50,9 @@ def init(
     init does one job: set up the source. It generates nothing by default; run
     `flex-kit gen` (or pass --gen) to build the host surfaces when you're ready.
 
-    --update refreshes only the flex-kit base items (its own agents/skills/commands) to
-    the installed version, overwriting them - everything you added stays untouched.
+    --update refreshes flex-kit's own content (base agents/skills/commands + every
+    installed pack) to the installed version, overwriting it - only your truly custom
+    items (skills/agents flex-kit does not ship) stay untouched.
     """
     root = project.resolve()
     if update:
@@ -63,7 +64,7 @@ def init(
         except FileNotFoundError as e:
             ui.error(str(e))
             raise typer.Exit(1) from None
-        ui.success(f"updated {len(up.updated)} base item(s) to this version")
+        ui.success(f"updated {len(up.updated)} item(s) to this version")
         for rel in up.updated:
             ui.detail("~", rel)
         if up.gen is not None:

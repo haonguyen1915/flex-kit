@@ -117,6 +117,24 @@ def test_update_refreshes_base_and_keeps_added_items(tmp_path: Path) -> None:
     assert not any(rel.startswith("skills/my-custom") for rel in result.updated)
 
 
+def test_update_also_refreshes_installed_packs(tmp_path: Path) -> None:
+    from flex_kit.add import add
+
+    init(tmp_path)
+    add(tmp_path, "python")  # install a pack
+    drifted = tmp_path / ".flexkit/skills/python-naming/SKILL.md"
+    drifted.write_text("OLD\n")
+    custom = tmp_path / ".flexkit/skills/my-custom/SKILL.md"  # truly custom, not flex-kit's
+    custom.parent.mkdir(parents=True)
+    custom.write_text("mine\n")
+
+    result = update(tmp_path)
+
+    assert "skills/python-naming" in result.updated  # installed pack refreshed too
+    assert "name: python-naming" in drifted.read_text()
+    assert custom.read_text() == "mine\n"  # custom item untouched
+
+
 def test_update_requires_flexkit(tmp_path: Path) -> None:
     with pytest.raises(FileNotFoundError):
         update(tmp_path)

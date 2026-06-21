@@ -33,12 +33,14 @@ class UpdateResult:
 
 
 def update(project_root: Path, run_gen: bool = False) -> UpdateResult:
-    """Refresh the flex-kit BASE items (the template's agents/skills/commands) in an
-    existing .flexkit/ to the installed version's prompts, overwriting them. Anything not
-    shipped in the base template - added packs, your own skills/agents - is left entirely
-    untouched. Items the new version dropped are not removed (only add/overwrite), and
-    flexkit.config.json is never touched.
+    """Refresh flex-kit's own content in an existing .flexkit/ to the installed version's
+    prompts, overwriting it: the BASE template (agents/skills/commands) AND every pack
+    already installed (a pack is flex-kit content, just opt-in). Anything flex-kit does not
+    ship - your own skills/agents, hand edits - is left entirely untouched. Items the new
+    version dropped are not removed (only add/overwrite); flexkit.config.json is not touched.
     """
+    from flex_kit.add import _copy_pack, installed_packs  # local import avoids a cycle
+
     dest = project_root / ".flexkit"
     if not dest.exists():
         raise FileNotFoundError(f"No .flexkit/ in {project_root} - run `flex-kit init` first")
@@ -54,6 +56,9 @@ def update(project_root: Path, run_gen: bool = False) -> UpdateResult:
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copytree(item, target) if item.is_dir() else shutil.copyfile(item, target)
             updated.append(f"{kind}/{item.name}")
+    for pack in sorted(installed_packs(project_root)):
+        added, _ = _copy_pack(project_root, pack, force=True)
+        updated.extend(added)
     result = gen(project_root) if run_gen else None
     return UpdateResult(updated=updated, gen=result)
 

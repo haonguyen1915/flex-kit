@@ -69,10 +69,11 @@ re-scaffolds from the template (throwing away your skills/agents/commands) - use
 to start over. `--force` **asks for confirmation** before deleting a non-empty `.flexkit/`
 (scripted/non-interactive runs proceed with a warning).
 
-**Upgraded flex-kit and want the newer base prompts?** `flex-kit init --update` refreshes
-just the flex-kit base items (its own agents/skills/commands) to the installed version,
-overwriting them - everything you added (packs, your own skills/agents) is left untouched.
-Then `flex-kit gen` (or `--update --gen`) to rebuild the hosts.
+**Upgraded flex-kit and want the newer prompts?** `flex-kit init --update` refreshes
+flex-kit's own content - the base agents/skills/commands **and every installed pack** - to
+the installed version, overwriting it. Only your truly custom items (skills/agents flex-kit
+doesn't ship) are left untouched. Then `flex-kit gen` (or `--update --gen`) to rebuild the
+hosts.
 
 ## 3. Author a skill (the core loop)
 
