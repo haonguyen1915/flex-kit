@@ -130,3 +130,4 @@ make test      # pytest
 make check     # ruff + mypy + pytest
 make publish   # build + poetry publish (PyPI)
 ```
+# flex-kit
