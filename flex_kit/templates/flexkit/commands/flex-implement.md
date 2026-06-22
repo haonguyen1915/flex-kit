@@ -1,7 +1,7 @@
 ---
 name: flex-implement
 description: Deliver the active plan - the next step, or all steps with --full - then run the verify-fix loop (review + tests) until the change is clean. Use to implement planned work autonomously.
-argument-hint: [--full] [--codex]
+argument-hint: [--full] [--no-codex]
 ---
 
 Deliver the active plan. The host runs this flow; flex-kit supplies the plan, the
@@ -42,9 +42,10 @@ When a hard checkpoint is required depends on the plan's mode:
    `tester` in parallel. A `revise` verdict OR a failing test means fix and re-verify
    (spawn `implementer` with the verdict + test report). Cap at 2 iterations
    (`--full`: 3); at the cap, present what remains with `[A] / [R]` and hand off.
-   - `--codex`: turn on the skill's `codexReview` - also run `flex-kit codex-review
-     --type diff` for a cross-model second opinion and merge its critical/high findings
-     into the verdict (host `reviewer` stays authoritative; skip if `codex` is absent).
+   - The cross-model Codex pass runs **by default** (the skill's `codexReview` is on):
+     `flex-kit codex-review --type diff` for a second opinion, its critical/high findings
+     merged into the verdict (host `reviewer` stays authoritative; auto-skips when `codex`
+     is absent). Pass `--no-codex` to opt out even when `codex` is available.
 5. **Close out.** When every step is `- [x]`, the verdict is clean, and tests pass,
    summarize what shipped (offer to commit if the user wants) and present
    `[A] Approve -> /flex-close` or `[R] Revise`.

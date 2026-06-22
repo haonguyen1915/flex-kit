@@ -1,7 +1,7 @@
 ---
 name: flex-review
 description: Review a code change - the working tree, a branch/PR, a commit, or a commit range - with the reviewer agent, no plan needed. Use for a standalone code review.
-argument-hint: [target | <sha> | since <sha>] [--codex]
+argument-hint: [target | <sha> | since <sha>] [--no-codex]
 ---
 
 Standalone code review of **$ARGUMENTS** - no plan required.
@@ -23,8 +23,9 @@ Pick the diff from what the user asked; ask with clickable options if it's uncle
    template (goal, files changed, checks run, read-these-first).
 2. Spawn the `reviewer` agent -> `handoffs/review-verdict.md` (verdict + findings) and a
    durable `reports/review-<timestamp>.md`.
-3. `--codex`: also run `flex-kit codex-review --type diff` and merge its critical/high
-   findings (host `reviewer` stays authoritative; skip if `codex` is absent).
+3. **By default** also run `flex-kit codex-review --type diff` and merge its critical/high
+   findings (host `reviewer` stays authoritative; auto-skips when `codex` is absent). Pass
+   `--no-codex` to opt out.
 
 ## 3. Report
 
