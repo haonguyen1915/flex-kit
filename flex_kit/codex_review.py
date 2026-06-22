@@ -53,7 +53,16 @@ def _review_input(root: Path) -> str:
     return f.read_text(encoding="utf-8") if f.exists() else ""
 
 
-def build_prompt(root: Path, kind: str, target: str | None, base: str | None = None) -> str:
+def build_prompt(
+    root: Path,
+    kind: str,
+    target: str | None,
+    base: str | None = None,
+    instruction: str | None = None,
+) -> str:
+    # `instruction` overrides the generic lens (e.g. "review the light-mode UI for
+    # DataGrip fidelity") so topic-focused reviews stay on this flow + saved report.
+    lead = instruction or _INSTRUCTION
     if kind == "diff":
         ctx = _review_input(root)
         # Context grounds the review (what the change is for) without surrendering
@@ -63,16 +72,16 @@ def build_prompt(root: Path, kind: str, target: str | None, base: str | None = N
             if ctx.strip()
             else ""
         )
-        return f"{_INSTRUCTION}\n\n{ctx_block}```diff\n{_git_diff(root, base)}\n```"
+        return f"{lead}\n\n{ctx_block}```diff\n{_git_diff(root, base)}\n```"
     if kind == "file":
         if not target:
             raise ValueError("--type file needs a path target")
-        return f"{_INSTRUCTION}\n\nFile `{target}`:\n\n```\n{(root / target).read_text()}\n```"
+        return f"{lead}\n\nFile `{target}`:\n\n```\n{(root / target).read_text()}\n```"
     # plan (default)
     p = plan_mod.active_plan(root)
     if p is None:
         raise FileNotFoundError("No active plan - pass --type diff, or a file with --type file")
-    return f"{_INSTRUCTION}\n\nPlan:\n\n{(p.dir / 'plan.md').read_text()}"
+    return f"{lead}\n\nPlan:\n\n{(p.dir / 'plan.md').read_text()}"
 
 
 @dataclass
@@ -90,8 +99,9 @@ def codex_review(
     effort: str = DEFAULT_EFFORT,
     dry_run: bool = False,
     base: str | None = None,
+    instruction: str | None = None,
 ) -> CodexReviewResult:
-    prompt = build_prompt(root, kind, target, base)
+    prompt = build_prompt(root, kind, target, base, instruction)
     p = plan_mod.active_plan(root)
     report_dir = (p.dir / "reports") if p else (root / "reports")
     report = report_dir / "codex-review.md"

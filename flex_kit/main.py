@@ -242,6 +242,14 @@ def codex_review(
         help="With --type diff: review the committed range <base>...HEAD (e.g. develop). "
         "Default diff is staged + unstaged vs HEAD (works before commit).",
     ),
+    instruction: str = typer.Option(
+        None,
+        "--instruction",
+        "-i",
+        help="Override the review lens (e.g. 'review the light-mode UI for DataGrip "
+        "fidelity, focus light mode only'). Defaults to the generic "
+        "correctness/risk/convention prompt.",
+    ),
     model: str = typer.Option(codex_review_mod.DEFAULT_MODEL, "--model"),
     effort: str = typer.Option(codex_review_mod.DEFAULT_EFFORT, "--effort"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Print the command, don't run codex."),
@@ -253,6 +261,7 @@ def codex_review(
         kind=type_,
         target=target,
         base=base,
+        instruction=instruction,
         model=model,
         effort=effort,
         dry_run=dry_run,

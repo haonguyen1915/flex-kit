@@ -77,6 +77,20 @@ def test_diff_includes_tracked_and_untracked(tmp_path: Path) -> None:
     assert "new_file.py" in prompt and "y = 99" in prompt  # untracked new file included
 
 
+def test_custom_instruction_overrides_the_lens(tmp_path: Path) -> None:
+    (tmp_path / "x.py").write_text("print(1)\n")
+    lens = "review the light-mode UI for DataGrip fidelity, light mode only"
+    prompt = build_prompt(tmp_path, "file", "x.py", instruction=lens)
+    assert lens in prompt
+    assert "independent reviewer from a different model" not in prompt  # generic lead replaced
+
+
+def test_default_instruction_is_back_compatible(tmp_path: Path) -> None:
+    (tmp_path / "x.py").write_text("print(1)\n")
+    prompt = build_prompt(tmp_path, "file", "x.py")  # no instruction
+    assert "independent reviewer from a different model" in prompt  # generic lead kept
+
+
 def test_diff_prompt_includes_review_input_context(tmp_path: Path) -> None:
     (tmp_path / "handoffs").mkdir()
     (tmp_path / "handoffs/review-input.md").write_text("Goal: ship the widget\n")
