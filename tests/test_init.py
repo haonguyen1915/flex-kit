@@ -7,11 +7,19 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
+import flex_kit
 from flex_kit.doctor import doctor
 from flex_kit.init import init, update
 from flex_kit.main import app
 
 _runner = CliRunner()
+
+
+def test_cli_version_reports_version_and_path() -> None:
+    res = _runner.invoke(app, ["--version"])
+    assert res.exit_code == 0
+    assert flex_kit.__version__ in res.output
+    assert "loaded from" in res.output  # the diagnostic path
 
 
 def test_init_scaffolds_and_gens(tmp_path: Path) -> None:

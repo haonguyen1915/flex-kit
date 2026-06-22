@@ -32,6 +32,31 @@ app = typer.Typer(
 )
 
 
+def _version_callback(value: bool) -> None:
+    if value:
+        import flex_kit
+
+        # Print where it loaded from too: a stale site-packages copy can shadow an
+        # editable checkout, so the path is the real "which build am I running" signal.
+        typer.echo(f"flex-kit {flex_kit.__version__}")
+        typer.echo(f"  loaded from {Path(flex_kit.__file__).parent}")
+        raise typer.Exit()
+
+
+@app.callback()
+def _root(
+    version: bool = typer.Option(
+        False,
+        "--version",
+        "-V",
+        callback=_version_callback,
+        is_eager=True,
+        help="Show the version (and where flex-kit is loaded from), then exit.",
+    ),
+) -> None:
+    """Single-source skill kit for Claude Code + Codex."""
+
+
 @app.command()
 def init(
     project: Path = typer.Option(Path.cwd, "--project", "-p", help="Project root."),
