@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "flex-kit"
-version = "0.1.0"
+version = "0.1.1"
 description = "Single-source AI-host kit: author skills once, generate native surfaces for Claude Code and Codex, validate they stay in sync."
 license = "MIT"
 packages = [{include = "flex_kit"}]
