@@ -18,10 +18,11 @@ a convergence-driven loop before presenting results.
 
 ## Protocol
 
-Every `handoffs/` and `reports/` path below lives **under the active plan dir** -
-`plans/active/<id>/` (get `<id>` from `flex-kit status`) - so they archive with the plan on
-`/flex-close` instead of piling up at the repo root. With no active plan (a planless
-`/flex-review`), they fall back to the repo root.
+Two locations, by lifecycle. **`handoffs/`** is the current-iteration scratchpad
+(overwritten every pass) and lives at the **repo root** - a fixed, predictable path.
+**`reports/`** is the durable, timestamped audit and lives under the **active plan dir** -
+`plans/active/<id>/` (get `<id>` from `flex-kit status`) - so it archives with the plan on
+`/flex-close`; with no active plan (a planless `/flex-review`) it falls back to the repo root.
 
 1. **Hand off context.** Write `handoffs/review-input.md` using the template below.
 2. **Verify (in parallel).** Spawn the `reviewer` and `tester` agents together, each

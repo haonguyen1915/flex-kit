@@ -40,8 +40,8 @@ because "it's a small change".
 
 ## Output
 
-Write two files - under the **active plan dir** (`plans/active/<id>/`, from
-`flex-kit status`), or the repo root when there is no active plan:
+Write two files - `handoffs/` at the **repo root**, `reports/` under the **active plan dir**
+(`plans/active/<id>/` from `flex-kit status`, or the repo root if there is no active plan):
 
 - `handoffs/review-verdict.md` - the **current** verdict the loop reads: `approve` |
   `revise`, plus critical/high finding counts, each a one-line summary + a fix. Keep it

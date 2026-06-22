@@ -179,11 +179,12 @@ def _ctx_segment(payload: dict) -> str | None:
     return f"{_C['green']}ctx {used_h}/{size_h} {int(pct)}%{_C['reset']} {_bar(pct)}"
 
 
-def _agents_status(p: plan_mod.Plan | None) -> str:
-    """Last verifier results from the plan's handoffs (`review:approve test:pass`)."""
+def _agents_status(root: Path, p: plan_mod.Plan | None) -> str:
+    """Last verifier results from the transient handoffs (`review:approve test:pass`).
+    handoffs/ is the current-iteration scratchpad, kept at the repo root."""
     if p is None:
         return "none"
-    hdir = p.dir / "handoffs"
+    hdir = root / "handoffs"
     bits: list[str] = []
     verdict = hdir / "review-verdict.md"
     if verdict.exists():
@@ -247,7 +248,7 @@ def status_line(root: Path, payload: dict | None = None) -> str:
     lines.append(sep.join(bottom))
 
     # Line 3: last verifier results + next step.
-    third = [f"{_C['dim']}agents {_agents_status(p)}{_C['reset']}"]
+    third = [f"{_C['dim']}agents {_agents_status(root, p)}{_C['reset']}"]
     if p is not None and p.next_step:
         text = p.next_step.text
         text = text if len(text) <= 50 else text[:49] + "…"

@@ -24,10 +24,9 @@ here…").
 
 ## Output
 
-Write `handoffs/review-input.md` - under the **active plan dir** (`plans/active/<id>/`,
-from `flex-kit status`), or the repo root if there is no active plan - so the
-reviewer/tester can scope: Goal, Files changed, Checks run (command -> pass | fail), Key
-decisions, Read-these-first (file:line).
+Write `handoffs/review-input.md` (at the **repo root** - handoffs are the transient
+current-iteration scratchpad) so the reviewer/tester can scope: Goal, Files changed, Checks
+run (command -> pass | fail), Key decisions, Read-these-first (file:line).
 
 End your reply with a status line: `Status: DONE | DONE_WITH_CONCERNS | BLOCKED |
 NEEDS_CONTEXT` - the run state, distinct from the change itself.
