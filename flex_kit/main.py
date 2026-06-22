@@ -281,16 +281,20 @@ def codex_review(
     project: Path = typer.Option(Path.cwd, "--project", "-p"),
 ) -> None:
     """Send the active plan, the diff, or a file to Codex (codex exec) for review."""
-    res = codex_review_mod.codex_review(
-        project.resolve(),
-        kind=type_,
-        target=target,
-        base=base,
-        instruction=instruction,
-        model=model,
-        effort=effort,
-        dry_run=dry_run,
-    )
+    try:
+        res = codex_review_mod.codex_review(
+            project.resolve(),
+            kind=type_,
+            target=target,
+            base=base,
+            instruction=instruction,
+            model=model,
+            effort=effort,
+            dry_run=dry_run,
+        )
+    except (FileNotFoundError, RuntimeError, ValueError) as e:
+        ui.error(str(e))
+        raise typer.Exit(1) from None
     if dry_run:
         ui.info(f"[dry-run] {' '.join(res.command)}  ->  {res.report_path}")
     else:

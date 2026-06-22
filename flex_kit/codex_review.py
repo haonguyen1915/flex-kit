@@ -114,6 +114,11 @@ def codex_review(
         out = subprocess.run(cmd, input=prompt, text=True, capture_output=True, check=True)
     except FileNotFoundError as e:
         raise FileNotFoundError("`codex` CLI not found - install Codex and log in") from e
+    except subprocess.CalledProcessError as e:
+        # capture_output swallows codex's stderr into the exception; surface it so the real
+        # reason (not logged in, bad model, rate limit, ...) is visible, not a bare exit code.
+        detail = (e.stderr or e.stdout or "").strip() or f"exit code {e.returncode}"
+        raise RuntimeError(f"codex exec failed: {detail}") from e
     report_dir.mkdir(parents=True, exist_ok=True)
     report.write_text(out.stdout or "(codex produced no output)\n", encoding="utf-8")
     return CodexReviewResult(report_path=report, model=model, command=cmd)

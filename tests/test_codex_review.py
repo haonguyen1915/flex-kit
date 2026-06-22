@@ -60,6 +60,18 @@ def test_plan_kind_without_active_plan_errors(tmp_path: Path) -> None:
         codex_review(tmp_path, kind="plan")
 
 
+def test_codex_failure_surfaces_stderr(tmp_path: Path, monkeypatch) -> None:
+    _plan(tmp_path)
+
+    def fake_run(cmd, input=None, **kw):  # noqa: A002 - mirrors subprocess.run
+        raise subprocess.CalledProcessError(returncode=1, cmd=cmd, stderr="not logged in to codex")
+
+    monkeypatch.setattr("flex_kit.codex_review.subprocess.run", fake_run)
+    with pytest.raises(RuntimeError, match="not logged in to codex"):  # stderr, not a bare code
+        codex_review(tmp_path)
+    assert not (tmp_path / "reports" / "codex-review.md").exists()  # no bogus report on failure
+
+
 def test_diff_includes_tracked_and_untracked(tmp_path: Path) -> None:
     _git(tmp_path, "init", "-q")
     _git(tmp_path, "config", "user.email", "t@t.t")
