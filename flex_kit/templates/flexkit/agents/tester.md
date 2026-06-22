@@ -32,7 +32,8 @@ because "the suite is green".
 
 ## Output
 
-Write two files:
+Write two files - under the **active plan dir** (`plans/active/<id>/`, from
+`flex-kit status`), or the repo root when there is no active plan:
 
 - `handoffs/test-report.md` - the **current** report the loop reads: overall
   `pass` | `fail`, the exact command run, each failure (one line + file/test, marked

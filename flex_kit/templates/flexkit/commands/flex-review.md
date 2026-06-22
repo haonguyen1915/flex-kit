@@ -22,7 +22,8 @@ Pick the diff from what the user asked; ask with clickable options if it's uncle
 1. Write the scope into `handoffs/review-input.md` using the `process-verify-fix-loop` skill's
    template (goal, files changed, checks run, read-these-first).
 2. Spawn the `reviewer` agent -> `handoffs/review-verdict.md` (verdict + findings) and a
-   durable `reports/review-<timestamp>.md`.
+   durable `reports/review-<timestamp>.md`. These live at the **repo root** here -
+   `/flex-review` is planless (a verify-fix-loop run with a plan keeps them in the plan dir).
 3. **By default** also run `flex-kit codex-review --type diff` and merge its critical/high
    findings (host `reviewer` stays authoritative; auto-skips when `codex` is absent). Pass
    `--no-codex` to opt out.
