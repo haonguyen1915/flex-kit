@@ -45,9 +45,25 @@ def _git_diff(root: Path, base: str | None = None) -> str:
     return out
 
 
+def _review_input(root: Path) -> str:
+    """The verify-fix-loop handoff (goal, files, key decisions, read-first), if present -
+    so Codex reviews the diff WITH the same scope the host reviewer has, not blind.
+    handoffs/ is the transient current-iteration scratchpad, always at the repo root."""
+    f = root / "handoffs" / "review-input.md"
+    return f.read_text(encoding="utf-8") if f.exists() else ""
+
+
 def build_prompt(root: Path, kind: str, target: str | None, base: str | None = None) -> str:
     if kind == "diff":
-        return f"{_INSTRUCTION}\n\n```diff\n{_git_diff(root, base)}\n```"
+        ctx = _review_input(root)
+        # Context grounds the review (what the change is for) without surrendering
+        # independence - Codex still judges the code, including the stated decisions.
+        ctx_block = (
+            f"Change context (judge it critically, do not take it as given):\n\n{ctx}\n\n"
+            if ctx.strip()
+            else ""
+        )
+        return f"{_INSTRUCTION}\n\n{ctx_block}```diff\n{_git_diff(root, base)}\n```"
     if kind == "file":
         if not target:
             raise ValueError("--type file needs a path target")

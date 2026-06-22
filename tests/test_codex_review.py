@@ -75,3 +75,13 @@ def test_diff_includes_tracked_and_untracked(tmp_path: Path) -> None:
 
     assert "x = 2" in prompt  # tracked change (git diff HEAD = staged + unstaged)
     assert "new_file.py" in prompt and "y = 99" in prompt  # untracked new file included
+
+
+def test_diff_prompt_includes_review_input_context(tmp_path: Path) -> None:
+    (tmp_path / "handoffs").mkdir()
+    (tmp_path / "handoffs/review-input.md").write_text("Goal: ship the widget\n")
+
+    prompt = build_prompt(tmp_path, "diff", None)
+
+    assert "Goal: ship the widget" in prompt  # handoff scope fed to Codex
+    assert "judge it critically" in prompt  # but still told to stay independent
