@@ -236,6 +236,12 @@ def gen(
 def codex_review(
     target: str = typer.Argument(None, help="A file path (with --type file)."),
     type_: str = typer.Option("plan", "--type", help="plan | diff | file."),
+    base: str = typer.Option(
+        None,
+        "--base",
+        help="With --type diff: review the committed range <base>...HEAD (e.g. develop). "
+        "Default diff is staged + unstaged vs HEAD (works before commit).",
+    ),
     model: str = typer.Option(codex_review_mod.DEFAULT_MODEL, "--model"),
     effort: str = typer.Option(codex_review_mod.DEFAULT_EFFORT, "--effort"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Print the command, don't run codex."),
@@ -243,7 +249,13 @@ def codex_review(
 ) -> None:
     """Send the active plan, the diff, or a file to Codex (codex exec) for review."""
     res = codex_review_mod.codex_review(
-        project.resolve(), kind=type_, target=target, model=model, effort=effort, dry_run=dry_run
+        project.resolve(),
+        kind=type_,
+        target=target,
+        base=base,
+        model=model,
+        effort=effort,
+        dry_run=dry_run,
     )
     if dry_run:
         ui.info(f"[dry-run] {' '.join(res.command)}  ->  {res.report_path}")

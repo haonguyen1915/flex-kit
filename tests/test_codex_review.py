@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import subprocess
 from datetime import datetime
 from pathlib import Path
 
@@ -13,6 +14,10 @@ from flex_kit.codex_review import build_prompt, codex_review
 
 def _plan(tmp_path: Path) -> None:
     plan_mod.create_plan(tmp_path, "task", now=datetime(2026, 6, 18, 9, 0))
+
+
+def _git(root: Path, *args: str) -> None:
+    subprocess.run(["git", "-C", str(root), *args], check=True, capture_output=True, text=True)
 
 
 def test_build_prompt_file(tmp_path: Path) -> None:
@@ -53,3 +58,20 @@ def test_runs_codex_and_writes_report(tmp_path: Path, monkeypatch) -> None:
 def test_plan_kind_without_active_plan_errors(tmp_path: Path) -> None:
     with pytest.raises(FileNotFoundError):
         codex_review(tmp_path, kind="plan")
+
+
+def test_diff_includes_tracked_and_untracked(tmp_path: Path) -> None:
+    _git(tmp_path, "init", "-q")
+    _git(tmp_path, "config", "user.email", "t@t.t")
+    _git(tmp_path, "config", "user.name", "t")
+    (tmp_path / "tracked.py").write_text("x = 1\n")
+    _git(tmp_path, "add", ".")
+    _git(tmp_path, "commit", "-qm", "init")
+    # uncommitted: modify a tracked file + add a brand-new untracked file
+    (tmp_path / "tracked.py").write_text("x = 2\n")
+    (tmp_path / "new_file.py").write_text("y = 99\n")
+
+    prompt = build_prompt(tmp_path, "diff", None)
+
+    assert "x = 2" in prompt  # tracked change (git diff HEAD = staged + unstaged)
+    assert "new_file.py" in prompt and "y = 99" in prompt  # untracked new file included

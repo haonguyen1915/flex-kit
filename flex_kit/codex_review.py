@@ -25,14 +25,29 @@ _INSTRUCTION = (
 )
 
 
-def _git_diff(root: Path) -> str:
-    cmd = ["git", "-C", str(root), "diff"]
+def _git(root: Path, *args: str) -> str:
+    cmd = ["git", "-C", str(root), *args]
     return subprocess.run(cmd, capture_output=True, text=True, timeout=10).stdout
 
 
-def build_prompt(root: Path, kind: str, target: str | None) -> str:
+def _git_diff(root: Path, base: str | None = None) -> str:
+    # `base` set -> review a committed range (branch vs base), which still works AFTER
+    # /commit; uncommitted/untracked work does not belong in that range.
+    if base:
+        return _git(root, "diff", f"{base}...HEAD")
+    # Otherwise review uncommitted work. `git diff HEAD` covers staged + unstaged (plain
+    # `git diff` would silently miss staged). It omits untracked NEW files, so append each
+    # as an added-file diff - matching the review flow's "staged + unstaged + untracked".
+    out = _git(root, "diff", "HEAD")
+    untracked = _git(root, "ls-files", "--others", "--exclude-standard").splitlines()
+    for f in filter(None, untracked):
+        out += _git(root, "diff", "--no-index", "--", "/dev/null", f)
+    return out
+
+
+def build_prompt(root: Path, kind: str, target: str | None, base: str | None = None) -> str:
     if kind == "diff":
-        return f"{_INSTRUCTION}\n\n```diff\n{_git_diff(root)}\n```"
+        return f"{_INSTRUCTION}\n\n```diff\n{_git_diff(root, base)}\n```"
     if kind == "file":
         if not target:
             raise ValueError("--type file needs a path target")
@@ -58,8 +73,9 @@ def codex_review(
     model: str = DEFAULT_MODEL,
     effort: str = DEFAULT_EFFORT,
     dry_run: bool = False,
+    base: str | None = None,
 ) -> CodexReviewResult:
-    prompt = build_prompt(root, kind, target)
+    prompt = build_prompt(root, kind, target, base)
     p = plan_mod.active_plan(root)
     report_dir = (p.dir / "reports") if p else (root / "reports")
     report = report_dir / "codex-review.md"
