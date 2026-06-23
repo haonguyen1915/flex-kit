@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.1.2] - 2026-06-23
+
+### Release Notes
+
+Improves Codex integration controls and CLI ergonomics, with better diagnostics.
+
+### What's Changed
+- Added a `--codex` flag to flex-fix so Codex-powered review can be enabled explicitly when you want it.
+- Made cross-model Codex review opt-in again, reducing unexpected behavior in default runs.
+- Now surfaces Codex stderr output instead of swallowing it, making failures and misconfigurations easier to debug.
+- Added a `--version` CLI flag that reports the package version directly from `pyproject`.
+
+### Features
+
+- feat: add --codex to flex-fix (c1d79cc)
+- feat: add --version reading the version from pyproject (0b53134)
+
+### Bug Fixes
+
+- fix: surface codex stderr instead of swallowing it (2f3b0f9)
+
+### Refactoring
+
+- refactor: make the codex cross-model review opt-in again (79d5e22)
+
+**Contributors:** @Nguyễn Văn Hảo
+
+**Compare changes:** [v0.1.1...v0.1.2](https://github.com/haonguyen1915/flex-kit.git/-/compare/v0.1.1...v0.1.2)
+
 ## [0.1.1] - 2026-06-22
 
 ### Release Notes
