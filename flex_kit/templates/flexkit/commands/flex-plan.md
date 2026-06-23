@@ -18,8 +18,10 @@ routes onward from here, so you never have to pick the lane yourself.
    `process-planning-methodology` skill's scope-challenge maps complexity to a mode). This
    writes an empty `plan.md` - don't hand-roll the folder.
 4. **Draft.** Spawn the `planner` agent to fill `plan.md` (Goal, Steps, Files, Done,
-   Risks, Open Questions). Mirror any `## Open Questions` back as `Questions for You` -
-   numbered, with 2-4 concrete options each - don't make the user open the file.
+   Risks, Open Questions). Then resolve every `## Open Questions` by running the
+   `process-decision-interview` protocol - **one question at a time**, each re-explained
+   plainly, with reasoned options, a `[Recommended]` pick + why, and an `Other` (write your
+   own) choice - so the user never opens the file to answer.
 5. **Log decisions.** Append each settled decision to the plan's `decisions.md` as
    `## YYYY-MM-DD - <label>` (create the file if absent).
 6. **Approve.** Run `flex-kit status` to confirm, then close with a checkpoint:
@@ -29,5 +31,6 @@ routes onward from here, so you never have to pick the lane yourself.
 
    Use `[C] Continue` only as a soft nudge after approval.
 
-When a choice comes up (routing or plan shape), present 2-4 numbered options and
-recommend one; the user can pick a number or answer free-form. Don't implement here.
+Every choice (routing, plan shape, or an open question) goes through the
+`process-decision-interview` protocol - asked one at a time, with reasoned options, a
+`[Recommended]` pick, and an `Other` (write-your-own) option. Don't implement here.

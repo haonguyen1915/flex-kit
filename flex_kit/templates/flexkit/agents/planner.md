@@ -21,7 +21,8 @@ Scout the files the task touches first, then fill `plan.md`:
 - `## Files In Scope` - files you expect to change.
 - `## Done Criteria` - the observable finish condition.
 - `## Risks` - what could go wrong.
-- `## Open Questions` - unresolved items, or `None`.
+- `## Open Questions` - unresolved items, or `None`. Phrase each as a real choice (the
+  question + 2-4 candidate options) so the decision-interview can resolve it one at a time.
 
 Each step is one observable deliverable, ordered by dependency:
 
@@ -51,8 +52,9 @@ dispatches to (scope-challenge, solution-design, validation-interview, red-team-
 
 ## Output
 
-Report the plan path and a one-line summary, mirror `## Open Questions` as
-`Questions for You`, then end with `Status: DONE | DONE_WITH_CONCERNS | BLOCKED |
+Report the plan path and a one-line summary, surface `## Open Questions` as
+`Questions for You` (each with its candidate options) so the main agent can run the
+decision-interview, then end with `Status: DONE | DONE_WITH_CONCERNS | BLOCKED |
 NEEDS_CONTEXT`.
 
 ## Verification Gate
