@@ -104,6 +104,86 @@ def test_pre_tool_allows_normal_path() -> None:
     assert hooks.pre_tool_decision({"tool_input": {"file_path": "src/main.py"}}) is None
 
 
+def _write_transcript(path: Path, *user_contents: object) -> None:
+    """A minimal host transcript: each arg is one user-message content (str or list)."""
+    lines = [
+        json.dumps({"type": "user", "message": {"role": "user", "content": c}})
+        for c in user_contents
+    ]
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def test_notify_detects_finished_flex_command(tmp_path: Path) -> None:
+    tp = tmp_path / "t.jsonl"
+    # A slash command, then a tool result (array content) - the command still wins.
+    _write_transcript(
+        tp,
+        "<command-name>/flex-implement</command-name><command-args></command-args>",
+        [{"type": "tool_result", "content": "ok"}],
+    )
+    assert hooks._finished_notify_command({"transcript_path": str(tp)}) == "flex-implement"
+
+
+def test_notify_silent_on_plain_prompt(tmp_path: Path) -> None:
+    tp = tmp_path / "t.jsonl"
+    _write_transcript(tp, "<command-name>/flex-fix</command-name>", "just chatting now")
+    # The last real prompt is plain text, so the finished turn is not a flex command.
+    assert hooks._finished_notify_command({"transcript_path": str(tp)}) is None
+
+
+def test_notify_silent_on_non_notify_command(tmp_path: Path) -> None:
+    tp = tmp_path / "t.jsonl"
+    _write_transcript(tp, "<command-name>/flex-commit</command-name>")
+    assert hooks._finished_notify_command({"transcript_path": str(tp)}) is None
+
+
+def test_notify_silent_without_transcript() -> None:
+    assert hooks._finished_notify_command({}) is None
+    assert hooks._finished_notify_command({"transcript_path": "/no/such/file"}) is None
+
+
+def test_stop_fires_os_notify(tmp_path: Path, monkeypatch) -> None:
+    tp = tmp_path / "t.jsonl"
+    _write_transcript(tp, "<command-name>/flex-review</command-name>")
+    calls: list[tuple[str, str]] = []
+    monkeypatch.setattr(hooks, "_os_notify", lambda title, msg: calls.append((title, msg)))
+    hooks.stop({"transcript_path": str(tp)})
+    assert calls == [("flex-kit", "/flex-review done")]
+
+
+def test_stop_silent_on_plain_turn(tmp_path: Path, monkeypatch) -> None:
+    tp = tmp_path / "t.jsonl"
+    _write_transcript(tp, "hello")
+    calls: list = []
+    monkeypatch.setattr(hooks, "_os_notify", lambda title, msg: calls.append((title, msg)))
+    hooks.stop({"transcript_path": str(tp)})
+    assert calls == []
+
+
+def test_gen_notify_opt_in_wires_stop_hook(tmp_path: Path) -> None:
+    root = tmp_path / "proj"
+    shutil.copytree(FIXTURE, root)
+    cfg = root / ".flexkit/flexkit.config.json"
+    data = json.loads(cfg.read_text())
+    data["notify"] = True
+    cfg.write_text(json.dumps(data, indent=2) + "\n")
+    gen(root)
+
+    events = json.loads((root / ".claude/settings.json").read_text())["hooks"]
+    assert "Stop" in events
+    assert events["Stop"][0]["hooks"][0]["command"] == "flex-kit hook stop"
+    findings = [f for r in doctor(root) for f in r.findings]
+    assert findings == [], findings
+
+
+def test_gen_notify_off_by_default(tmp_path: Path) -> None:
+    root = tmp_path / "proj"
+    shutil.copytree(FIXTURE, root)
+    gen(root)
+    events = json.loads((root / ".claude/settings.json").read_text())["hooks"]
+    assert "Stop" not in events
+
+
 def test_gen_wires_hooks_into_settings(tmp_path: Path) -> None:
     root = tmp_path / "proj"
     shutil.copytree(FIXTURE, root)

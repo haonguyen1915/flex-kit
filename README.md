@@ -93,6 +93,11 @@ of the host's native subagents:
   session-start injects branch + plan orientation (and re-orients after compaction),
   a per-prompt reminder tracks plan progress, and a pre-tool guard blocks
   secret/credential access. One Python binary, no scattered scripts.
+- **Notify** (opt-in) - set `"notify": true` in `.flexkit/flexkit.config.json` to wire a
+  Stop hook that fires a desktop notification when a long-running flex command
+  (`/flex-plan`, `/flex-implement`, `/flex-fix`, `/flex-review`, `/flex-codex-review`)
+  finishes. Cross-platform (macOS / Linux `notify-send` / Windows), silent on plain
+  turns. Off by default; run `flex-kit gen` after enabling.
 - **Autonomous delivery** - the bundled `/flex-implement` command walks the active plan
   and runs the `process-verify-fix-loop` (reviewer/implementer subagents) until the change is
   clean. The host runs it; flex-kit supplies the plan, agents, and protocol. Slash

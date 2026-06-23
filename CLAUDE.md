@@ -38,7 +38,7 @@ model-routing, semantic-memory layers and ships no domain content.
 | File | Role |
 |---|---|
 | `main.py` | Typer CLI: init / init-docs / add / remove / gen / codex-review / doctor / plan / status / next-step / spec / close / statusline / hook |
-| `config.py` | load `.flexkit/flexkit.config.json` (hosts, skillsDir, agentsDir, commandsDir, docsDir) |
+| `config.py` | load `.flexkit/flexkit.config.json` (hosts, skillsDir, agentsDir, commandsDir, docsDir, notify) |
 | `skills.py` / `agents.py` | discover + parse source skills / agents |
 | `commands.py` | discover + parse source commands (Claude slash-command surface) |
 | `docs.py` | discover `inject:`-tagged project docs + inject their index at `<!-- DOCS -->`, routed per consumer (`all` / agent id / lane); scaffold the docs/ skeleton |
@@ -67,7 +67,9 @@ native subagents + prose, never a flex-kit engine:
   when step/file counts exceed the budget. `status` surfaces the escalation.
 - **Hooks** (`hooks.py` + `flex-kit hook <event>`): wired into `.claude/settings.json`
   by the claude host's `emit_global()`. session-start (orient + compaction re-orient),
-  user-prompt (deduped plan reminder), pre-tool (secret guard). Codex has no hooks.
+  user-prompt (deduped plan reminder), pre-tool (secret guard). An opt-in stop hook
+  (`config.notify`) fires a desktop notification when a long flex command finishes.
+  Codex has no hooks.
 - **Autonomous delivery**: the bundled `implement` command (templates base) ties the
   plan + `verify-fix-loop` skill + reviewer/implementer agents into one flow.
 

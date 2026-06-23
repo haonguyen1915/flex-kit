@@ -85,7 +85,7 @@ def gen(project_root: Path, dry_run: bool = False, out_root: Path | None = None)
         host = HOSTS.get(host_name)
         if host is None:
             raise ValueError(f'Unknown host "{host_name}" (see flex_kit/hosts/)')
-        host_files = emit_for_host(host, skills, agents, commands, docs)
+        host_files = emit_for_host(host, skills, agents, commands, docs, config)
         per_host[host_name] += len(host_files)
         files.extend(host_files)
 

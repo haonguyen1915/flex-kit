@@ -8,8 +8,11 @@ surface; Codex has no event-hook contract.
 
 from __future__ import annotations
 
+import json
 import re
+import shutil
 import subprocess
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -279,3 +282,88 @@ def pre_tool_decision(payload: dict) -> str | None:
     if _SECRET.search(text):
         return "flex-kit guard: blocked access to a secret/credential path"
     return None
+
+
+# Long-running flex commands worth a desktop notification when they finish. A plain
+# chat turn or a quick command (e.g. /flex-status) stays silent.
+NOTIFY_COMMANDS = (
+    "flex-plan",
+    "flex-implement",
+    "flex-fix",
+    "flex-review",
+    "flex-codex-review",
+)
+
+
+def _last_user_prompt(transcript_path: str) -> str | None:
+    """The most recent human prompt / slash-command text from the host transcript.
+
+    Tool results are recorded as user-type messages with an *array* content; a real
+    prompt (typed text or a slash command) has *string* content. We return the last
+    string one - the input that drove the turn that just ended.
+    """
+    path = Path(transcript_path)
+    if not path.is_file():
+        return None
+    last: str | None = None
+    for line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            ev = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if ev.get("type") != "user":
+            continue
+        content = (ev.get("message") or {}).get("content")
+        if isinstance(content, str):
+            last = content
+    return last
+
+
+def _finished_notify_command(payload: dict) -> str | None:
+    """The NOTIFY_COMMANDS entry the just-ended turn was driven by, else None."""
+    tp = payload.get("transcript_path")
+    if not tp:
+        return None
+    prompt = _last_user_prompt(str(tp))
+    if not prompt:
+        return None
+    for cmd in NOTIFY_COMMANDS:
+        if f"<command-name>/{cmd}</command-name>" in prompt:
+            return cmd
+    return None
+
+
+def _os_notify(title: str, message: str) -> None:
+    """Best-effort cross-platform desktop notification. Never raises, never blocks long."""
+    try:
+        if sys.platform == "darwin":
+            script = f'display notification "{message}" with title "{title}" sound name "Glass"'
+            cmd = ["osascript", "-e", script]
+        elif sys.platform.startswith("linux"):
+            if not shutil.which("notify-send"):
+                return
+            cmd = ["notify-send", title, message]
+        elif sys.platform.startswith("win"):
+            ps = (
+                "[reflection.assembly]::LoadWithPartialName('System.Windows.Forms')|Out-Null;"
+                "$n=New-Object System.Windows.Forms.NotifyIcon;"
+                "$n.Icon=[System.Drawing.SystemIcons]::Information;$n.Visible=$true;"
+                f"$n.ShowBalloonTip(5000,'{title}','{message}',"
+                "[System.Windows.Forms.ToolTipIcon]::Info)"
+            )
+            cmd = ["powershell", "-NoProfile", "-Command", ps]
+        else:
+            return
+        subprocess.run(cmd, timeout=10, check=False, capture_output=True)
+    except Exception:
+        pass
+
+
+def stop(payload: dict | None = None) -> None:
+    """Stop hook: notify when a long-running flex command finishes (if enabled)."""
+    cmd = _finished_notify_command(payload or {})
+    if cmd:
+        _os_notify("flex-kit", f"/{cmd} done")

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from flex_kit.agents import Agent
 from flex_kit.commands import Command
+from flex_kit.config import Config
 from flex_kit.docs import Doc
 from flex_kit.emit import OutFile
 from flex_kit.skills import Skill
@@ -20,6 +21,7 @@ def emit_for_host(
     agents: list[Agent],
     commands: list[Command],
     docs: list[Doc],
+    config: Config | None = None,
 ) -> list[OutFile]:
     out: list[OutFile] = []
     for skill in skills:
@@ -31,5 +33,5 @@ def emit_for_host(
         for command in commands:
             out.extend(host.emit_command(command, skills, agents, docs))
     if hasattr(host, "emit_global"):
-        out.extend(host.emit_global())
+        out.extend(host.emit_global(config))
     return out

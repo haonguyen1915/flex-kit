@@ -424,7 +424,7 @@ def statusline(project: Path = typer.Option(Path.cwd, "--project", "-p")) -> Non
 
 @app.command()
 def hook(
-    event: str = typer.Argument(..., help="session-start | pre-tool"),
+    event: str = typer.Argument(..., help="session-start | user-prompt | pre-tool | stop"),
     project: Path = typer.Option(Path.cwd, "--project", "-p"),
 ) -> None:
     """Runtime hook entrypoint, invoked by the host via .claude/settings.json."""
@@ -445,6 +445,8 @@ def hook(
         hooks_mod.subagent_start(root, payload)
     elif event == "subagent-stop":
         hooks_mod.subagent_stop(root, payload)
+    elif event == "stop":
+        hooks_mod.stop(payload)
     elif event == "user-prompt":
         line = hooks_mod.user_prompt(root)
         if line:

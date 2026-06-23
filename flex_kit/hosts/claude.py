@@ -57,6 +57,10 @@ _HOOKS = {
     ],
 }
 
+# Opt-in (config.notify): a desktop notification when a long-running flex command
+# finishes. `flex-kit hook stop` inspects the transcript and stays silent otherwise.
+_STOP_HOOK = [{"hooks": [{"type": "command", "command": "flex-kit hook stop"}]}]
+
 
 def emit_skill(skill: Skill) -> list[OutFile]:
     entries = [
@@ -98,7 +102,10 @@ def emit_command(
     return [OutFile(f"{COMMANDS_DIR}/{command.id}.md", content)]
 
 
-def emit_global() -> list[OutFile]:
+def emit_global(config=None) -> list[OutFile]:
     """Host-level output not tied to a single capability: status line + hooks wiring."""
-    content = json.dumps({"statusLine": _STATUS_LINE, "hooks": _HOOKS}, indent=2) + "\n"
+    hooks = _HOOKS
+    if config is not None and getattr(config, "notify", False):
+        hooks = {**_HOOKS, "Stop": _STOP_HOOK}  # appended deterministically for stable output
+    content = json.dumps({"statusLine": _STATUS_LINE, "hooks": hooks}, indent=2) + "\n"
     return [OutFile(SETTINGS_FILE, content)]

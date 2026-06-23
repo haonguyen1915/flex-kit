@@ -20,6 +20,9 @@ class Config:
     agents_dir: str = _DEFAULT_AGENTS_DIR
     commands_dir: str = _DEFAULT_COMMANDS_DIR
     docs_dir: str = _DEFAULT_DOCS_DIR
+    # Opt-in: fire a cross-platform desktop notification when a long-running flex
+    # command finishes (Claude host only). Off by default; wires a Stop hook when true.
+    notify: bool = False
 
 
 def load_config(project_root: Path) -> Config:
@@ -33,4 +36,5 @@ def load_config(project_root: Path) -> Config:
         agents_dir=raw.get("agentsDir", _DEFAULT_AGENTS_DIR),
         commands_dir=raw.get("commandsDir", _DEFAULT_COMMANDS_DIR),
         docs_dir=raw.get("docsDir", _DEFAULT_DOCS_DIR),
+        notify=bool(raw.get("notify", False)),
     )
