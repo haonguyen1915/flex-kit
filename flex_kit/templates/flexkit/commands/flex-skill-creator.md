@@ -40,7 +40,7 @@ prefix prevents collisions and makes the flat list self-grouping. Groups:
 | prefix | scope |
 |---|---|
 | `architecture-` | code & system structure: design patterns, layering, domain modeling, boundaries |
-| `engineering-` | implementation craft (language-agnostic): errors, concurrency, testing, observability, performance |
+| `engineering-` | language-invariant **design** craft: error strategy, concurrency design. The applied idiom/mechanics (and testing, observability, performance - which lean language-specific) live in the language pack |
 | `backend-` | server-side: api, data, caching, auth (+ `backend-<lang>` for implementation) |
 | `frontend-` | client-side: components, state, a11y, performance (+ `frontend-<framework>`) |
 | `ai-` | AI/LLM: prompting, RAG, evals, agents, context engineering |
@@ -59,18 +59,27 @@ colliding with the kit's or another project's skills when sources are unified.
 **Two more axes - language & framework.** Discipline groups above are language-agnostic;
 tech-specific content gets its own prefix on a parallel axis, one prefix per pack:
 
-- **Language**: `rust-`, `go-`, `python-`, `typescript-`, `java-` - idioms, naming, syntax.
+- **Language**: `rust-`, `go-`, `python-`, `typescript-`, `java-` - a **self-contained** kit:
+  naming/typing/idioms **and** that language's take on project setup, layering, error handling,
+  concurrency, testing, patterns.
 - **Framework**: `svelte-`, `react-`, `vue-`, `django-` - that framework's APIs and patterns.
 - **Engine** (database): `postgresql-`, `mysql-`, `mongodb-`, `redis-`, `sqlite-` - that engine's features and idioms.
 
-They compose: a Rust + Tauri + Postgres service adds `engineering` + `backend` + `database`
-+ `rust` + `tauri` + `postgresql`.
+**Split rule (language-first, duplication allowed).** A skill is *agent context*, not code,
+so **self-contained beats DRY**: the agent loads one skill and has everything, instead of
+stitching a cross-referenced abstract one. So a **language pack restates** a discipline
+principle in that language's idiom (`python-error-handling` covers the exception strategy
+*and* its rationale) rather than cross-referencing `engineering-error-handling`. Duplicating a
+short shared principle is cheap; its concrete application is language-specific anyway.
 
-**Split rule.** A rule true in *every* language / engine -> a **discipline** skill
-(`engineering-error-handling`, `database-schema-design`). *How a specific tech expresses it*
-(an idiom, a feature, syntax, naming) -> a **language / framework / engine** skill
-(`rust-error-handling`, `svelte-error-handling`, `postgresql-jsonb`). Cross-reference between
-layers; never duplicate.
+Keep a **discipline** skill (`architecture-`, `engineering-`, `backend-`) only for content that
+is genuinely **protocol/concept-level** and barely varies by language - REST/HTTP semantics,
+DB schema design, domain-modeling concepts. Everything that an agent applies *as code* lives in
+the language pack.
+
+A skill's **group folder** (e.g. `packs/python/skills/craft/python-error-handling/`) is repo
+tidiness only: `flex-kit add` **flattens** it to `skills/<id>/`, since hosts discover skills one
+level deep. Group in the source, never in the output.
 
 Body - principles, not a rigid template:
 
