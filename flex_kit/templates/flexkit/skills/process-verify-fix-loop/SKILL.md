@@ -34,12 +34,12 @@ Two locations, by lifecycle. **`handoffs/`** is the current-iteration scratchpad
    - Each also writes a durable, timestamped copy under `reports/` -
      `reports/review-<timestamp>.md` and `reports/test-<timestamp>.md` - so the audit
      trail survives across iterations instead of living only in chat.
-   - **Cross-model pass (default on; turn off with `codexReview: off`).** Also run
+   - **Optional cross-model pass (when `codexReview` is on).** Also run
      `flex-kit codex-review --type diff` for a second opinion from a different model.
      Read `reports/codex-review.md` and **merge its critical/high findings into
      `handoffs/review-verdict.md`** (the host `reviewer` stays authoritative - Codex
-     adds findings, never overrides). **If the `codex` CLI is unavailable, skip silently
-     and continue** - the loop never blocks on Codex.
+     adds findings, never overrides). If the `codex` CLI is unavailable, skip silently
+     and continue.
 3. **Merge and decide.** A `revise` verdict OR any failing test means continue to
    step 4. `approve` with only low/medium findings AND all tests passing means the
    loop may exit - check the Exit gates first.
@@ -94,7 +94,7 @@ The loop is cheap; skipping it is where regressions ship. Reject these:
 | `implementer` | `implementer` | the agent that applies fixes |
 | `maxIterations` | 2 | advisory cap on fix-verify cycles before pausing for the user |
 | `severityThreshold` | `high` | minimum finding severity that triggers another fix iteration |
-| `codexReview` | on | cross-model Codex review (`flex-kit codex-review`) merged into the verdict; auto-skips when the `codex` CLI is absent |
+| `codexReview` | off | add a cross-model Codex review (`flex-kit codex-review`), merged into the verdict; auto-skips when the `codex` CLI is absent |
 
 ## Rules
 
