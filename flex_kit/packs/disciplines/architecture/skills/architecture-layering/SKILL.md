@@ -1,6 +1,6 @@
 ---
 name: architecture-layering
-description: Structure code by layers with dependencies pointing inward - domain core, infrastructure at the edge, ports and adapters. Use when organizing modules, placing a new file, or reviewing whether a dependency crosses a layer the wrong way. Not for choosing a pattern (see architecture-design-patterns) or framework wiring.
+description: Structure code by layers with dependencies pointing inward - domain core, infrastructure at the edge, ports and adapters. This is the principle behind Clean Architecture, Hexagonal (ports & adapters), and Onion architecture. Use when organizing modules, placing a new file, applying Clean/Hexagonal/Onion architecture, or reviewing whether a dependency crosses a layer the wrong way. Not for choosing a pattern (see architecture-design-patterns), a language's concrete layout/DI (see the language pack's <lang>-architecture), or framework wiring.
 ---
 
 # Layering
@@ -32,6 +32,21 @@ framework; those live at the edge and depend on the core, never the reverse.
   outer implementation (Postgres, an HTTP client). The use case depends on the port.
 - This inverts the dependency: infrastructure implements an interface the domain defines, so
   the domain stays ignorant of it - and the core becomes testable with a fake adapter.
+
+## Named styles - one principle, many names
+
+Clean Architecture, Hexagonal, and Onion are the **same dependency rule** drawn
+differently - learn the rule, not four diagrams.
+
+- **Clean Architecture** (Martin) - concentric rings, `entities -> use cases -> interface
+  adapters -> frameworks`. The rings are the layers above; the "dependency rule" is
+  deps-inward.
+- **Hexagonal / Ports & Adapters** (Cockburn) - the app is a hexagon; each side is a port,
+  with a *driving* adapter (UI, test) or *driven* adapter (DB, queue) plugged in.
+- **Onion** (Palermo) - domain at the centre, infrastructure as the outer shell.
+
+"Make it hexagonal / clean" means: invert the dependencies onto ports the core owns - the
+tool is already above. Don't treat them as different architectures to choose between.
 
 ## Crossing boundaries
 
