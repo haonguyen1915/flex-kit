@@ -6,8 +6,29 @@ from datetime import datetime
 from pathlib import Path
 
 import pytest
+from typer.testing import CliRunner
 
 from flex_kit import plan as plan_mod
+from flex_kit.main import app
+
+_runner = CliRunner()
+
+
+def test_long_title_yields_a_short_folder_slug() -> None:
+    long_title = "Tier 2 FE component tests audit coverage gaps and fill them all in"
+    slug = plan_mod._slugify(long_title)
+    assert len(slug) <= 40
+    assert not slug.endswith("-") and "--" not in slug  # cut on a clean word boundary
+
+
+def test_plan_refuses_while_another_is_active(tmp_path: Path) -> None:
+    plan_mod.create_plan(tmp_path, "first task", now=datetime(2026, 6, 18, 9, 0))
+    res = _runner.invoke(app, ["plan", "second task", "--project", str(tmp_path)])
+    assert res.exit_code != 0  # refused - finish the active one first
+    assert plan_mod.active_plan(tmp_path).title == "first task"  # unchanged
+
+    forced = _runner.invoke(app, ["plan", "second task", "--force", "--project", str(tmp_path)])
+    assert forced.exit_code == 0  # --force overrides
 
 
 def test_create_sets_active_and_parses(tmp_path: Path) -> None:

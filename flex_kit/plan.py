@@ -52,8 +52,10 @@ class Plan:
         return modes.effective_mode(self.mode, len(self.steps), len(self.files))
 
 
-def _slugify(title: str) -> str:
+def _slugify(title: str, max_len: int = 40) -> str:
     slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
+    if len(slug) > max_len:  # cap the slug so plan folder names stay short, cut on a word
+        slug = slug[:max_len].rsplit("-", 1)[0] or slug[:max_len]
     return slug or "plan"
 
 

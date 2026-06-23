@@ -14,9 +14,12 @@ routes onward from here, so you never have to pick the lane yourself.
    `/flex-review` instead. Skip when the path is obvious.
 2. **Frame (large/ambiguous only).** For a large, ambiguous, or contract-changing plan,
    apply the `process-decision-interview` skill before drafting.
-3. **Scaffold.** Run `flex-kit plan "<task>"` (add `--mode patch|build|design`; the
-   `process-planning-methodology` skill's scope-challenge maps complexity to a mode). This
-   writes an empty `plan.md` - don't hand-roll the folder.
+3. **Scaffold.** First check `flex-kit status` - if a plan is already active, **finish or
+   `/flex-close` it before starting a new one** (`flex-kit plan` refuses while one is active,
+   so the in-progress plan is never silently orphaned). Then run `flex-kit plan "<task>"`
+   with a **short title - a few words**, since it becomes the plan's folder name (add
+   `--mode patch|build|design`; the `process-planning-methodology` skill's scope-challenge
+   maps complexity to a mode). This writes an empty `plan.md` - don't hand-roll the folder.
 4. **Draft.** Spawn the `planner` agent to fill `plan.md` (Goal, Steps, Files, Done,
    Risks, Open Questions). Then resolve every `## Open Questions` by running the
    `process-decision-interview` protocol - **one question at a time**, each re-explained

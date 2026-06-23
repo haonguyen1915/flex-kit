@@ -328,13 +328,26 @@ def doctor(
 
 @app.command()
 def plan(
-    title: str = typer.Argument(..., help="What the plan delivers."),
+    title: str = typer.Argument(..., help="What it delivers - keep short, it names the folder."),
     mode: str = typer.Option("build", "--mode", help="patch | build | design."),
+    force: bool = typer.Option(
+        False, "--force", help="Create even if a plan is active (old left in plans/active/)."
+    ),
     project: Path = typer.Option(Path.cwd, "--project", "-p"),
 ) -> None:
     """Create a tracked plan under plans/active/ and make it the active plan."""
+    root = project.resolve()
+    # Finish the current plan first: starting a new one would orphan the active plan in
+    # plans/active/ (it loses the `active` pointer but is never archived). --force overrides.
+    active = plan_mod.active_plan(root)
+    if active is not None and not force:
+        ui.error(
+            f"active plan {active.id} ({active.done_count}/{len(active.steps)} steps) - "
+            "finish it (`flex-kit close --confirm`) before a new one, or pass --force."
+        )
+        raise typer.Exit(1)
     try:
-        p = plan_mod.create_plan(project.resolve(), title, mode=mode)
+        p = plan_mod.create_plan(root, title, mode=mode)
     except ValueError as e:
         raise typer.BadParameter(str(e)) from e
     ui.success(f"created plan {p.id}  (mode: {p.mode})")
