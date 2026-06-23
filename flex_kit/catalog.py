@@ -21,9 +21,13 @@ _TEMPLATE = Path(__file__).parent / "templates" / "flexkit"
 
 
 def _dir_ids(base: Path, kind: str) -> set[str]:
-    """Skill ids: each is a `<kind>/<id>/SKILL.md` directory."""
+    """Skill ids: each is a `<id>/SKILL.md`, found at any depth.
+
+    A bundled pack may nest skills in group folders (`skills/<group>/<id>/SKILL.md`) for
+    tidiness; `add` flattens them to `skills/<id>`, so the owned id is the SKILL.md's
+    parent dir name regardless of how deep the group nesting is."""
     d = base / kind
-    return {p.name for p in d.iterdir() if (p / "SKILL.md").exists()} if d.is_dir() else set()
+    return {p.parent.name for p in d.rglob("SKILL.md")} if d.is_dir() else set()
 
 
 def _file_ids(base: Path, kind: str) -> set[str]:
@@ -33,7 +37,25 @@ def _file_ids(base: Path, kind: str) -> set[str]:
 
 
 def _packs() -> list[Path]:
-    return sorted(p for p in _PACKS.iterdir() if p.is_dir()) if _PACKS.is_dir() else []
+    """Pack dirs, found one category level deep (`packs/<category>/<pack>`) or flat.
+
+    Mirrors `add._pack_dirs`: packs are grouped by axis (`languages/`, `frameworks/`,
+    `disciplines/`) for tidiness, so the catalog must look inside a category dir too."""
+    if not _PACKS.is_dir():
+        return []
+    out: list[Path] = []
+    for top in sorted(_PACKS.iterdir()):
+        if not top.is_dir():
+            continue
+        if (top / "skills").is_dir() or (top / "agents").is_dir():
+            out.append(top)
+        else:
+            out.extend(
+                c
+                for c in sorted(top.iterdir())
+                if c.is_dir() and ((c / "skills").is_dir() or (c / "agents").is_dir())
+            )
+    return out
 
 
 def owned_skill_ids() -> set[str]:
