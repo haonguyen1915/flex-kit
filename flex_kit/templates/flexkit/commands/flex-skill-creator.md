@@ -64,6 +64,7 @@ tech-specific content gets its own prefix on a parallel axis, one prefix per pac
   concurrency, testing, patterns.
 - **Framework**: `svelte-`, `react-`, `vue-`, `django-` - that framework's APIs and patterns.
 - **Engine** (database): `postgresql-`, `mysql-`, `mongodb-`, `redis-`, `sqlite-` - that engine's features and idioms.
+- **Cloud / platform**: `aws-`, `gcp-`, `azure-`, `cloudflare-` - that provider's services and their secure-by-default usage (identity, storage, compute, queues), one prefix per provider.
 
 **Split rule (language-first, duplication allowed).** A skill is *agent context*, not code,
 so **self-contained beats DRY**: the agent loads one skill and has everything, instead of
