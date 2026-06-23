@@ -1,7 +1,7 @@
 ---
 name: flex-fix
 description: Quick bug-to-patch path - reproduce, diagnose the root cause, patch in patch mode, then verify. Use for a small, well-scoped bug fix rather than a full plan.
-argument-hint: [bug description]
+argument-hint: [bug description] [--codex]
 ---
 
 Fix a bug fast and tight: **$ARGUMENTS**
@@ -16,7 +16,9 @@ Fix a bug fast and tight: **$ARGUMENTS**
    contract change), STOP - this is not a quick fix; switch to `/flex-change`.
 4. **Patch.** Spawn the `implementer` for the minimal change. Add or adjust a test
    that fails before the fix and passes after.
-5. **Verify.** Apply the `process-verify-fix-loop` skill (`reviewer` + `tester`). When clean,
-   summarize the root cause and fix, then offer `/flex-close`.
+5. **Verify.** Apply the `process-verify-fix-loop` skill (`reviewer` + `tester`). With
+   `--codex`, also turn on the skill's `codexReview` for a cross-model second opinion
+   merged into the verdict (auto-skips if `codex` is absent). When clean, summarize the
+   root cause and fix, then offer `/flex-close`.
 
 Keep it minimal: a patch that needs a spec or touches contracts is no longer a fix.
