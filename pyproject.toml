@@ -1,31 +1,33 @@
-[tool.poetry]
+[project]
 name = "flex-kit"
 version = "0.1.2"
 description = "Single-source AI-host kit: author skills once, generate native surfaces for Claude Code and Codex, validate they stay in sync."
 license = "MIT"
-packages = [{include = "flex_kit"}]
-include = [
-  { path = "flex_kit/templates/**/*", format = ["sdist", "wheel"] },
-  { path = "flex_kit/packs/**/*", format = ["sdist", "wheel"] },
+requires-python = ">=3.10"
+dependencies = [
+  "typer>=0.12.0",
+  "rich>=13.0.0",          # already pulled by typer; declared since ui.py imports it directly
+  "questionary>=2.0.0",    # interactive pickers (e.g. `flex-kit add` with no args)
 ]
 
-[tool.poetry.dependencies]
-python = ">=3.10"
-typer = ">=0.12.0"
-rich = ">=13.0.0"  # already pulled by typer; declared since ui.py imports it directly
-questionary = ">=2.0.0"  # interactive pickers (e.g. `flex-kit add` with no args)
-
-[tool.poetry.group.dev.dependencies]
-pytest = ">=8.0.0,<9"
-ruff = ">=0.2.0"
-mypy = ">=1.8.0,<2"
-
-[tool.poetry.scripts]
+[project.scripts]
 flex-kit = "flex_kit.main:_main"
 
+[dependency-groups]
+dev = [
+  "pytest>=8.0.0,<9",
+  "ruff>=0.2.0",
+  "mypy>=1.8.0,<2",
+]
+
 [build-system]
-requires = ["poetry-core>=2.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# The package dir is flex_kit/; hatchling includes every file under it - so the bundled
+# templates/ and packs/ (.md and all) ship in the wheel + sdist without an explicit include list.
+[tool.hatch.build.targets.wheel]
+packages = ["flex_kit"]
 
 [tool.ruff]
 line-length = 100

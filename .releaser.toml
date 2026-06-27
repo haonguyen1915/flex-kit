@@ -5,8 +5,8 @@
 type = "auto"
 # Tag prefix for git tags (e.g., v1.2.3)
 tag_prefix = "v"
-# Prefer running native tooling (poetry version / npm version) when available
-use_native = true
+# No native version command under uv/PEP 621 - bump the `version = "..."` in [project] directly.
+use_native = false
 
 
 # --- Release Configuration ---

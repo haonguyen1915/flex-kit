@@ -1,18 +1,18 @@
 .PHONY: install test lint format check clean build publish publish-test
 
 install:
-	poetry install
+	uv sync
 
 test:
-	poetry run pytest -v
+	uv run pytest -v
 
 lint:
-	poetry run ruff check flex_kit
-	poetry run mypy flex_kit
+	uv run ruff check flex_kit
+	uv run mypy flex_kit
 
 format:
-	poetry run ruff format flex_kit tests
-	poetry run ruff check --fix flex_kit tests
+	uv run ruff format flex_kit tests
+	uv run ruff check --fix flex_kit tests
 
 check: lint test
 
@@ -20,10 +20,10 @@ clean:
 	rm -rf dist/ build/ *.egg-info
 
 build: clean
-	poetry build
+	uv build
 
 publish: build
-	poetry publish
+	uv publish
 
 publish-test: build
-	poetry publish -r testpypi
+	uv publish --publish-url https://test.pypi.org/legacy/

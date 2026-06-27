@@ -130,9 +130,9 @@ semantic-memory layers. See [`docs/prepkit-concept-spec.md`](docs/prepkit-concep
 ## Develop
 
 ```bash
-make install   # poetry install
+make install   # uv sync
 make test      # pytest
 make check     # ruff + mypy + pytest
-make publish   # build + poetry publish (PyPI)
+make publish   # uv build + uv publish (PyPI)
 ```
 # flex-kit
