@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -69,11 +70,51 @@ def _running_agents(root: Path) -> list[str]:
             pass
     return list(agents.values())
 
-_SECRET = re.compile(
-    r"\.env(\.|$)|\.env\.(production|prod|staging|live)|\.pem$|\.key$|credentials|"
-    r"secret|prod-keys|id_rsa|id_ed25519",
+# Sensitive files the guard refuses to let a tool open. Matched against actual PATH
+# arguments only - a file_path, or a path-shaped token in a Bash command - never against
+# free prose, a search pattern, or file CONTENT. So a commit message, a grep pattern, or a
+# skill body that merely names one of these words is fine; only a real path to a sensitive
+# file is blocked. Public templates (.env.example etc.) are committable and exempt.
+_SENSITIVE_NAME = re.compile(
+    r"\.env(?:\.|$)"
+    r"|^(?:id_rsa|id_ed25519|prod-keys)$"
+    r"|(?:secret|credential)s?\b.*\.(?:json|ya?ml|env|txt|ini|cfg|conf)$"
+    r"|\.(?:pem|key)$",
     re.IGNORECASE,
 )
+_PUBLIC_TEMPLATE = re.compile(r"\.(?:example|sample|template|dist|defaults?)$", re.IGNORECASE)
+# Tool-input keys that carry prose / file content, never a path to gate on.
+_NON_PATH_KEYS = frozenset(
+    {"description", "prompt", "content", "new_string", "old_string", "command"}
+)
+
+
+def _is_sensitive_path(arg: str) -> bool:
+    name = arg.rstrip("/").rsplit("/", 1)[-1]
+    if not name or _PUBLIC_TEMPLATE.search(name):
+        return False  # public template -> committable, not sensitive
+    return bool(_SENSITIVE_NAME.search(name))
+
+
+def _path_tokens(command: str) -> list[str]:
+    try:
+        toks = shlex.split(command)
+    except ValueError:
+        toks = command.split()
+    return [t for t in toks if not t.startswith("-")]
+
+
+def _sensitive_paths_in(payload: dict) -> list[str]:
+    tool = payload.get("tool_name", "")
+    ti = payload.get("tool_input", {}) or {}
+    cands: list[str] = []
+    if tool == "Bash":
+        cands += _path_tokens(str(ti.get("command", "")))
+    elif tool in ("Read", "Edit", "Write", "MultiEdit", "NotebookEdit"):
+        cands += [str(ti[k]) for k in ("file_path", "notebook_path") if ti.get(k)]
+    else:
+        cands += [str(v) for k, v in ti.items() if k not in _NON_PATH_KEYS]
+    return [c for c in cands if _is_sensitive_path(c)]
 
 
 def _git_branch(root: Path) -> str | None:
@@ -276,11 +317,14 @@ def user_prompt(root: Path) -> str | None:
 
 
 def pre_tool_decision(payload: dict) -> str | None:
-    """Return a deny reason if a tool call touches a secret/credential path."""
-    tool_input = payload.get("tool_input", {})
-    text = " ".join(str(v) for v in tool_input.values())
-    if _SECRET.search(text):
-        return "flex-kit guard: blocked access to a secret/credential path"
+    """Deny a tool call only when it targets a sensitive file PATH.
+
+    Scans path arguments (Read/Edit/Write file_path, Bash command tokens) - not prose,
+    search patterns, or file content - so legitimate work that merely names a guarded word
+    is allowed; only opening a real sensitive file is blocked."""
+    hits = _sensitive_paths_in(payload)
+    if hits:
+        return f"flex-kit guard: blocked - {hits[0]!r} looks like a sensitive file path"
     return None
 
 
