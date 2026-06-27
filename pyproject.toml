@@ -1,44 +1,34 @@
 [project]
 name = "flex-kit"
-version = "0.1.2"
+version = "0.1.3"
 description = "Single-source AI-host kit: author skills once, generate native surfaces for Claude Code and Codex, validate they stay in sync."
 license = "MIT"
 requires-python = ">=3.10"
-dependencies = [
-  "typer>=0.12.0",
-  "rich>=13.0.0",          # already pulled by typer; declared since ui.py imports it directly
-  "questionary>=2.0.0",    # interactive pickers (e.g. `flex-kit add` with no args)
-]
+dependencies = [ "typer>=0.12.0", "rich>=13.0.0", "questionary>=2.0.0",]
+
+[dependency-groups]
+dev = [ "pytest>=8.0.0,<9", "ruff>=0.2.0", "mypy>=1.8.0,<2",]
+
+[build-system]
+requires = [ "hatchling",]
+build-backend = "hatchling.build"
 
 [project.scripts]
 flex-kit = "flex_kit.main:_main"
-
-[dependency-groups]
-dev = [
-  "pytest>=8.0.0,<9",
-  "ruff>=0.2.0",
-  "mypy>=1.8.0,<2",
-]
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-# The package dir is flex_kit/; hatchling includes every file under it - so the bundled
-# templates/ and packs/ (.md and all) ship in the wheel + sdist without an explicit include list.
-[tool.hatch.build.targets.wheel]
-packages = ["flex_kit"]
 
 [tool.ruff]
 line-length = 100
 target-version = "py310"
 
-[tool.ruff.lint]
-select = ["E", "F", "I", "N", "W", "UP"]
-
 [tool.mypy]
 python_version = "3.10"
 warn_return_any = true
 
+[tool.ruff.lint]
+select = [ "E", "F", "I", "N", "W", "UP",]
+
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = [ "tests",]
+
+[tool.hatch.build.targets.wheel]
+packages = [ "flex_kit",]

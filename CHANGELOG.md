@@ -1,5 +1,52 @@
 # Changelog
 
+## [0.1.3] - 2026-06-27
+
+### Release Notes
+
+Expanded cloud and web skill packs while improving planning workflow reliability and developer tooling.
+
+### What's Changed
+- Added new AWS and FastAPI skill packs (including EC2 lifecycle plus IAM/Lambda/S3/DynamoDB and REST/auth) and rebuilt the Python pack as self-contained language skills.
+- Improved planning UX with an interactive one-question-at-a-time interview, safer plan creation when another plan is active, and shorter plan slugs.
+- Introduced optional desktop notifications when long-running flex commands finish.
+- Hardened guardrails and status reporting by scoping the pre-tool guard to sensitive path arguments and fixing plan status checkbox counting.
+- Streamlined contributor setup by migrating the build workflow from Poetry to uv.
+
+### Features
+
+- feat: add aws-ec2 skill with instance lifecycle (643396e)
+- feat: add aws cloud pack with iam lambda s3 dynamodb skills (54f2998)
+- feat: add fastapi pack with rest and auth skills (1343503)
+- feat: rebuild python pack as self-contained language skills (4220f3c)
+- feat: add opt-in desktop notification when a long flex command finishes (6ea07c4)
+- feat: guard a new plan against an active one and shorten the slug (a25f933)
+- feat: resolve planning questions via a one-at-a-time choice interview (faf14be)
+
+### Bug Fixes
+
+- fix: scope the pre-tool guard to sensitive path args (921837b)
+- fix: count only steps-section checkboxes in plan status (8feeba1)
+
+### Documentation
+
+- docs: add cloud/platform axis to skill taxonomy (b536a1d)
+- docs: adopt language-first skill split and discipline scope (d2edfec)
+
+### Refactoring
+
+- refactor: name architecture styles and sharpen boundaries (7584ee6)
+- refactor: discover grouped skills and category-nested packs (c86c824)
+- refactor: group packs by axis and python skills into tiers (c95624a)
+
+### Build
+
+- build: migrate from poetry to uv (d369ca9)
+
+**Contributors:** @Nguyễn Văn Hảo
+
+**Compare changes:** [v0.1.2...v0.1.3](https://github.com/haonguyen1915/flex-kit.git/-/compare/v0.1.2...v0.1.3)
+
 ## [0.1.2] - 2026-06-23
 
 ### Release Notes
