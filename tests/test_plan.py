@@ -54,6 +54,21 @@ def test_status_and_next_step_track_checklist(tmp_path: Path) -> None:
     assert active.next_step is not None and active.next_step.text == "two"
 
 
+def test_only_steps_section_checkboxes_are_counted(tmp_path: Path) -> None:
+    # Checkboxes under ## Done Criteria (or any non-Steps section) must NOT count as steps.
+    p = plan_mod.create_plan(tmp_path, "task", now=datetime(2026, 6, 18, 9, 0))
+    (p.dir / "plan.md").write_text(
+        "# Plan: task\n\n- id: x\n- mode: build\n- status: active\n\n"
+        "## Steps\n\n- [x] step one\n- [ ] step two\n\n"
+        "## Done Criteria\n\n- [ ] criteria a\n- [ ] criteria b\n- [ ] criteria c\n"
+    )
+    active = plan_mod.active_plan(tmp_path)
+    assert active is not None
+    assert len(active.steps) == 2  # 2 Steps, not 5 (the 3 Done-Criteria boxes excluded)
+    assert active.done_count == 1
+    assert active.next_step is not None and active.next_step.text == "step two"
+
+
 def test_close_requires_confirm_then_archives(tmp_path: Path) -> None:
     p = plan_mod.create_plan(tmp_path, "task", now=datetime(2026, 6, 18, 9, 0))
 

@@ -92,7 +92,7 @@ def _parse(plan_dir: Path) -> Plan:
             title = line[len("# Plan: ") :].strip()
         elif line.startswith("## "):
             section = line[3:].strip().lower()
-        elif m := _STEP.match(line):
+        elif section in ("steps", "tasks") and (m := _STEP.match(line)):
             steps.append(Step(done=m.group(1) == "x", text=m.group(2).strip()))
         elif section == "files in scope" and line.startswith("- "):
             files.append(line[2:].strip())
