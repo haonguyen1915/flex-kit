@@ -234,13 +234,25 @@ def test_stop_fires_os_notify(tmp_path: Path, monkeypatch) -> None:
     assert calls == [("flex-kit", "/flex-review done")]
 
 
-def test_stop_silent_on_plain_turn(tmp_path: Path, monkeypatch) -> None:
+def test_stop_notifies_any_task_by_default(tmp_path: Path, monkeypatch) -> None:
+    # Default notify_on="always": a plain (non-/flex) turn finishing still notifies.
     tp = tmp_path / "t.jsonl"
-    _write_transcript(tp, "hello")
+    _write_transcript(tp, "just do this thing")
     calls: list = []
     monkeypatch.setattr(hooks, "_os_notify", lambda title, msg: calls.append((title, msg)))
     hooks.stop(tmp_path, {"transcript_path": str(tp)})
-    assert calls == []
+    assert calls == [("flex-kit", "task done")]
+
+
+def test_stop_flex_mode_ignores_a_plain_turn(tmp_path: Path, monkeypatch) -> None:
+    (tmp_path / ".flexkit").mkdir()
+    (tmp_path / ".flexkit/config.toml").write_text('notifyOn = "flex"\n', encoding="utf-8")
+    tp = tmp_path / "t.jsonl"
+    _write_transcript(tp, "just a plain question")
+    calls: list = []
+    monkeypatch.setattr(hooks, "_os_notify", lambda title, msg: calls.append((title, msg)))
+    hooks.stop(tmp_path, {"transcript_path": str(tp)})
+    assert calls == []  # flex-only mode: no /flex-* command -> silent
 
 
 def test_stop_defers_notify_while_background_agents_run(tmp_path: Path, monkeypatch) -> None:

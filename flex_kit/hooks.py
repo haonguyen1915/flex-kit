@@ -18,6 +18,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from flex_kit import plan as plan_mod
+from flex_kit.config import resolve_config
 
 # A run is "live" while at least one subagent is active. SubagentStart/Stop hooks bump
 # a counter in state.json; the TTL guards against a missed Stop (e.g. a crash) leaving
@@ -63,7 +64,7 @@ def subagent_stop(root: Path, payload: dict | None = None) -> None:
         state.pop("pending_notify", None)
     plan_mod._write_state(root, state)
     if not agents and pending:
-        _os_notify("flex-kit", f"/{pending} done")
+        _os_notify("flex-kit", pending)
 
 
 def _running_agents(root: Path) -> list[str]:
@@ -391,17 +392,34 @@ def _finished_notify_command(payload: dict) -> str | None:
     return None
 
 
+def _run_quiet(cmd: list[str]) -> None:
+    subprocess.run(cmd, timeout=10, check=False, capture_output=True)
+
+
 def _os_notify(title: str, message: str) -> None:
-    """Best-effort cross-platform desktop notification. Never raises, never blocks long."""
+    """Best-effort cross-platform desktop notification. Never raises, never blocks long.
+
+    macOS: the osascript banner is silently dropped unless Script Editor is allowed under
+    System Settings > Notifications, so we ALSO play a sound (afplay) - audible even when the
+    banner is suppressed - and prefer `terminal-notifier` for a reliable banner when it's
+    installed (`brew install terminal-notifier`)."""
     try:
         if sys.platform == "darwin":
-            script = f'display notification "{message}" with title "{title}" sound name "Glass"'
-            cmd = ["osascript", "-e", script]
-        elif sys.platform.startswith("linux"):
-            if not shutil.which("notify-send"):
+            if shutil.which("terminal-notifier"):
+                _run_quiet(["terminal-notifier", "-title", title, "-message", message,
+                            "-sound", "Glass"])
                 return
-            cmd = ["notify-send", title, message]
-        elif sys.platform.startswith("win"):
+            script = f'display notification "{message}" with title "{title}"'
+            _run_quiet(["osascript", "-e", script])
+            sound = Path("/System/Library/Sounds/Glass.aiff")  # works with no notify permission
+            if sound.is_file() and shutil.which("afplay"):
+                _run_quiet(["afplay", str(sound)])
+            return
+        if sys.platform.startswith("linux"):
+            if shutil.which("notify-send"):
+                _run_quiet(["notify-send", title, message])
+            return
+        if sys.platform.startswith("win"):
             ps = (
                 "[reflection.assembly]::LoadWithPartialName('System.Windows.Forms')|Out-Null;"
                 "$n=New-Object System.Windows.Forms.NotifyIcon;"
@@ -409,27 +427,26 @@ def _os_notify(title: str, message: str) -> None:
                 f"$n.ShowBalloonTip(5000,'{title}','{message}',"
                 "[System.Windows.Forms.ToolTipIcon]::Info)"
             )
-            cmd = ["powershell", "-NoProfile", "-Command", ps]
-        else:
-            return
-        subprocess.run(cmd, timeout=10, check=False, capture_output=True)
+            _run_quiet(["powershell", "-NoProfile", "-Command", ps])
     except Exception:
         pass
 
 
 def stop(root: Path, payload: dict | None = None) -> None:
-    """Stop hook: notify when a long-running flex command finishes (if enabled).
+    """Stop hook: notify when a task finishes (the hook is only wired when `notify` is on).
 
-    The Stop hook fires when the main turn ends - but the task isn't done while background
-    subagents are still running. So if any are live, DEFER: record the pending notification
-    and let the last `subagent_stop` fire it when they all finish. Only notify now when
-    nothing is still running in the background."""
-    cmd = _finished_notify_command(payload or {})
-    if not cmd:
-        return
+    Scope by `notify_on`: "always" fires on any finished turn; "flex" only when a /flex-*
+    command drove it. The Stop hook fires when the main turn ends - but the task isn't done
+    while background subagents are still running, so if any are live, DEFER: park the
+    notification and let the last `subagent_stop` fire it once they all finish."""
+    payload = payload or {}
+    cmd = _finished_notify_command(payload)  # the /flex-* command driving the turn, if any
+    if resolve_config(root).notify_on == "flex" and not cmd:
+        return  # flex-only mode: ignore turns not driven by a /flex-* command
+    message = f"/{cmd} done" if cmd else "task done"
     if (root / ".flexkit").is_dir() and _running_agents(root):
         state = plan_mod._read_state(root)
-        state["pending_notify"] = cmd  # background agents live - notify when they drain
+        state["pending_notify"] = message  # background agents live - notify when they drain
         plan_mod._write_state(root, state)
         return
-    _os_notify("flex-kit", f"/{cmd} done")
+    _os_notify("flex-kit", message)

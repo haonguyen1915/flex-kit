@@ -26,6 +26,7 @@ _DEFAULT_AGENTS_DIR = ".flexkit/agents"
 _DEFAULT_COMMANDS_DIR = ".flexkit/commands"
 _DEFAULT_DOCS_DIR = "docs"  # project specs/conventions, indexed into agents via <!-- DOCS -->
 _DEFAULT_CODEX_EFFORT = "high"
+_DEFAULT_NOTIFY_ON = "always"  # "always" = any finished task | "flex" = only /flex-* commands
 
 
 @dataclass
@@ -35,9 +36,11 @@ class Config:
     agents_dir: str = _DEFAULT_AGENTS_DIR
     commands_dir: str = _DEFAULT_COMMANDS_DIR
     docs_dir: str = _DEFAULT_DOCS_DIR
-    # Opt-in: fire a cross-platform desktop notification when a long-running flex
-    # command finishes (Claude host only). Off by default; wires a Stop hook when true.
+    # Opt-in: fire a cross-platform desktop notification when a task finishes (Claude host
+    # only). Off by default; wires a Stop hook when true. `notify_on` scopes it: "always"
+    # notifies on any finished turn, "flex" only when a /flex-* command drove it.
     notify: bool = False
+    notify_on: str = _DEFAULT_NOTIFY_ON
     # Codex cross-model review knobs. `codex_model = None` means "don't pass -m" so
     # `codex exec` uses its own default (whatever ~/.codex/config.toml / Codex ships) -
     # the "always use the latest" path. Set it (globally or per-project) to pin a model.
@@ -84,6 +87,7 @@ def _from_raw(raw: dict) -> Config:
         commands_dir=raw.get("commandsDir", _DEFAULT_COMMANDS_DIR),
         docs_dir=raw.get("docsDir", _DEFAULT_DOCS_DIR),
         notify=bool(raw.get("notify", False)),
+        notify_on=raw.get("notifyOn", _DEFAULT_NOTIFY_ON),
         codex_model=raw.get("codexModel"),
         codex_effort=raw.get("codexEffort", _DEFAULT_CODEX_EFFORT),
     )
@@ -99,6 +103,7 @@ def config_as_dict(cfg: Config) -> dict:
         "commandsDir": cfg.commands_dir,
         "docsDir": cfg.docs_dir,
         "notify": cfg.notify,
+        "notifyOn": cfg.notify_on,
         "codexModel": cfg.codex_model,
         "codexEffort": cfg.codex_effort,
     }
@@ -124,8 +129,9 @@ _GLOBAL_SEED = """\
 # codexModel = "gpt-5.5"
 codexEffort = "high"          # reasoning effort: low | medium | high
 
-# Desktop notification when a long-running flex command finishes.
+# Desktop notification when a task finishes. notifyOn: "always" = any task | "flex" = only /flex-*.
 # notify = true
+# notifyOn = "always"
 """
 
 
