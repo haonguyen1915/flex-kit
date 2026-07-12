@@ -497,7 +497,6 @@ def close(
 def statusline(project: Path = typer.Option(Path.cwd, "--project", "-p")) -> None:
     """Print the status for the Claude Code status bar (wired in settings.json)."""
     # Claude pipes session JSON on stdin (model, workspace, cost, context_window).
-    root = project.resolve()
     payload: dict = {}
     if not sys.stdin.isatty():
         raw = sys.stdin.read()
@@ -507,8 +506,8 @@ def statusline(project: Path = typer.Option(Path.cwd, "--project", "-p")) -> Non
             except json.JSONDecodeError:
                 payload = {}
     cwd = (payload.get("workspace") or {}).get("current_dir") or payload.get("cwd")
-    if cwd:
-        root = Path(cwd)
+    start = Path(cwd) if cwd else project.resolve()
+    root = plan_mod.find_root(start) or start
     # Plain print (not typer.echo): keep the ANSI colors the host renders in the bar.
     print(hooks_mod.status_line(root, payload))
 
@@ -520,7 +519,6 @@ def hook(
 ) -> None:
     """Runtime hook entrypoint, invoked by the host via .claude/settings.json."""
     # Plain stdout / JSON: this is consumed by the host, never styled.
-    root = project.resolve()
     payload: dict = {}
     if not sys.stdin.isatty():
         raw = sys.stdin.read()
@@ -529,6 +527,13 @@ def hook(
                 payload = json.loads(raw)
             except json.JSONDecodeError:
                 payload = {}
+
+    # Resolve the real project root: prefer the host's cwd from the payload, then walk up to
+    # the nearest `.flexkit/`. Hooks run with an arbitrary process cwd (a subfolder, a git
+    # worktree), so trusting Path.cwd() scattered a fresh state.json wherever they fired.
+    cwd = (payload.get("workspace") or {}).get("current_dir") or payload.get("cwd")
+    start = Path(cwd) if cwd else project.resolve()
+    root = plan_mod.find_root(start) or start
 
     if event == "session-start":
         typer.echo(hooks_mod.session_start(root))

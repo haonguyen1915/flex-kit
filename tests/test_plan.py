@@ -21,6 +21,18 @@ def test_long_title_yields_a_short_folder_slug() -> None:
     assert not slug.endswith("-") and "--" not in slug  # cut on a clean word boundary
 
 
+def test_find_root_walks_up_to_the_flexkit_dir(tmp_path: Path) -> None:
+    (tmp_path / ".flexkit").mkdir()
+    deep = tmp_path / "src" / "pkg" / "mod"
+    deep.mkdir(parents=True)
+    assert plan_mod.find_root(deep) == tmp_path.resolve()  # found from a nested subdir
+    assert plan_mod.find_root(tmp_path) == tmp_path.resolve()
+
+
+def test_find_root_is_none_without_a_project(tmp_path: Path) -> None:
+    assert plan_mod.find_root(tmp_path) is None  # no .flexkit/ up the tree
+
+
 def test_plan_refuses_while_another_is_active(tmp_path: Path) -> None:
     plan_mod.create_plan(tmp_path, "first task", now=datetime(2026, 6, 18, 9, 0))
     res = _runner.invoke(app, ["plan", "second task", "--project", str(tmp_path)])

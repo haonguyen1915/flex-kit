@@ -32,6 +32,8 @@ def _running_map(state: dict) -> dict[str, str]:
 
 def subagent_start(root: Path, payload: dict | None = None) -> None:
     """SubagentStart: record the agent (`agent_type`) by its `agent_id`."""
+    if not (root / ".flexkit").is_dir():
+        return  # not a flex-kit project here - never create a stray .flexkit/state.json
     payload = payload or {}
     state = plan_mod._read_state(root)
     agents = _running_map(state)
@@ -43,6 +45,8 @@ def subagent_start(root: Path, payload: dict | None = None) -> None:
 
 
 def subagent_stop(root: Path, payload: dict | None = None) -> None:
+    if not (root / ".flexkit").is_dir():
+        return  # not a flex-kit project here - never create a stray .flexkit/state.json
     payload = payload or {}
     state = plan_mod._read_state(root)
     agents = _running_map(state)

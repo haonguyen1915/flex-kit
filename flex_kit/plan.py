@@ -59,6 +59,17 @@ def _slugify(title: str, max_len: int = 40) -> str:
     return slug or "plan"
 
 
+def find_root(start: Path) -> Path | None:
+    """Walk up from `start` to the nearest ancestor holding a `.flexkit/` dir - the project
+    root. Returns None if none is found, so callers (esp. hooks) can avoid scattering a stray
+    `.flexkit/state.json` in whatever directory they happened to run from."""
+    start = start.resolve()
+    for d in (start, *start.parents):
+        if (d / ".flexkit").is_dir():
+            return d
+    return None
+
+
 def _read_state(root: Path) -> dict:
     path = root / STATE_FILE
     return json.loads(path.read_text()) if path.exists() else {}

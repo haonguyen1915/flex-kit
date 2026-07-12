@@ -8,11 +8,15 @@ from datetime import datetime
 from pathlib import Path
 
 import pytest
+from typer.testing import CliRunner
 
 from flex_kit import hooks
 from flex_kit import plan as plan_mod
 from flex_kit.doctor import doctor
 from flex_kit.gen import gen
+from flex_kit.main import app
+
+_runner = CliRunner()
 
 FIXTURE = Path(__file__).parent / "fixtures" / "proj"
 
@@ -50,6 +54,7 @@ def test_status_line_reports_plan_progress(tmp_path: Path) -> None:
 
 
 def test_runtime_goes_live_with_subagents(tmp_path: Path) -> None:
+    (tmp_path / ".flexkit").mkdir()  # a real project - runtime state is tracked here
     assert "runtime idle" in hooks.status_line(tmp_path)
     hooks.subagent_start(tmp_path)
     hooks.subagent_start(tmp_path)  # two in parallel
@@ -61,6 +66,7 @@ def test_runtime_goes_live_with_subagents(tmp_path: Path) -> None:
 
 
 def test_runtime_shows_agent_names(tmp_path: Path) -> None:
+    (tmp_path / ".flexkit").mkdir()
     hooks.subagent_start(tmp_path, {"agent_id": "a1", "agent_type": "reviewer"})
     hooks.subagent_start(tmp_path, {"agent_id": "a2", "agent_type": "tester"})
     assert "runtime active: reviewer, tester" in hooks.status_line(tmp_path)
@@ -68,6 +74,26 @@ def test_runtime_shows_agent_names(tmp_path: Path) -> None:
     assert "runtime active: tester" in hooks.status_line(tmp_path)
     hooks.subagent_stop(tmp_path, {"agent_id": "a2"})
     assert "runtime idle" in hooks.status_line(tmp_path)
+
+
+def test_subagent_hook_no_ops_outside_a_project(tmp_path: Path) -> None:
+    # No .flexkit/ here - the subagent hooks must NOT scatter a stray .flexkit/state.json.
+    hooks.subagent_start(tmp_path, {"agent_id": "a1", "agent_type": "reviewer"})
+    hooks.subagent_stop(tmp_path, {"agent_id": "a1"})  # also a no-op, no crash
+    assert not (tmp_path / ".flexkit").exists()
+
+
+def test_hook_cli_writes_state_at_project_root_not_cwd(tmp_path: Path) -> None:
+    # The hook fires with a payload cwd deep inside a project; state must land at the root's
+    # .flexkit/, never in the subdir the hook happened to run from.
+    (tmp_path / ".flexkit").mkdir()
+    sub = tmp_path / "pkg" / "sub"
+    sub.mkdir(parents=True)
+    payload = json.dumps({"cwd": str(sub), "agent_id": "a1", "agent_type": "reviewer"})
+    res = _runner.invoke(app, ["hook", "subagent-start"], input=payload)
+    assert res.exit_code == 0, res.output
+    assert (tmp_path / ".flexkit/state.json").exists()  # written at the walked-up root
+    assert not (sub / ".flexkit").exists()  # not scattered in the cwd subdir
 
 
 def test_status_line_uses_host_payload(tmp_path: Path) -> None:
