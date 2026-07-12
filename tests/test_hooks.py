@@ -230,7 +230,7 @@ def test_stop_fires_os_notify(tmp_path: Path, monkeypatch) -> None:
     _write_transcript(tp, "<command-name>/flex-review</command-name>")
     calls: list[tuple[str, str]] = []
     monkeypatch.setattr(hooks, "_os_notify", lambda title, msg: calls.append((title, msg)))
-    hooks.stop({"transcript_path": str(tp)})
+    hooks.stop(tmp_path, {"transcript_path": str(tp)})  # no agents running -> notify now
     assert calls == [("flex-kit", "/flex-review done")]
 
 
@@ -239,8 +239,39 @@ def test_stop_silent_on_plain_turn(tmp_path: Path, monkeypatch) -> None:
     _write_transcript(tp, "hello")
     calls: list = []
     monkeypatch.setattr(hooks, "_os_notify", lambda title, msg: calls.append((title, msg)))
-    hooks.stop({"transcript_path": str(tp)})
+    hooks.stop(tmp_path, {"transcript_path": str(tp)})
     assert calls == []
+
+
+def test_stop_defers_notify_while_background_agents_run(tmp_path: Path, monkeypatch) -> None:
+    (tmp_path / ".flexkit").mkdir()
+    hooks.subagent_start(tmp_path, {"agent_id": "a1", "agent_type": "reviewer"})  # still running
+    tp = tmp_path / "t.jsonl"
+    _write_transcript(tp, "<command-name>/flex-implement</command-name>")
+    calls: list = []
+    monkeypatch.setattr(hooks, "_os_notify", lambda title, msg: calls.append((title, msg)))
+
+    hooks.stop(tmp_path, {"transcript_path": str(tp)})
+    assert calls == []  # turn ended but a background agent is live -> NOT done, defer
+
+    hooks.subagent_stop(tmp_path, {"agent_id": "a1"})  # the last agent finishes -> now done
+    assert calls == [("flex-kit", "/flex-implement done")]
+
+
+def test_deferred_notify_only_after_the_last_agent(tmp_path: Path, monkeypatch) -> None:
+    (tmp_path / ".flexkit").mkdir()
+    hooks.subagent_start(tmp_path, {"agent_id": "a1"})
+    hooks.subagent_start(tmp_path, {"agent_id": "a2"})  # two in parallel
+    tp = tmp_path / "t.jsonl"
+    _write_transcript(tp, "<command-name>/flex-fix</command-name>")
+    calls: list = []
+    monkeypatch.setattr(hooks, "_os_notify", lambda title, msg: calls.append((title, msg)))
+
+    hooks.stop(tmp_path, {"transcript_path": str(tp)})
+    hooks.subagent_stop(tmp_path, {"agent_id": "a1"})
+    assert calls == []  # one agent still running -> keep waiting
+    hooks.subagent_stop(tmp_path, {"agent_id": "a2"})
+    assert calls == [("flex-kit", "/flex-fix done")]  # all drained -> fire once
 
 
 def test_gen_notify_opt_in_wires_stop_hook(tmp_path: Path) -> None:

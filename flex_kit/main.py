@@ -542,7 +542,7 @@ def hook(
     elif event == "subagent-stop":
         hooks_mod.subagent_stop(root, payload)
     elif event == "stop":
-        hooks_mod.stop(payload)
+        hooks_mod.stop(root, payload)
     elif event == "user-prompt":
         line = hooks_mod.user_prompt(root)
         if line:

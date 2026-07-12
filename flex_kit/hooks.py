@@ -56,7 +56,14 @@ def subagent_stop(root: Path, payload: dict | None = None) -> None:
     elif agents:
         agents.pop(next(iter(agents)))
     state["running_agents"] = agents
+    # The last background agent just finished. If a Stop was deferred waiting on them, the
+    # task is now truly done - fire the notification it parked.
+    pending = state.get("pending_notify")
+    if not agents and pending:
+        state.pop("pending_notify", None)
     plan_mod._write_state(root, state)
+    if not agents and pending:
+        _os_notify("flex-kit", f"/{pending} done")
 
 
 def _running_agents(root: Path) -> list[str]:
@@ -410,8 +417,19 @@ def _os_notify(title: str, message: str) -> None:
         pass
 
 
-def stop(payload: dict | None = None) -> None:
-    """Stop hook: notify when a long-running flex command finishes (if enabled)."""
+def stop(root: Path, payload: dict | None = None) -> None:
+    """Stop hook: notify when a long-running flex command finishes (if enabled).
+
+    The Stop hook fires when the main turn ends - but the task isn't done while background
+    subagents are still running. So if any are live, DEFER: record the pending notification
+    and let the last `subagent_stop` fire it when they all finish. Only notify now when
+    nothing is still running in the background."""
     cmd = _finished_notify_command(payload or {})
-    if cmd:
-        _os_notify("flex-kit", f"/{cmd} done")
+    if not cmd:
+        return
+    if (root / ".flexkit").is_dir() and _running_agents(root):
+        state = plan_mod._read_state(root)
+        state["pending_notify"] = cmd  # background agents live - notify when they drain
+        plan_mod._write_state(root, state)
+        return
+    _os_notify("flex-kit", f"/{cmd} done")
