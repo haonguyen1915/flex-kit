@@ -38,7 +38,7 @@ model-routing, semantic-memory layers and ships no domain content.
 | File | Role |
 |---|---|
 | `main.py` | Typer CLI: init / init-docs / add / remove / gen / codex-review / doctor / plan / status / next-step / spec / close / statusline / hook |
-| `config.py` | resolve config: global `~/.flex-kit/config.json` overlaid by project `.flexkit/config.json` (hosts, skillsDir, agentsDir, commandsDir, docsDir, notify, codexModel, codexEffort; legacy `flexkit.config.json` still read). `load_config` requires a project; `resolve_config` tolerates its absence (global+defaults) |
+| `config.py` | resolve config: global `~/.flex-kit/config.toml` overlaid by project `.flexkit/config.toml` (TOML, commentable; keys hosts, skillsDir, agentsDir, commandsDir, docsDir, notify, codexModel, codexEffort; legacy `.json` still read). `load_config` requires a project; `resolve_config` tolerates its absence (global+defaults) |
 | `skills.py` / `agents.py` | discover + parse source skills / agents |
 | `commands.py` | discover + parse source commands (Claude slash-command surface) |
 | `docs.py` | discover `inject:`-tagged project docs + inject their index at `<!-- DOCS -->`, routed per consumer (`all` / agent id / lane); scaffold the docs/ skeleton |

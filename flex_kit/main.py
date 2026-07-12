@@ -6,6 +6,7 @@ import json
 import os
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 
 import typer
@@ -20,8 +21,9 @@ from flex_kit.add import add_packs as run_add_packs
 from flex_kit.add import installed_packs, list_packs
 from flex_kit.add import remove as run_remove
 from flex_kit.config import (
-    config_as_json,
-    default_config_json,
+    config_as_dict,
+    default_config_text,
+    dumps_toml,
     global_config_path,
     load_config,
     project_config_path,
@@ -349,7 +351,7 @@ def config_show(
     ui.blank()
     if resolved:
         ui.info("effective (global < project):")
-        print(json.dumps(config_as_json(resolve_config(project.resolve())), indent=2))
+        print(dumps_toml(config_as_dict(resolve_config(project.resolve()))), end="")
         return
     path = _config_target(global_, project)
     if not path.is_file():
@@ -371,8 +373,7 @@ def config_edit(
     path = _config_target(global_, project)
     if not path.is_file():
         path.parent.mkdir(parents=True, exist_ok=True)
-        skeleton = default_config_json(global_scope=global_)  # documented starter, not empty {}
-        path.write_text(json.dumps(skeleton, indent=2) + "\n", encoding="utf-8")
+        path.write_text(default_config_text(global_scope=global_), encoding="utf-8")
     ed = editor or os.environ.get("VISUAL") or os.environ.get("EDITOR") or "nano"
     cmd = [ed, str(path)]
     if Path(ed).name.startswith("code"):
@@ -383,9 +384,10 @@ def config_edit(
         ui.error(f"editor not found: {ed!r} - try --editor nano|vim|code")
         raise typer.Exit(1) from None
     try:
-        json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as e:
-        ui.error(f"{path} is not valid JSON: {e}")
+        text = path.read_text(encoding="utf-8")
+        json.loads(text) if path.suffix == ".json" else tomllib.loads(text)
+    except (json.JSONDecodeError, tomllib.TOMLDecodeError) as e:
+        ui.error(f"{path} is not valid {path.suffix.lstrip('.').upper()}: {e}")
         raise typer.Exit(1) from None
     ui.success(f"saved {path}")
 

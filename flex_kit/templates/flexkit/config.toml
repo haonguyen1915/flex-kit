@@ -1,0 +1,14 @@
+# flex-kit project config. Values here override the global ~/.flex-kit/config.toml.
+# Every key is optional - omit one to use the default shown. Keys are camelCase.
+
+hosts = ["claude", "codex"]        # which host surfaces `gen` produces
+skillsDir = ".flexkit/skills"      # where source skills live
+agentsDir = ".flexkit/agents"      # where source agents live
+commandsDir = ".flexkit/commands"  # where source commands live
+docsDir = "docs"                   # project docs indexed into agents at <!-- DOCS -->
+notify = false                     # desktop notification when a long flex command finishes
+
+# Codex cross-model review (opt-in via `flex-kit codex-review` / `--codex`).
+# Leave codexModel unset to use Codex's own model (the latest it ships); set it to pin one.
+# codexModel = "gpt-5.5"
+codexEffort = "high"               # reasoning effort: low | medium | high

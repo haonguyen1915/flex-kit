@@ -220,10 +220,8 @@ def test_stop_silent_on_plain_turn(tmp_path: Path, monkeypatch) -> None:
 def test_gen_notify_opt_in_wires_stop_hook(tmp_path: Path) -> None:
     root = tmp_path / "proj"
     shutil.copytree(FIXTURE, root)
-    cfg = root / ".flexkit/config.json"
-    data = json.loads(cfg.read_text())
-    data["notify"] = True
-    cfg.write_text(json.dumps(data, indent=2) + "\n")
+    cfg = root / ".flexkit/config.toml"
+    cfg.write_text(cfg.read_text() + "notify = true\n")  # append a key to the TOML config
     gen(root)
 
     events = json.loads((root / ".claude/settings.json").read_text())["hooks"]
