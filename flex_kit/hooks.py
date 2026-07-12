@@ -406,8 +406,11 @@ def _os_notify(title: str, message: str) -> None:
     try:
         if sys.platform == "darwin":
             if shutil.which("terminal-notifier"):
+                # -group replaces the previous flex-kit notification instead of stacking, so
+                # they never pile up. Set the app's style to "Banners" (System Settings >
+                # Notifications > terminal-notifier) for auto-dismiss; "Alerts" stay until closed.
                 _run_quiet(["terminal-notifier", "-title", title, "-message", message,
-                            "-sound", "Glass"])
+                            "-sound", "Glass", "-group", "flex-kit"])
                 return
             script = f'display notification "{message}" with title "{title}"'
             _run_quiet(["osascript", "-e", script])
