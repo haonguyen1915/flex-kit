@@ -17,7 +17,7 @@ from flex_kit.add import add_all as run_add_all
 from flex_kit.add import add_packs as run_add_packs
 from flex_kit.add import installed_packs, list_packs
 from flex_kit.add import remove as run_remove
-from flex_kit.config import load_config
+from flex_kit.config import load_config, resolve_config
 from flex_kit.docs import scaffold_docs
 from flex_kit.doctor import doctor as run_doctor
 from flex_kit.gen import gen as run_gen
@@ -275,21 +275,27 @@ def codex_review(
         "fidelity, focus light mode only'). Defaults to the generic "
         "correctness/risk/convention prompt.",
     ),
-    model: str = typer.Option(codex_review_mod.DEFAULT_MODEL, "--model"),
-    effort: str = typer.Option(codex_review_mod.DEFAULT_EFFORT, "--effort"),
+    model: str = typer.Option(
+        None, "--model", help="Codex model. Default: codexModel from config, else Codex's own."
+    ),
+    effort: str = typer.Option(
+        None, "--effort", help="Reasoning effort. Default: codexEffort from config, else 'high'."
+    ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Print the command, don't run codex."),
     project: Path = typer.Option(Path.cwd, "--project", "-p"),
 ) -> None:
     """Send the active plan, the diff, or a file to Codex (codex exec) for review."""
+    root = project.resolve()
+    cfg = resolve_config(root)  # global (~/.flex-kit) overlaid by project (.flexkit), if any
     try:
         res = codex_review_mod.codex_review(
-            project.resolve(),
+            root,
             kind=type_,
             target=target,
             base=base,
             instruction=instruction,
-            model=model,
-            effort=effort,
+            model=model or cfg.codex_model,  # None -> omit -m, Codex uses its own default
+            effort=effort or cfg.codex_effort,
             dry_run=dry_run,
         )
     except (FileNotFoundError, RuntimeError, ValueError) as e:
@@ -298,7 +304,7 @@ def codex_review(
     if dry_run:
         ui.info(f"[dry-run] {' '.join(res.command)}  ->  {res.report_path}")
     else:
-        ui.success(f"codex review ({res.model}) saved -> {res.report_path}")
+        ui.success(f"codex review ({res.model or 'codex default'}) saved -> {res.report_path}")
 
 
 @app.command()

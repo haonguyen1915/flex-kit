@@ -26,12 +26,19 @@ def test_build_prompt_file(tmp_path: Path) -> None:
     assert "print(1)" in prompt and "independent reviewer" in prompt
 
 
-def test_dry_run_builds_codex_command(tmp_path: Path) -> None:
+def test_dry_run_defers_model_to_codex_by_default(tmp_path: Path) -> None:
     _plan(tmp_path)
     res = codex_review(tmp_path, dry_run=True)
     assert res.command[:2] == ["codex", "exec"]
-    assert res.model == "gpt-5.5"
+    assert res.model is None and "-m" not in res.command  # no pin -> Codex uses its own default
     assert not res.report_path.exists()  # dry-run writes nothing
+
+
+def test_dry_run_pins_an_explicit_model(tmp_path: Path) -> None:
+    _plan(tmp_path)
+    res = codex_review(tmp_path, model="gpt-5.5", dry_run=True)
+    assert res.model == "gpt-5.5"
+    assert "-m" in res.command and "gpt-5.5" in res.command
 
 
 def test_runs_codex_and_writes_report(tmp_path: Path, monkeypatch) -> None:

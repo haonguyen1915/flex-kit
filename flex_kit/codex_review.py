@@ -15,7 +15,9 @@ from pathlib import Path
 
 from flex_kit import plan as plan_mod
 
-DEFAULT_MODEL = "gpt-5.5"
+# `model = None` -> don't pass `-m`, so `codex exec` uses its own default model
+# (~/.codex/config.toml or Codex's shipped default) - the "always latest" path. A caller
+# (the CLI, resolving flex-kit config) passes a concrete model to pin one.
 DEFAULT_EFFORT = "high"
 
 _INSTRUCTION = (
@@ -87,7 +89,7 @@ def build_prompt(
 @dataclass
 class CodexReviewResult:
     report_path: Path
-    model: str
+    model: str | None  # None -> Codex chose its own default (no -m passed)
     command: list[str]
 
 
@@ -95,7 +97,7 @@ def codex_review(
     root: Path,
     kind: str = "plan",
     target: str | None = None,
-    model: str = DEFAULT_MODEL,
+    model: str | None = None,
     effort: str = DEFAULT_EFFORT,
     dry_run: bool = False,
     base: str | None = None,
@@ -105,7 +107,8 @@ def codex_review(
     p = plan_mod.active_plan(root)
     report_dir = (p.dir / "reports") if p else (root / "reports")
     report = report_dir / "codex-review.md"
-    cmd = ["codex", "exec", "-m", model, "-c", f'reasoning.effort="{effort}"', "--full-auto", "-"]
+    model_args = ["-m", model] if model else []  # omit -m -> Codex uses its own default
+    cmd = ["codex", "exec", *model_args, "-c", f'reasoning.effort="{effort}"', "--full-auto", "-"]
 
     if dry_run:
         return CodexReviewResult(report_path=report, model=model, command=cmd)
