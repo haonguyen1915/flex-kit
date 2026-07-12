@@ -405,16 +405,18 @@ def _os_notify(title: str, message: str) -> None:
     installed (`brew install terminal-notifier`)."""
     try:
         if sys.platform == "darwin":
+            # Banner (best-effort - may be suppressed by Notification permission / Focus).
+            # -group replaces the previous flex-kit notification instead of stacking. Set the
+            # app's style to "Banners" (System Settings > Notifications) for auto-dismiss.
             if shutil.which("terminal-notifier"):
-                # -group replaces the previous flex-kit notification instead of stacking, so
-                # they never pile up. Set the app's style to "Banners" (System Settings >
-                # Notifications > terminal-notifier) for auto-dismiss; "Alerts" stay until closed.
                 _run_quiet(["terminal-notifier", "-title", title, "-message", message,
-                            "-sound", "Glass", "-group", "flex-kit"])
-                return
-            script = f'display notification "{message}" with title "{title}"'
-            _run_quiet(["osascript", "-e", script])
-            sound = Path("/System/Library/Sounds/Glass.aiff")  # works with no notify permission
+                            "-group", "flex-kit"])
+            else:
+                script = f'display notification "{message}" with title "{title}"'
+                _run_quiet(["osascript", "-e", script])
+            # ALWAYS play a sound too - afplay needs no notification permission, so a finished
+            # task is audible even when every banner path is silently dropped.
+            sound = Path("/System/Library/Sounds/Glass.aiff")
             if sound.is_file() and shutil.which("afplay"):
                 _run_quiet(["afplay", str(sound)])
             return
