@@ -6,7 +6,6 @@ import json
 import os
 import subprocess
 import sys
-from dataclasses import asdict
 from pathlib import Path
 
 import typer
@@ -20,7 +19,14 @@ from flex_kit.add import add_all as run_add_all
 from flex_kit.add import add_packs as run_add_packs
 from flex_kit.add import installed_packs, list_packs
 from flex_kit.add import remove as run_remove
-from flex_kit.config import global_config_path, load_config, resolve_config
+from flex_kit.config import (
+    config_as_json,
+    default_config_json,
+    global_config_path,
+    load_config,
+    project_config_path,
+    resolve_config,
+)
 from flex_kit.docs import scaffold_docs
 from flex_kit.doctor import doctor as run_doctor
 from flex_kit.gen import gen as run_gen
@@ -319,7 +325,7 @@ app.add_typer(config_app, name="config")
 
 def _config_paths(project: Path) -> tuple[Path, Path]:
     """(project file, global file) - the two layers, project overrides global."""
-    return project.resolve() / ".flexkit" / "flexkit.config.json", global_config_path()
+    return project_config_path(project.resolve()), global_config_path()
 
 
 def _config_target(global_: bool, project: Path) -> Path:
@@ -343,7 +349,7 @@ def config_show(
     ui.blank()
     if resolved:
         ui.info("effective (global < project):")
-        print(json.dumps(asdict(resolve_config(project.resolve())), indent=2))
+        print(json.dumps(config_as_json(resolve_config(project.resolve())), indent=2))
         return
     path = _config_target(global_, project)
     if not path.is_file():
@@ -365,7 +371,8 @@ def config_edit(
     path = _config_target(global_, project)
     if not path.is_file():
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text("{}\n", encoding="utf-8")
+        skeleton = default_config_json(global_scope=global_)  # documented starter, not empty {}
+        path.write_text(json.dumps(skeleton, indent=2) + "\n", encoding="utf-8")
     ed = editor or os.environ.get("VISUAL") or os.environ.get("EDITOR") or "nano"
     cmd = [ed, str(path)]
     if Path(ed).name.startswith("code"):

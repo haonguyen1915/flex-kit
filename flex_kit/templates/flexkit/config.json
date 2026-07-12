@@ -1,0 +1,10 @@
+{
+  "hosts": ["claude", "codex"],
+  "skillsDir": ".flexkit/skills",
+  "agentsDir": ".flexkit/agents",
+  "commandsDir": ".flexkit/commands",
+  "docsDir": "docs",
+  "notify": false,
+  "codexModel": null,
+  "codexEffort": "high"
+}

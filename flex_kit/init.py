@@ -37,7 +37,7 @@ def update(project_root: Path, run_gen: bool = False) -> UpdateResult:
     prompts, overwriting it: the BASE template (agents/skills/commands) AND every pack
     already installed (a pack is flex-kit content, just opt-in). Anything flex-kit does not
     ship - your own skills/agents, hand edits - is left entirely untouched. Items the new
-    version dropped are not removed (only add/overwrite); flexkit.config.json is not touched.
+    version dropped are not removed (only add/overwrite); config.json is not touched.
     """
     from flex_kit.add import _copy_pack, installed_packs  # local import avoids a cycle
 

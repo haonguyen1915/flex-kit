@@ -10,8 +10,11 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from flex_kit.config import load_config, resolve_config
+import flex_kit
+from flex_kit.config import default_config_json, load_config, resolve_config
 from flex_kit.main import app
+
+_TEMPLATE = Path(flex_kit.__file__).parent / "templates/flexkit/config.json"
 
 _runner = CliRunner()
 
@@ -32,7 +35,7 @@ def _write_global(data: dict) -> None:
 
 def _write_project(root: Path, data: dict) -> None:
     (root / ".flexkit").mkdir(parents=True, exist_ok=True)
-    (root / ".flexkit/flexkit.config.json").write_text(json.dumps(data), encoding="utf-8")
+    (root / ".flexkit/config.json").write_text(json.dumps(data), encoding="utf-8")
 
 
 def test_defaults_when_nothing_configured(tmp_path: Path) -> None:
@@ -98,3 +101,31 @@ def test_config_show_resolved_prints_merged(tmp_path: Path) -> None:
     res = _runner.invoke(app, ["config", "show", "--resolved", "--project", str(tmp_path)])
     assert res.exit_code == 0, res.output
     assert "project-model" in res.output  # merged: project wins
+    assert "codexModel" in res.output and "codex_model" not in res.output  # JSON keys, not internal
+
+
+def test_project_template_matches_config_defaults() -> None:
+    # The scaffolded template must list every key at its default - no silent drift from Config.
+    assert json.loads(_TEMPLATE.read_text(encoding="utf-8")) == default_config_json()
+
+
+def test_config_edit_seeds_documented_skeleton(tmp_path: Path, monkeypatch) -> None:
+    # A no-op editor: the file keeps whatever `config edit` seeded.
+    monkeypatch.setattr(
+        "flex_kit.main.subprocess.run", lambda cmd, **kw: subprocess.CompletedProcess(cmd, 0)
+    )
+    res = _runner.invoke(app, ["config", "edit", "--global", "--editor", "true"])
+    assert res.exit_code == 0, res.output
+    seed = json.loads(Path(os.environ["FLEXKIT_GLOBAL_CONFIG"]).read_text(encoding="utf-8"))
+    assert "codexModel" in seed and "codexEffort" in seed  # documented, not empty {}
+    assert "skillsDir" not in seed  # project-only keys omitted from the global skeleton
+
+
+def test_legacy_config_filename_is_still_read(tmp_path: Path) -> None:
+    # Pre-rename projects keep working: .flexkit/flexkit.config.json is read when config.json absent.
+    (tmp_path / ".flexkit").mkdir(parents=True)
+    (tmp_path / ".flexkit/flexkit.config.json").write_text(
+        json.dumps({"codexModel": "legacy-model"}), encoding="utf-8"
+    )
+    assert resolve_config(tmp_path).codex_model == "legacy-model"
+    assert load_config(tmp_path).codex_model == "legacy-model"  # load_config finds legacy too

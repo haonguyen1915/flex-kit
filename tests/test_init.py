@@ -26,7 +26,7 @@ def test_init_scaffolds_and_gens(tmp_path: Path) -> None:
     result = init(tmp_path)
 
     # Source scaffolded.
-    assert (tmp_path / ".flexkit/flexkit.config.json").exists()
+    assert (tmp_path / ".flexkit/config.json").exists()
     assert (tmp_path / ".flexkit/skills/process-navigator/SKILL.md").exists()
     assert (tmp_path / ".flexkit/skills/process-verify-fix-loop/SKILL.md").exists()
     assert (tmp_path / ".flexkit/skills/process-decision-interview/SKILL.md").exists()
