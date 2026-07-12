@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.1.5] - 2026-07-12
+
+### Release Notes
+
+Improves shutdown/finish reliability by waiting for background work to complete before sending completion notifications.
+
+### What's Changed
+- Delayed finish/completion notifications until background agents fully drain to prevent premature “done” signals.
+- Reduced risk of missed or partially processed background tasks during shutdown or job finalization.
+- Improved overall reliability of long-running workflows that depend on background agents completing cleanly.
+
+### Bug Fixes
+
+- fix: defer finish notification until background agents drain (fe0a16c)
+
+**Contributors:** @Nguyễn Văn Hảo
+
+**Compare changes:** [v0.1.4...v0.1.5](https://github.com/haonguyen1915/flex-kit.git/-/compare/v0.1.4...v0.1.5)
+
 ## [0.1.4] - 2026-07-12
 
 ### Release Notes
