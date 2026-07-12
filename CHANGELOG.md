@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.1.6] - 2026-07-12
+
+### Release Notes
+
+Notification delivery on macOS is more reliable and less noisy, with broader coverage and smarter grouping.
+
+### What's Changed
+- Ensured the notification sound always plays, even when a banner is displayed, so alerts aren’t missed.
+- Grouped terminal-notifier notifications so repeated updates replace the existing alert instead of stacking duplicates.
+- Expanded notifications to work for any task, with an audible macOS fallback when standard notification audio isn’t available.
+
+### Features
+
+- feat: group terminal-notifier notifications so they replace not stack (3254135)
+- feat: broaden notify to any task with an audible macos fallback (cea8757)
+
+### Bug Fixes
+
+- fix: always play the notify sound even when a banner shows (d1795b9)
+
+**Contributors:** @Nguyễn Văn Hảo
+
+**Compare changes:** [v0.1.5...v0.1.6](https://github.com/haonguyen1915/flex-kit.git/-/compare/v0.1.5...v0.1.6)
+
 ## [0.1.5] - 2026-07-12
 
 ### Release Notes
