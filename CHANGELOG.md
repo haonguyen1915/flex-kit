@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.1.4] - 2026-07-12
+
+### Release Notes
+
+Configuration management is now more robust and user-friendly, with clearer layering and new CLI tooling.
+
+### What's Changed
+- Added `config show` and `config edit` commands to inspect and update configuration from the CLI.
+- Introduced a global `~/.flex-kit` config layer (including Codex model tuning knobs) to complement per-project settings.
+- Improved reliability by correctly resolving the project root so hooks don’t scatter `state.json` across directories.
+- Standardized and reorganized config storage by moving project config to `.flexkit/config.json` and adopting comment-friendly TOML config files.
+
+### Features
+
+- feat: add config show and edit cli commands (459b78a)
+- feat: add ~/.flex-kit global config layer with codex model knobs (7378dcc)
+
+### Bug Fixes
+
+- fix: resolve project root so hooks never scatter state.json (af032b8)
+
+### Refactoring
+
+- refactor: switch config files to commentable toml (f42700a)
+- refactor: rename project config to .flexkit/config.json (0ed8e23)
+
+**Contributors:** @Nguyễn Văn Hảo
+
+**Compare changes:** [v0.1.3...v0.1.4](https://github.com/haonguyen1915/flex-kit.git/-/compare/v0.1.3...v0.1.4)
+
 ## [0.1.3] - 2026-06-27
 
 ### Release Notes
