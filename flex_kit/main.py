@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 import sys
+from dataclasses import asdict
 from pathlib import Path
 
 import typer
@@ -17,7 +20,7 @@ from flex_kit.add import add_all as run_add_all
 from flex_kit.add import add_packs as run_add_packs
 from flex_kit.add import installed_packs, list_packs
 from flex_kit.add import remove as run_remove
-from flex_kit.config import load_config, resolve_config
+from flex_kit.config import global_config_path, load_config, resolve_config
 from flex_kit.docs import scaffold_docs
 from flex_kit.doctor import doctor as run_doctor
 from flex_kit.gen import gen as run_gen
@@ -305,6 +308,79 @@ def codex_review(
         ui.info(f"[dry-run] {' '.join(res.command)}  ->  {res.report_path}")
     else:
         ui.success(f"codex review ({res.model or 'codex default'}) saved -> {res.report_path}")
+
+
+config_app = typer.Typer(
+    no_args_is_help=True,
+    help="Show or edit flex-kit config (project .flexkit or global ~/.flex-kit).",
+)
+app.add_typer(config_app, name="config")
+
+
+def _config_paths(project: Path) -> tuple[Path, Path]:
+    """(project file, global file) - the two layers, project overrides global."""
+    return project.resolve() / ".flexkit" / "flexkit.config.json", global_config_path()
+
+
+def _config_target(global_: bool, project: Path) -> Path:
+    proj, glob = _config_paths(project)
+    return glob if global_ else proj
+
+
+@config_app.command("show")
+def config_show(
+    global_: bool = typer.Option(False, "--global", "-g", help="Show the global ~/.flex-kit file."),
+    resolved: bool = typer.Option(
+        False, "--resolved", "-r", help="Show the merged effective config, not one raw file."
+    ),
+    project: Path = typer.Option(Path.cwd, "--project", "-p"),
+) -> None:
+    """Print a config file (with its path) - project by default, --global for ~/.flex-kit."""
+    proj, glob = _config_paths(project)
+    # Always surface both source paths + which one exists, so the origin is never a mystery.
+    ui.detail("project", f"{proj}  {'[exists]' if proj.is_file() else '[missing]'}")
+    ui.detail("global", f"{glob}  {'[exists]' if glob.is_file() else '[missing]'}")
+    ui.blank()
+    if resolved:
+        ui.info("effective (global < project):")
+        print(json.dumps(asdict(resolve_config(project.resolve())), indent=2))
+        return
+    path = _config_target(global_, project)
+    if not path.is_file():
+        scope = " --global" if global_ else ""
+        ui.warn(f"no file at {path} - run `flex-kit config edit{scope}` to create it")
+        raise typer.Exit(1)
+    print(path.read_text(encoding="utf-8").rstrip())
+
+
+@config_app.command("edit")
+def config_edit(
+    global_: bool = typer.Option(False, "--global", "-g", help="Edit the global ~/.flex-kit file."),
+    editor: str = typer.Option(
+        None, "--editor", "-e", help="Editor: nano | vim | code | ... (default $VISUAL/$EDITOR)."
+    ),
+    project: Path = typer.Option(Path.cwd, "--project", "-p"),
+) -> None:
+    """Open the config in an editor (creating it if absent); validates JSON on save."""
+    path = _config_target(global_, project)
+    if not path.is_file():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("{}\n", encoding="utf-8")
+    ed = editor or os.environ.get("VISUAL") or os.environ.get("EDITOR") or "nano"
+    cmd = [ed, str(path)]
+    if Path(ed).name.startswith("code"):
+        cmd.insert(1, "--wait")  # block until the VS Code tab closes, so we can validate after
+    try:
+        subprocess.run(cmd, check=False)
+    except FileNotFoundError:
+        ui.error(f"editor not found: {ed!r} - try --editor nano|vim|code")
+        raise typer.Exit(1) from None
+    try:
+        json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        ui.error(f"{path} is not valid JSON: {e}")
+        raise typer.Exit(1) from None
+    ui.success(f"saved {path}")
 
 
 @app.command()
