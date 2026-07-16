@@ -27,7 +27,11 @@ def emit_for_host(
     for skill in skills:
         out.extend(host.emit_skill(skill))
     if agents and hasattr(host, "emit_agent"):
+        agent_models = config.agent_models if config else {}
         for agent in agents:
+            override = agent_models.get(agent.id)
+            if override:
+                agent.frontmatter["model"] = override
             out.extend(host.emit_agent(agent, skills, docs))
     if commands and hasattr(host, "emit_command"):
         for command in commands:

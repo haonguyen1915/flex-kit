@@ -5,9 +5,25 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
+from flex_kit.config import config_as_dict, dumps_toml, load_config
 from flex_kit.doctor import doctor
 from flex_kit.gen import gen
 from flex_kit.init import init
+
+
+def test_gen_applies_agent_model_override(tmp_path: Path) -> None:
+    init(tmp_path)
+    raw = config_as_dict(load_config(tmp_path))
+    raw["agentModels"] = {"reviewer": "fable"}
+    (tmp_path / ".flexkit/config.toml").write_text(dumps_toml(raw), encoding="utf-8")
+
+    gen(tmp_path)
+
+    # The configured agent's generated surface uses the override...
+    assert "model: fable" in (tmp_path / ".claude/agents/reviewer.md").read_text()
+    # ...while an agent absent from the map keeps its own frontmatter model.
+    assert "model: opus" in (tmp_path / ".claude/agents/planner.md").read_text()
+    assert [f for r in doctor(tmp_path) for f in r.findings] == []
 
 
 def test_gen_preserves_unmanaged_files(tmp_path: Path) -> None:

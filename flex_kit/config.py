@@ -26,7 +26,9 @@ _DEFAULT_AGENTS_DIR = ".flexkit/agents"
 _DEFAULT_COMMANDS_DIR = ".flexkit/commands"
 _DEFAULT_DOCS_DIR = "docs"  # project specs/conventions, indexed into agents via <!-- DOCS -->
 _DEFAULT_CODEX_EFFORT = "high"
-_DEFAULT_NOTIFY_ON = "always"  # "always" = any finished task | "flex" = only /flex-* commands
+# "tasks" = only turns that ran a subagent or a /flex-* command (skips trivial chat) |
+# "always" = every finished turn | "flex" = only /flex-* commands.
+_DEFAULT_NOTIFY_ON = "tasks"
 
 
 @dataclass
@@ -37,8 +39,9 @@ class Config:
     commands_dir: str = _DEFAULT_COMMANDS_DIR
     docs_dir: str = _DEFAULT_DOCS_DIR
     # Opt-in: fire a cross-platform desktop notification when a task finishes (Claude host
-    # only). Off by default; wires a Stop hook when true. `notify_on` scopes it: "always"
-    # notifies on any finished turn, "flex" only when a /flex-* command drove it.
+    # only). Off by default; wires a Stop hook when true. `notify_on` scopes it: "tasks"
+    # (default) only turns that used a subagent or a /flex-* command, "always" every turn,
+    # "flex" only /flex-* commands.
     notify: bool = False
     notify_on: str = _DEFAULT_NOTIFY_ON
     # Codex cross-model review knobs. `codex_model = None` means "don't pass -m" so
@@ -46,6 +49,10 @@ class Config:
     # the "always use the latest" path. Set it (globally or per-project) to pin a model.
     codex_model: str | None = None
     codex_effort: str = _DEFAULT_CODEX_EFFORT
+    # Per-agent model override for the Claude host, keyed by agent id (e.g.
+    # {"reviewer": "fable"}). Overrides the agent source's `model:` frontmatter at
+    # gen time; an agent not listed keeps its own frontmatter model.
+    agent_models: dict[str, str] = field(default_factory=dict)
 
 
 def _first_existing(*paths: Path) -> Path | None:
@@ -90,6 +97,7 @@ def _from_raw(raw: dict) -> Config:
         notify_on=raw.get("notifyOn", _DEFAULT_NOTIFY_ON),
         codex_model=raw.get("codexModel"),
         codex_effort=raw.get("codexEffort", _DEFAULT_CODEX_EFFORT),
+        agent_models=dict(raw.get("agentModels") or {}),
     )
 
 
@@ -106,13 +114,27 @@ def config_as_dict(cfg: Config) -> dict:
         "notifyOn": cfg.notify_on,
         "codexModel": cfg.codex_model,
         "codexEffort": cfg.codex_effort,
+        "agentModels": cfg.agent_models,
     }
 
 
+def _toml_value(v: object) -> str:
+    """Render one config value as TOML. Dicts become inline tables (`{ a = "b" }`);
+    json.dumps handles str / bool / list of str."""
+    if isinstance(v, dict):
+        inner = ", ".join(f"{k} = {json.dumps(val)}" for k, val in v.items())
+        return "{" + (f" {inner} " if inner else "") + "}"
+    return json.dumps(v)
+
+
 def dumps_toml(d: dict) -> str:
-    """Serialize a flat config dict to TOML. `None` is omitted (TOML has no null - absence is
-    the default). `json.dumps` already renders str / bool / list of str as valid TOML values."""
-    lines = [f"{k} = {json.dumps(v)}" for k, v in d.items() if v is not None]
+    """Serialize a config dict to TOML. `None` and empty dicts are omitted (TOML has no
+    null - absence is the default). Scalars, lists, and one level of dict are supported."""
+    lines = [
+        f"{k} = {_toml_value(v)}"
+        for k, v in d.items()
+        if v is not None and v != {}
+    ]
     return "\n".join(lines) + ("\n" if lines else "")
 
 
@@ -129,9 +151,10 @@ _GLOBAL_SEED = """\
 # codexModel = "gpt-5.5"
 codexEffort = "high"          # reasoning effort: low | medium | high
 
-# Desktop notification when a task finishes. notifyOn: "always" = any task | "flex" = only /flex-*.
+# Desktop notification when a task finishes. notifyOn: "tasks" (default) = turns using a
+# subagent/flex cmd | "always" = every turn | "flex" = only /flex-*.
 # notify = true
-# notifyOn = "always"
+# notifyOn = "tasks"
 """
 
 
