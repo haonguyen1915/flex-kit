@@ -108,7 +108,9 @@ def codex_review(
     report_dir = (p.dir / "reports") if p else (root / "reports")
     report = report_dir / "codex-review.md"
     model_args = ["-m", model] if model else []  # omit -m -> Codex uses its own default
-    cmd = ["codex", "exec", *model_args, "-c", f'reasoning.effort="{effort}"', "--full-auto", "-"]
+    # review only reads the repo -> read-only sandbox (newer codex dropped --full-auto)
+    cmd = ["codex", "exec", *model_args, "-c", f'reasoning.effort="{effort}"',
+           "--sandbox", "read-only", "-"]
 
     if dry_run:
         return CodexReviewResult(report_path=report, model=model, command=cmd)
