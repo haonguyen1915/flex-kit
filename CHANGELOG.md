@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.1.7] - 2026-08-12
+
+### Release Notes
+
+Improves agent configuration flexibility and restores compatibility with updated Codex execution flags while tightening default notification behavior.
+
+### What's Changed
+- Default notification scope now targets tasks initiated via subagents or the flex command, reducing noisy alerts.
+- You can override the model on a per-agent basis using the new agentModels configuration for finer control.
+- Updated Codex execution to use the supported --sandbox read-only mode, fixing failures caused by the removed --full-auto flag.
+
+### Features
+
+- feat: default notify scope to tasks driven by subagent or flex command (adac9ed)
+- feat: allow per-agent model override via agentModels config (2be839f)
+
+### Bug Fixes
+
+- fix: replace dropped codex exec --full-auto with --sandbox read-only (0d76392)
+
+**Contributors:** @Nguyễn Văn Hảo
+
+**Compare changes:** [v0.1.6...v0.1.7](https://github.com/haonguyen1915/flex-kit.git/-/compare/v0.1.6...v0.1.7)
+
 ## [0.1.6] - 2026-07-12
 
 ### Release Notes
