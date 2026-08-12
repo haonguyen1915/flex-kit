@@ -234,14 +234,44 @@ def test_stop_fires_os_notify(tmp_path: Path, monkeypatch) -> None:
     assert calls == [("flex-kit", "/flex-review done")]
 
 
-def test_stop_notifies_any_task_by_default(tmp_path: Path, monkeypatch) -> None:
-    # Default notify_on="always": a plain (non-/flex) turn finishing still notifies.
+def test_stop_silent_on_trivial_turn_by_default(tmp_path: Path, monkeypatch) -> None:
+    # Default notify_on="tasks": a plain turn with no subagent and no /flex-* command is
+    # NOT a task worth signalling -> silent (no beep on every chat turn).
+    (tmp_path / ".flexkit").mkdir()
     tp = tmp_path / "t.jsonl"
-    _write_transcript(tp, "just do this thing")
+    _write_transcript(tp, "just a quick question")
     calls: list = []
     monkeypatch.setattr(hooks, "_os_notify", lambda title, msg: calls.append((title, msg)))
     hooks.stop(tmp_path, {"transcript_path": str(tp)})
-    assert calls == [("flex-kit", "task done")]
+    assert calls == []
+
+
+def test_stop_notifies_a_task_that_used_a_subagent(tmp_path: Path, monkeypatch) -> None:
+    # "tasks" mode: a turn that ran a subagent (even non-/flex) IS a task -> notify when done.
+    (tmp_path / ".flexkit").mkdir()
+    hooks.subagent_start(tmp_path, {"agent_id": "a1", "agent_type": "reviewer"})
+    hooks.subagent_stop(tmp_path, {"agent_id": "a1"})  # agent finished within the turn
+    tp = tmp_path / "t.jsonl"
+    _write_transcript(tp, "please review and fix")  # no /flex command
+    calls: list = []
+    monkeypatch.setattr(hooks, "_os_notify", lambda title, msg: calls.append((title, msg)))
+    hooks.stop(tmp_path, {"transcript_path": str(tp)})
+    assert calls == [("flex-kit", "task done")]  # notified because the task used an agent
+
+
+def test_stop_defers_background_agent_task_without_a_flex_command(tmp_path, monkeypatch) -> None:
+    # The user's scenario: a plain task spawns a background agent. "tasks" mode must still
+    # defer + notify when it drains - not stay silent, not beep early.
+    (tmp_path / ".flexkit").mkdir()
+    hooks.subagent_start(tmp_path, {"agent_id": "a1"})  # background agent, still running
+    tp = tmp_path / "t.jsonl"
+    _write_transcript(tp, "kick off a background job")  # no /flex command
+    calls: list = []
+    monkeypatch.setattr(hooks, "_os_notify", lambda title, msg: calls.append((title, msg)))
+    hooks.stop(tmp_path, {"transcript_path": str(tp)})
+    assert calls == []  # agent still live -> defer
+    hooks.subagent_stop(tmp_path, {"agent_id": "a1"})
+    assert calls == [("flex-kit", "task done")]  # fires only when the agent drains
 
 
 def test_stop_flex_mode_ignores_a_plain_turn(tmp_path: Path, monkeypatch) -> None:
@@ -268,6 +298,26 @@ def test_stop_defers_notify_while_background_agents_run(tmp_path: Path, monkeypa
 
     hooks.subagent_stop(tmp_path, {"agent_id": "a1"})  # the last agent finishes -> now done
     assert calls == [("flex-kit", "/flex-implement done")]
+
+
+def test_stop_defers_even_when_running_at_is_stale(tmp_path: Path, monkeypatch) -> None:
+    # A background agent older than the status-bar TTL is STILL running - stop must defer,
+    # not fire "done" early. (The TTL is only for the status bar, not the done-signal.)
+    (tmp_path / ".flexkit").mkdir()
+    plan_mod._write_state(
+        tmp_path,
+        {"running_agents": {"a1": "reviewer"}, "running_at": "2020-01-01T00:00:00",  # ancient
+         "task_saw_agents": True},
+    )
+    tp = tmp_path / "t.jsonl"
+    _write_transcript(tp, "a long background job")
+    calls: list = []
+    monkeypatch.setattr(hooks, "_os_notify", lambda title, msg: calls.append((title, msg)))
+
+    hooks.stop(tmp_path, {"transcript_path": str(tp)})
+    assert calls == []  # deferred despite the stale timestamp - the agent is still live
+    hooks.subagent_stop(tmp_path, {"agent_id": "a1"})
+    assert calls == [("flex-kit", "task done")]
 
 
 def test_deferred_notify_only_after_the_last_agent(tmp_path: Path, monkeypatch) -> None:

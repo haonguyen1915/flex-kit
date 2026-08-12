@@ -7,7 +7,8 @@ agentsDir = ".flexkit/agents"      # where source agents live
 commandsDir = ".flexkit/commands"  # where source commands live
 docsDir = "docs"                   # project docs indexed into agents at <!-- DOCS -->
 notify = false                     # desktop notification when a task finishes
-# notifyOn = "always"              # "always" = any finished task | "flex" = only /flex-* commands
+# notifyOn = "tasks"               # "tasks" = turns that used a subagent/flex cmd (default) |
+                                   # "always" = every turn | "flex" = only /flex-* commands
 
 # Codex cross-model review (opt-in via `flex-kit codex-review` / `--codex`).
 # Leave codexModel unset to use Codex's own model (the latest it ships); set it to pin one.

@@ -42,6 +42,7 @@ def subagent_start(root: Path, payload: dict | None = None) -> None:
     agents[key] = str(payload.get("agent_type") or "agent")
     state["running_agents"] = agents
     state["running_at"] = datetime.now().isoformat(timespec="seconds")
+    state["task_saw_agents"] = True  # this task used a subagent -> worth a "done" in tasks mode
     plan_mod._write_state(root, state)
 
 
@@ -62,6 +63,7 @@ def subagent_stop(root: Path, payload: dict | None = None) -> None:
     pending = state.get("pending_notify")
     if not agents and pending:
         state.pop("pending_notify", None)
+        state.pop("task_saw_agents", None)  # task fully done - reset for the next one
     plan_mod._write_state(root, state)
     if not agents and pending:
         _os_notify("flex-kit", pending)
@@ -316,6 +318,12 @@ def status_line(root: Path, payload: dict | None = None) -> str:
 
 def user_prompt(root: Path) -> str | None:
     """Per-prompt plan reminder, deduped - only fires when plan state advances."""
+    # A new user prompt starts a new task: reset the per-task notify markers so the previous
+    # task's "used an agent" flag / parked notification never bleed into this one.
+    if (root / ".flexkit").is_dir():
+        state = plan_mod._read_state(root)
+        if state.pop("task_saw_agents", None) is not None or state.pop("pending_notify", None):
+            plan_mod._write_state(root, state)
     p = plan_mod.active_plan(root)
     if p is None:
         return None
@@ -437,21 +445,36 @@ def _os_notify(title: str, message: str) -> None:
         pass
 
 
+def _wants_notify(scope: str, cmd: str | None, saw_agents: bool) -> bool:
+    """Does a finishing turn deserve a notification under `notify_on`?"""
+    if scope == "always":
+        return True
+    if scope == "flex":
+        return cmd is not None
+    return saw_agents or cmd is not None  # "tasks": used a subagent, or a /flex-* command
+
+
 def stop(root: Path, payload: dict | None = None) -> None:
     """Stop hook: notify when a task finishes (the hook is only wired when `notify` is on).
 
-    Scope by `notify_on`: "always" fires on any finished turn; "flex" only when a /flex-*
-    command drove it. The Stop hook fires when the main turn ends - but the task isn't done
-    while background subagents are still running, so if any are live, DEFER: park the
-    notification and let the last `subagent_stop` fire it once they all finish."""
+    A "task" (in the default "tasks" scope) is a turn that ran a subagent or a /flex-*
+    command - trivial chat turns stay silent. The Stop hook fires when the main turn ends,
+    but the task isn't done while background subagents are still running, so if any are live,
+    DEFER: park the notification and let the last `subagent_stop` fire it once they drain."""
     payload = payload or {}
     cmd = _finished_notify_command(payload)  # the /flex-* command driving the turn, if any
-    if resolve_config(root).notify_on == "flex" and not cmd:
-        return  # flex-only mode: ignore turns not driven by a /flex-* command
+    state = plan_mod._read_state(root) if (root / ".flexkit").is_dir() else {}
+    scope = resolve_config(root).notify_on
+    if not _wants_notify(scope, cmd, bool(state.get("task_saw_agents"))):
+        return  # not a task worth signalling (e.g. a plain chat turn in "tasks" scope)
     message = f"/{cmd} done" if cmd else "task done"
-    if (root / ".flexkit").is_dir() and _running_agents(root):
-        state = plan_mod._read_state(root)
-        state["pending_notify"] = message  # background agents live - notify when they drain
+    # Defer on the RAW running-agent set (ignore the status-bar's 5-min TTL): a background
+    # agent running longer than that is still not done, so keep waiting.
+    if _running_map(state):
+        state["pending_notify"] = message  # notify when the last subagent drains
         plan_mod._write_state(root, state)
         return
     _os_notify("flex-kit", message)
+    if state.get("task_saw_agents"):  # task finished within the turn - reset for the next one
+        state.pop("task_saw_agents", None)
+        plan_mod._write_state(root, state)
