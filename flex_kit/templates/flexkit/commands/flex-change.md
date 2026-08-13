@@ -1,7 +1,7 @@
 ---
 name: flex-change
 description: Start design-first work - create a plan in design mode, scaffold a spec (proposal/design/tasks), and settle the design before implementing. Use for ambiguous or cross-cutting work.
-argument-hint: [task]
+argument-hint: [task] [--codex]
 ---
 
 Start design-first work for: **$ARGUMENTS**
@@ -19,7 +19,14 @@ skill helps decide). Otherwise:
 4. Fill them in order: **proposal** (problem + chosen direction) -> **design**
    (system shape, data/contracts, validation plan, risks) -> **tasks** (the
    checklist). Log key decisions to `decisions.md` as `## YYYY-MM-DD - <label>`.
-5. **Hard checkpoint.** Present the design with `[A] Approve / [R] Revise` and do
-   **not** implement until the user approves.
-6. On approval, spawn the `planner` agent to derive the plan `## Steps` from
+5. **Cross-model review (if `--codex`).** When `$ARGUMENTS` contains `--codex`, run
+   `/flex-codex-review --type plan` on the design before the checkpoint, summarize Codex's
+   findings by severity, and fold anything worth acting on into the design. Needs the
+   `codex` CLI; skip with a note if it's absent.
+6. **Hard checkpoint.** Present the design with `[A] Approve / [R] Revise / [X] Codex
+   review` and do **not** implement until the user approves. `[X]` runs
+   `/flex-codex-review --type plan` for an independent second opinion on the design from
+   another model (same as passing `--codex` up front; needs the `codex` CLI) - high-value
+   here, since reviewing a design costs far less than reworking a built one.
+7. On approval, spawn the `planner` agent to derive the plan `## Steps` from
    `spec/tasks.md`, then run `/flex-implement`.

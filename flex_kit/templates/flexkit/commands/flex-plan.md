@@ -1,7 +1,7 @@
 ---
 name: flex-plan
 description: Create a tracked plan for a task and scaffold its steps. Use to start a new piece of work before implementing it.
-argument-hint: [task] [--mode patch|build|design]
+argument-hint: [task] [--mode patch|build|design] [--codex]
 ---
 
 Plan the work for: **$ARGUMENTS**
@@ -27,10 +27,17 @@ routes onward from here, so you never have to pick the lane yourself.
    own) choice - so the user never opens the file to answer.
 5. **Log decisions.** Append each settled decision to the plan's `decisions.md` as
    `## YYYY-MM-DD - <label>` (create the file if absent).
-6. **Approve.** Run `flex-kit status` to confirm, then close with a checkpoint:
+6. **Cross-model review (if `--codex`).** When `$ARGUMENTS` contains `--codex`, run
+   `/flex-codex-review --type plan` on the drafted plan before the checkpoint, summarize
+   Codex's findings by severity, and fold anything worth acting on back into the plan.
+   Needs the `codex` CLI; skip with a note if it's absent.
+7. **Approve.** Run `flex-kit status` to confirm, then close with a checkpoint:
    - `[A] Approve` -> `/flex-implement` (step-by-step)
    - `[D] Approve` -> `/flex-implement --full` (autonomous end-to-end)
    - `[R] Revise` -> adjust scope, mode, or steps first
+   - `[X] Codex review` -> run `/flex-codex-review --type plan` for a second opinion from
+     another model (same as passing `--codex` up front; needs the `codex` CLI). Worth it
+     for a large, ambiguous, or contract-changing plan; skip for small ones.
 
    Use `[C] Continue` only as a soft nudge after approval.
 
