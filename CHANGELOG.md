@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.1.8] - 2026-08-13
+
+### Release Notes
+
+Adds an optional Codex-assisted review mode to make plan changes easier to inspect before applying.
+
+### What's Changed
+- Introduced a new `--codex` flag for `flex-plan` to generate plans in a Codex-friendly format for easier review.
+- Added `--codex` support to `flex-change` so you can review proposed changes consistently before applying them.
+- Improved the plan review workflow by making Codex output an opt-in CLI switch rather than a separate command or manual step.
+
+### Features
+
+- feat: add --codex flag to flex-plan and flex-change for plan review (5f1db52)
+
+**Contributors:** @Nguyễn Văn Hảo
+
+**Compare changes:** [v0.1.7...v0.1.8](https://github.com/haonguyen1915/flex-kit.git/-/compare/v0.1.7...v0.1.8)
+
 ## [0.1.7] - 2026-08-12
 
 ### Release Notes
