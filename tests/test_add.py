@@ -39,6 +39,12 @@ def test_backend_pack_is_bundled() -> None:
     assert "backend" in list_packs()
 
 
+def test_confluence_pack_is_bundled() -> None:
+    # Under the tools/ axis: added by its flat leaf name, ships one confluence-docs skill.
+    assert "confluence" in list_packs()
+    assert [rel for rel, _ in _pack_items("confluence")] == ["skills/confluence-docs"]
+
+
 def test_category_nested_pack_is_discovered_by_flat_name(tmp_path: Path, monkeypatch) -> None:
     # A pack grouped under a category folder (packs/<category>/<pack>) is found and added
     # by its flat leaf name - the category is repo organization only.
