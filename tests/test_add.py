@@ -39,6 +39,12 @@ def test_backend_pack_is_bundled() -> None:
     assert "backend" in list_packs()
 
 
+def test_writing_pack_is_bundled() -> None:
+    # disciplines/writing ships the human-writing skill (subjective, no evals).
+    assert "writing" in list_packs()
+    assert [rel for rel, _ in _pack_items("writing")] == ["skills/human-writing"]
+
+
 def test_confluence_pack_is_bundled() -> None:
     # Under the tools/ axis: added by its flat leaf name, ships one confluence-docs skill.
     assert "confluence" in list_packs()
