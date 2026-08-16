@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.1.9] - 2026-08-16
+
+### Release Notes
+
+New content packs expand writing quality controls and documentation generation options.
+
+### What's Changed
+- Added a “human-writing” pack to produce more natural, anti-AI-slop prose in both English and Vietnamese.
+- Introduced an opt-in Confluence documentation pack to generate docs tailored for Confluence workflows.
+- Expanded pack-based customization so teams can choose the right writing and documentation style per project.
+
+### Features
+
+- feat: add human-writing pack for anti-AI-slop prose in EN and VI (633916d)
+- feat: add opt-in confluence docs pack (4eabed9)
+
+**Contributors:** @Nguyễn Văn Hảo
+
+**Compare changes:** [v0.1.8...v0.1.9](https://github.com/haonguyen1915/flex-kit.git/-/compare/v0.1.8...v0.1.9)
+
 ## [0.1.8] - 2026-08-13
 
 ### Release Notes
